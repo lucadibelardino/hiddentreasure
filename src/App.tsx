@@ -13,7 +13,8 @@ const App: React.FC = () => {
       <Hero />
       <Features />
       <Gallery />
-      <Contact />
+      <Gallery />
+      {/* <Contact /> Replaced by BookingBar */}
       <Footer />
     </div>
   );

@@ -143,7 +143,8 @@ const BookingBar: React.FC = () => {
                         minDate={new Date()}
                         placeholderText="Add dates"
                         className={styles.input}
-                        shouldCloseOnSelect={false} /* Keep open to allow easier range selection flow */
+                        shouldCloseOnSelect={false} /* Keep open */
+                        monthsShown={2}
                     />
                 </div>
                 <div className={styles.divider}></div>
