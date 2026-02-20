@@ -180,27 +180,31 @@
 
 
 /* PREMIUM CALENDAR STYLING */
+/* PREMIUM CALENDAR STYLING */
 .dayContainer {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
     width: 100%;
+    height: 100%;
 }
 
 .dayNumber {
-    font-weight: 700;
-    font-size: 0.95rem;
-    line-height: 1.1;
+    font-weight: 600;
+    font-size: 0.9rem;
+    /* Slightly smaller for better fit */
+    line-height: 1;
     color: #222;
+    margin-top: 2px;
+    /* Visual optical adjustment */
 }
 
 .dayPrice {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: #717171;
-    font-weight: 600;
-    margin-top: 3px;
+    font-weight: 500;
+    margin-top: 2px;
 }
 
 /* Override React Datepicker for size */
@@ -237,14 +241,22 @@
 }
 
 :global(.react-datepicker__day) {
-    width: 50px;
-    /* Bigger touch targets */
-    height: 50px;
-    margin: 2px;
+    width: 48px;
+    /* Slightly smaller than 50 to ensure margin fits */
+    height: 48px;
+    margin: 4px;
+    /* More spacing between bubbles */
     border-radius: 50%;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     vertical-align: middle;
+
+    /* Flex centering is key here */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: normal;
+    /* Reset line-height */
 }
 
 :global(.react-datepicker__day:hover) {
@@ -259,6 +271,8 @@
     background-color: #222 !important;
     color: white !important;
     border-radius: 50% !important;
+    border: none !important;
+    /* Ensure no border messes up sizing */
 }
 
 :global(.react-datepicker__day--selected) .dayNumber,
