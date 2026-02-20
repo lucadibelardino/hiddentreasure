@@ -21,6 +21,7 @@ const BookingBar: React.FC = () => {
     const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
     const [errors, setErrors] = useState({ name: '', email: '' });
+    const [selectionError, setSelectionError] = useState<string | null>(null);
 
     const PRICE_PER_NIGHT = 250;
 
