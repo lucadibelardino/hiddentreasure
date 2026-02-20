@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import ical from 'node-ical';
-import { fetch } from 'undici'; // Built-in node 18+ but good to be explicit or use global fetch
 
 // Load environment variables (GitHub Actions sets these)
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
