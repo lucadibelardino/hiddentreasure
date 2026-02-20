@@ -1,0 +1,25 @@
+:root {
+  /* Colors */
+  --color-primary: #2C3E50; /* Deep Blue/Sate */
+  --color-secondary: #D4AF37; /* Gold/Sand Accent */
+  --color-background: #FDFBF7; /* Off-white/Cream */
+  --color-text: #333333;
+  --color-text-light: #666666;
+  --color-white: #FFFFFF;
+  --color-overlay: rgba(0, 0, 0, 0.4);
+
+  /* Typography */
+  --font-family-serif: 'Playfair Display', serif;
+  --font-family-sans: 'Inter', sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 2rem;
+  --spacing-lg: 4rem;
+  --spacing-xl: 8rem;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.4s ease;
+}

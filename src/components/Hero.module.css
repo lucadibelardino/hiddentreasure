@@ -1,0 +1,82 @@
+.hero {
+    height: 100vh;
+    width: 100%;
+    background-image: url('https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=2070&auto=format&fit=crop');
+    /* Placeholder beach house */
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    color: var(--color-white);
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    padding: 0 1rem;
+    animation: fadeIn 1.5s ease-out;
+}
+
+.title {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    font-family: var(--font-family-sans);
+    font-size: 1.25rem;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+    opacity: 0.9;
+}
+
+.cta {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background-color: var(--color-white);
+    color: var(--color-text);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.9rem;
+    border: none;
+    transition: all var(--transition-medium);
+}
+
+.cta:hover {
+    background-color: var(--color-secondary);
+    color: var(--color-white);
+    transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .title {
+        font-size: 2.5rem;
+    }
+}

@@ -1,0 +1,33 @@
+.section {
+    padding: var(--spacing-xl) 0;
+    background-color: var(--color-white);
+    text-align: center;
+}
+
+.title {
+    font-size: 2.5rem;
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-primary);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.item {
+    overflow: hidden;
+    height: 300px;
+}
+
+.item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-medium);
+}
+
+.item:hover img {
+    transform: scale(1.05);
+}
