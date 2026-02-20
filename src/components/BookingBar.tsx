@@ -10,12 +10,42 @@ const BookingBar: React.FC = () => {
     const [guests, setGuests] = useState(2);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+    const [blockedDates, setBlockedDates] = useState<Date[]>([]);
 
     // Strict Input States
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
     const [errors, setErrors] = useState({ name: '', email: '' });
 
     const PRICE_PER_NIGHT = 250;
+
+    React.useEffect(() => {
+        const fetchBlockedDates = async () => {
+            if (!supabase) return;
+            const { data, error } = await supabase.from('blocked_dates').select('check_in, check_out');
+
+            if (error) {
+                console.error('Error fetching blocked dates:', error);
+                return;
+            }
+
+            if (data) {
+                const dates: Date[] = [];
+                data.forEach((booking: any) => {
+                    const start = new Date(booking.check_in);
+                    const end = new Date(booking.check_out);
+
+                    // Iterate from start to end and add to blocked list
+                    // Note: This matches simple day blocking. 
+                    for (let dt = new Date(start); dt <= end; dt.setDate(dt.getDate() + 1)) {
+                        dates.push(new Date(dt));
+                    }
+                });
+                setBlockedDates(dates);
+            }
+        };
+
+        fetchBlockedDates();
+    }, []);
 
     const calculateTotal = () => {
         if (!startDate || !endDate) return 0;
@@ -109,6 +139,8 @@ const BookingBar: React.FC = () => {
                         selectsStart
                         startDate={startDate}
                         endDate={endDate}
+                        excludeDates={blockedDates}
+                        minDate={new Date()}
                         placeholderText="Add dates"
                         className={styles.input}
                         shouldCloseOnSelect={false} /* Keep open to allow easier range selection flow */
@@ -124,6 +156,7 @@ const BookingBar: React.FC = () => {
                         startDate={startDate}
                         endDate={endDate}
                         minDate={startDate || new Date()}
+                        excludeDates={blockedDates}
                         placeholderText="Add dates"
                         className={styles.input}
                     />
