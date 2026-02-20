@@ -1,24 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import styles from './BookingBar.module.css';
 import { supabase } from '../lib/supabase';
 
 const BookingBar: React.FC = () => {
-    const [startDate, setStartDate] = useState<Date | null>(null);
-    const [endDate, setEndDate] = useState<Date | null>(null);
+    const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
+    const [startDate, endDate] = dateRange;
     const [guests, setGuests] = useState(2);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+
+    // Popover States
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const [isGuestOpen, setIsGuestOpen] = useState(false);
+
+    // Data States
     const [blockedDates, setBlockedDates] = useState<Date[]>([]);
 
-    // Strict Input States
+    // Modal & Form States
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
     const [errors, setErrors] = useState({ name: '', email: '' });
 
     const PRICE_PER_NIGHT = 250;
 
-    React.useEffect(() => {
+    // Click outside to close popovers
+    const calendarRef = useRef<HTMLDivElement>(null);
+    const guestRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+                setIsCalendarOpen(false);
+            }
+            if (guestRef.current && !guestRef.current.contains(event.target as Node)) {
+                setIsGuestOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Fetch Blocked Dates
+    useEffect(() => {
         const fetchBlockedDates = async () => {
             if (!supabase) return;
             const { data, error } = await supabase.from('blocked_dates').select('check_in, check_out');
@@ -33,9 +58,6 @@ const BookingBar: React.FC = () => {
                 data.forEach((booking: any) => {
                     const start = new Date(booking.check_in);
                     const end = new Date(booking.check_out);
-
-                    // Iterate from start to end and add to blocked list
-                    // Note: This matches simple day blocking. 
                     for (let dt = new Date(start); dt <= end; dt.setDate(dt.getDate() + 1)) {
                         dates.push(new Date(dt));
                     }
@@ -43,7 +65,6 @@ const BookingBar: React.FC = () => {
                 setBlockedDates(dates);
             }
         };
-
         fetchBlockedDates();
     }, []);
 
@@ -58,13 +79,11 @@ const BookingBar: React.FC = () => {
         let isValid = true;
         const newErrors = { name: '', email: '' };
 
-        // Name: Letters and spaces only, 2-50 chars
         if (!/^[a-zA-Z\s]{2,50}$/.test(formData.name)) {
             newErrors.name = 'Please enter a valid name (letters only).';
             isValid = false;
         }
 
-        // Email: Standard Simple Regex
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = 'Please enter a valid email address.';
             isValid = false;
@@ -74,9 +93,34 @@ const BookingBar: React.FC = () => {
         return isValid;
     };
 
+    const handleDateChange = (update: [Date | null, Date | null]) => {
+        setDateRange(update);
+        const [start, end] = update;
+        // Optional: Auto-close if needed, but per user request we might want to keep it open
+        // until they click outside or click "check availability"
+    };
+
+    const toggleCalendar = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsCalendarOpen(!isCalendarOpen);
+        setIsGuestOpen(false);
+    };
+
+    const toggleGuest = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsGuestOpen(!isGuestOpen);
+        setIsCalendarOpen(false);
+    };
+
+    const updateGuests = (operation: 'inc' | 'dec') => {
+        if (operation === 'inc' && guests < 6) setGuests(prev => prev + 1);
+        if (operation === 'dec' && guests > 1) setGuests(prev => prev - 1);
+    };
+
     const handleBookClick = () => {
         if (!startDate || !endDate) {
             alert("Please select check-in and check-out dates.");
+            setIsCalendarOpen(true);
             return;
         }
         setIsModalOpen(true);
@@ -84,20 +128,15 @@ const BookingBar: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!validateInput()) return;
-
-        if (!supabase) {
-            alert("Booking disabled: Missing Supabase configuration.");
-            return;
-        }
+        if (!supabase) { alert("Config missing"); return; }
 
         setStatus('submitting');
         try {
             const { error } = await supabase.from('bookings').insert([{
                 name: formData.name,
-                email: formData.email, // Validated email
-                message: formData.message, // React escapes this automatically against XSS
+                email: formData.email,
+                message: formData.message,
                 check_in: startDate,
                 check_out: endDate,
                 guests: guests,
@@ -110,73 +149,95 @@ const BookingBar: React.FC = () => {
             setTimeout(() => {
                 setIsModalOpen(false);
                 setStatus('idle');
-                setStartDate(null);
-                setEndDate(null);
+                setDateRange([null, null]);
                 setFormData({ name: '', email: '', message: '' });
                 setGuests(2);
             }, 3000);
         } catch (err) {
             console.error(err);
             setStatus('error');
-            alert("Something went wrong. Please try again.");
+            alert("Error submitting request.");
         }
     };
 
-    const handleGuestChange = (val: number) => {
-        if (val >= 1 && val <= 6) {
-            setGuests(val);
-        }
+    const renderDayContents = (day: number) => {
+        return (
+            <div className={styles.dayContainer}>
+                <span className={styles.dayNumber}>{day}</span>
+                <span className={styles.dayPrice}>€{PRICE_PER_NIGHT}</span>
+            </div>
+        );
     };
 
     return (
         <>
             <div className={styles.bar}>
-                <div className={styles.field}>
-                    <label>Check-in</label>
-                    <DatePicker
-                        selected={startDate}
-                        onChange={(date: Date | null) => setStartDate(date)}
-                        selectsStart
-                        startDate={startDate}
-                        endDate={endDate}
-                        excludeDates={blockedDates}
-                        minDate={new Date()}
-                        placeholderText="Add dates"
-                        className={styles.input}
-                        shouldCloseOnSelect={false} /* Keep open */
-                        monthsShown={2}
-                    />
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.field}>
-                    <label>Check-out</label>
-                    <DatePicker
-                        selected={endDate}
-                        onChange={(date: Date | null) => setEndDate(date)}
-                        selectsEnd
-                        startDate={startDate}
-                        endDate={endDate}
-                        minDate={startDate || new Date()}
-                        excludeDates={blockedDates}
-                        placeholderText="Add dates"
-                        className={styles.input}
-                    />
-                </div>
-                <div className={styles.divider}></div>
-                <div className={styles.field}>
-                    <label>Guests</label>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <input
-                            type="number"
-                            min="1"
-                            max="6"
-                            value={guests}
-                            onChange={(e) => handleGuestChange(parseInt(e.target.value))}
-                            className={styles.input}
-                            onKeyDown={(e) => e.preventDefault()} // Prevent typing, forced to use spinner or logic
-                        />
+                {/* Unified Date Trigger */}
+                <div className={`${styles.field} ${styles.dateField}`} onClick={toggleCalendar} ref={calendarRef}>
+                    <label>Dates</label>
+                    <div className={styles.displayRow}>
+                        <span className={!startDate ? styles.placeholder : ''}>
+                            {startDate ? startDate.toLocaleDateString() : 'Add dates'}
+                        </span>
+                        <span className={styles.arrow}>➜</span>
+                        <span className={!endDate ? styles.placeholder : ''}>
+                            {endDate ? endDate.toLocaleDateString() : 'Add dates'}
+                        </span>
                     </div>
+
+                    {isCalendarOpen && (
+                        <div className={styles.calendarWrapper} onClick={e => e.stopPropagation()}>
+                            <DatePicker
+                                selected={startDate}
+                                onChange={handleDateChange}
+                                startDate={startDate}
+                                endDate={endDate}
+                                selectsRange
+                                inline
+                                monthsShown={2}
+                                minDate={new Date()}
+                                excludeDates={blockedDates}
+                                renderDayContents={renderDayContents}
+                                calendarClassName={styles.customCalendar}
+                            />
+                        </div>
+                    )}
                 </div>
+
+                <div className={styles.divider}></div>
+
+                {/* Guest Trigger */}
+                <div className={styles.field} onClick={toggleGuest} ref={guestRef}>
+                    <label>Guests</label>
+                    <div className={styles.displayRow}>
+                        <span>{guests} Guest{guests > 1 ? 's' : ''}</span>
+                    </div>
+
+                    {isGuestOpen && (
+                        <div className={styles.guestPopover} onClick={e => e.stopPropagation()}>
+                            <div className={styles.guestRow}>
+                                <div>
+                                    <h4>Adults</h4>
+                                    <p>ages 13 or above</p>
+                                </div>
+                                <div className={styles.guestControls}>
+                                    <button
+                                        className={styles.roundBtn}
+                                        onClick={() => updateGuests('dec')}
+                                        disabled={guests <= 1}
+                                    >-</button>
+                                    <span className={styles.guestCount}>{guests}</span>
+                                    <button
+                                        className={styles.roundBtn}
+                                        onClick={() => updateGuests('inc')}
+                                        disabled={guests >= 6}
+                                    >+</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
                 <button className={styles.searchBtn} onClick={handleBookClick}>
                     Check Availability
                 </button>
@@ -189,12 +250,11 @@ const BookingBar: React.FC = () => {
                         {status === 'success' ? (
                             <div className={styles.successMessage}>
                                 <h3>Request Sent! 🌊</h3>
-                                <p>We have received your booking request.</p>
-                                <p>You will receive a confirmation email at <strong>{formData.email}</strong> shortly.</p>
+                                <p>We'll confirm your booking at <strong>{formData.email}</strong> shortly.</p>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit}>
-                                <h3>Complete your Request</h3>
+                                <h3>Complete Request</h3>
                                 <p className={styles.modalDescription}>You won't be charged yet.</p>
 
                                 <div className={styles.summary}>
@@ -204,49 +264,42 @@ const BookingBar: React.FC = () => {
                                     </div>
                                     <div className={styles.summaryRow}>
                                         <span>Guests</span>
-                                        <span>{guests} guest{guests > 1 ? 's' : ''}</span>
+                                        <span>{guests} People</span>
                                     </div>
                                     <div className={styles.summaryRow}>
-                                        <span>Total Est.</span>
+                                        <span>Total</span>
                                         <span>€{calculateTotal().toLocaleString()}</span>
                                     </div>
                                 </div>
 
                                 <div className={styles.formGroup}>
-                                    <label>Full Name</label>
+                                    <label>Name</label>
                                     <input
-                                        type="text"
-                                        required
-                                        value={formData.name}
+                                        type="text" required value={formData.name}
                                         onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                        placeholder="e.g. Mario Rossi"
+                                        placeholder="Full Name"
                                     />
                                     {errors.name && <span className={styles.errorMsg}>{errors.name}</span>}
                                 </div>
-
                                 <div className={styles.formGroup}>
-                                    <label>Email Address</label>
+                                    <label>Email</label>
                                     <input
-                                        type="email"
-                                        required
-                                        value={formData.email}
+                                        type="email" required value={formData.email}
                                         onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                        placeholder="name@example.com"
+                                        placeholder="Email Address"
                                     />
                                     {errors.email && <span className={styles.errorMsg}>{errors.email}</span>}
                                 </div>
-
                                 <div className={styles.formGroup}>
-                                    <label>Message (Optional)</label>
+                                    <label>Message</label>
                                     <textarea
                                         value={formData.message}
                                         onChange={e => setFormData({ ...formData, message: e.target.value })}
-                                        rows={3}
+                                        rows={2}
                                     />
                                 </div>
-
                                 <button type="submit" className={styles.confirmBtn} disabled={status === 'submitting'}>
-                                    {status === 'submitting' ? 'Processing...' : 'Send Request'}
+                                    {status === 'submitting' ? 'Sending...' : 'Send Request'}
                                 </button>
                             </form>
                         )}
