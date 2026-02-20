@@ -6,8 +6,6 @@ const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY;
 const AIRBNB_ICAL_URL = 'https://www.airbnb.com/calendar/ical/38283678.ics?t=1fc73ff3da0648cab27aee083723689a&locale=it';
 
-console.log(`Checking credentials... URL exists: ${!!SUPABASE_URL}, KEY exists: ${!!SUPABASE_KEY}`);
-
 if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.error('Missing Supabase credentials. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.');
     process.exit(1);
