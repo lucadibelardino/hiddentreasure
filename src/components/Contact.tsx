@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './Contact.module.css';
+import { supabase } from '../lib/supabase';
 
 const Contact: React.FC = () => {
     const [formData, setFormData] = useState({
@@ -7,16 +8,41 @@ const Contact: React.FC = () => {
         email: '',
         message: ''
     });
+    const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        alert('Thank you for your inquiry! We will get back to you soon.');
-        setFormData({ name: '', email: '', message: '' });
+        setStatus('submitting');
+
+        try {
+            const { error } = await supabase
+                .from('bookings')
+                .insert([
+                    {
+                        name: formData.name,
+                        email: formData.email,
+                        message: formData.message,
+                        created_at: new Date().toISOString()
+                    }
+                ]);
+
+            if (error) throw error;
+
+            setStatus('success');
+            alert('Thank you for your inquiry! We have received your request.');
+            setFormData({ name: '', email: '', message: '' });
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            setStatus('error');
+            alert('There was an error sending your message. Please try again or email us directly.');
+        } finally {
+            setStatus('idle');
+        }
     };
 
     return (
@@ -43,6 +69,7 @@ const Contact: React.FC = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 required
+                                disabled={status === 'submitting'}
                             />
                         </div>
                         <div className={styles.formGroup}>
@@ -54,6 +81,7 @@ const Contact: React.FC = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
+                                disabled={status === 'submitting'}
                             />
                         </div>
                         <div className={styles.formGroup}>
@@ -65,9 +93,12 @@ const Contact: React.FC = () => {
                                 onChange={handleChange}
                                 rows={5}
                                 required
+                                disabled={status === 'submitting'}
                             />
                         </div>
-                        <button type="submit" className={styles.submitBtn}>Send Inquiry</button>
+                        <button type="submit" className={styles.submitBtn} disabled={status === 'submitting'}>
+                            {status === 'submitting' ? 'Sending...' : 'Send Inquiry'}
+                        </button>
                     </form>
                 </div>
             </div>
