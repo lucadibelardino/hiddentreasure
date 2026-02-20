@@ -3,15 +3,15 @@ import ical from 'node-ical';
 
 // Load environment variables (GitHub Actions sets these)
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const AIRBNB_ICAL_URL = 'https://www.airbnb.com/calendar/ical/38283678.ics?t=1fc73ff3da0648cab27aee083723689a&locale=it';
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.error('Missing Supabase credentials. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.');
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    console.error('Missing Supabase credentials. Ensure VITE_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.');
     process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 async function syncCalendar() {
     try {
