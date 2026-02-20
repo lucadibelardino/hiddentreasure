@@ -179,8 +179,7 @@
 }
 
 
-/* PREMIUM CALENDAR STYLING */
-/* PREMIUM CALENDAR STYLING */
+/* PREMIUM CALENDAR STYLING - BLUE THEME */
 .dayContainer {
     display: flex;
     flex-direction: column;
@@ -188,16 +187,16 @@
     justify-content: center;
     width: 100%;
     height: 100%;
+    position: relative;
+    z-index: 2;
 }
 
 .dayNumber {
     font-weight: 600;
     font-size: 0.9rem;
-    /* Slightly smaller for better fit */
-    line-height: 1;
+    line-height: normal;
     color: #222;
-    margin-top: 2px;
-    /* Visual optical adjustment */
+    margin-top: 1px;
 }
 
 .dayPrice {
@@ -230,49 +229,48 @@
     margin-bottom: 1.5rem;
     font-weight: 800;
     text-transform: capitalize;
-    /* Make month look better */
 }
 
 :global(.react-datepicker__day-name) {
-    width: 50px;
+    width: 48px;
     color: #717171;
     font-weight: 600;
     font-size: 0.85rem;
+    margin: 0;
 }
 
 :global(.react-datepicker__day) {
     width: 48px;
-    /* Slightly smaller than 50 to ensure margin fits */
     height: 48px;
-    margin: 4px;
-    /* More spacing between bubbles */
+    margin: 0;
+    /* Continuous strip: no margin */
     border-radius: 50%;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.2s, color 0.2s;
     overflow: hidden;
     vertical-align: middle;
-
-    /* Flex centering is key here */
     display: inline-flex;
     align-items: center;
     justify-content: center;
     line-height: normal;
-    /* Reset line-height */
 }
 
 :global(.react-datepicker__day:hover) {
-    background-color: #f7f7f7;
-    border: 1px solid #222;
-    /* Airbnb style hover ring */
+    background-color: #f0f8ff;
+    /* Light blue hover */
+    border-radius: 50%;
 }
 
+/* SELECTED / START / END -> SOLID BLUE */
 :global(.react-datepicker__day--selected),
 :global(.react-datepicker__day--range-end),
 :global(.react-datepicker__day--range-start) {
-    background-color: #222 !important;
+    background-color: #007AFF !important;
+    /* BLUE */
     color: white !important;
     border-radius: 50% !important;
     border: none !important;
-    /* Ensure no border messes up sizing */
+    position: relative;
+    z-index: 10;
 }
 
 :global(.react-datepicker__day--selected) .dayNumber,
@@ -284,28 +282,56 @@
 :global(.react-datepicker__day--selected) .dayPrice,
 :global(.react-datepicker__day--range-start) .dayPrice,
 :global(.react-datepicker__day--range-end) .dayPrice {
-    color: #eee;
+    color: #e0e0e0;
 }
 
-/* Range Styling - The Strip */
-:global(.react-datepicker__day--in-range) {
-    background-color: #F0F0F0 !important;
-    color: #222 !important;
+/* RANGE STRIP -> CONTINUOUS LIGHT BLUE */
+:global(.react-datepicker__day--in-range),
+:global(.react-datepicker__day--in-selecting-range) {
+    background-color: rgba(0, 122, 255, 0.1) !important;
+    /* Very light blue transparent */
+    color: #007AFF !important;
     border-radius: 0 !important;
 }
 
-:global(.react-datepicker__day--in-selecting-range) {
-    background-color: #F0F0F0 !important;
-}
-
+/* Visual connections for start/end */
 :global(.react-datepicker__day--range-start) {
     border-top-right-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
+    /* Create visual connection to right */
+    background: linear-gradient(90deg, #007AFF 50%, rgba(0, 122, 255, 0.1) 50%) !important;
+    /* But wait, if we want the circle to be #007AFF and the strip to be light... 
+       Actually simplest way to get "circle + strip" is to let the day be the circle (z-index high)
+       and use a pseudo element for the strip. But react-datepicker handles this logic class-wise.
+       
+       Better approach for "half-circle half-square": 
+       Set background to the light color, and use a pseudo-element for the dark circle? 
+       Or just keep it simple: Start is a circle, but has a :after rect connecting it?
+       
+       Let's stick to the trusted method:
+       Start: Rounded Left
+       End: Rounded Right
+    */
+    background-color: #007AFF !important;
+    border-radius: 50% 0 0 50% !important;
 }
 
 :global(.react-datepicker__day--range-end) {
-    border-top-left-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
+    background-color: #007AFF !important;
+    border-radius: 0 50% 50% 0 !important;
+}
+
+/* If it's a single selected day or start==end */
+:global(.react-datepicker__day--selected) {
+    border-radius: 50% !important;
+}
+
+:global(.react-datepicker__day--range-start.react-datepicker__day--range-end) {
+    border-radius: 50% !important;
+}
+
+:global(.react-datepicker__day--in-range) .dayNumber {
+    color: #007AFF;
 }
 
 :global(.react-datepicker__triangle) {
@@ -316,7 +342,6 @@
     top: 25px;
 }
 
-/* Adjusted arrow position based on header padding */
 :global(.react-datepicker__navigation-icon::before) {
     border-color: #222;
     border-width: 2px 2px 0 0;
@@ -324,9 +349,12 @@
     width: 10px;
 }
 
+/* UNAVAILABLE / DISABLED DATES */
 :global(.react-datepicker__day--disabled) {
     color: #ccc !important;
     text-decoration: line-through;
+    opacity: 0.3;
+    /* Ghost effect */
     pointer-events: none;
 }
 
@@ -334,11 +362,15 @@
     display: none;
 }
 
+:global(.react-datepicker__day--disabled) .dayNumber {
+    color: #ccc;
+}
+
+/* HIDDEN OUTSIDE DAYS */
 :global(.react-datepicker__day--outside-month) {
     visibility: hidden;
     pointer-events: none;
     height: 0;
-    /* Collapse height if needed, but visibility hidden usually keeps layout stable which is better */
 }
 
 
