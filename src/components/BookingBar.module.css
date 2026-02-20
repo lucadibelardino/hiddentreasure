@@ -94,6 +94,19 @@
     animation: fadeIn 0.15s ease-out;
 }
 
+/* Floating error message inside calendar */
+.inlineError {
+    color: #E0354D;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: #FFF0F0;
+    border-radius: 8px;
+    animation: fadeIn 0.2s;
+}
+
 .guestPopover {
     position: absolute;
     top: 120%;
@@ -177,15 +190,16 @@
 }
 
 .dayNumber {
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.95rem;
-    line-height: 1;
+    line-height: 1.1;
+    color: #222;
 }
 
 .dayPrice {
     font-size: 0.65rem;
     color: #717171;
-    font-weight: 400;
+    font-weight: 600;
     margin-top: 3px;
 }
 
@@ -209,30 +223,34 @@
 
 :global(.react-datepicker__current-month) {
     font-size: 1.2rem;
-    margin-bottom: 1rem;
-    font-weight: 700;
+    margin-bottom: 1.5rem;
+    font-weight: 800;
+    text-transform: capitalize;
+    /* Make month look better */
 }
 
 :global(.react-datepicker__day-name) {
-    width: 48px;
+    width: 50px;
     color: #717171;
     font-weight: 600;
     font-size: 0.85rem;
 }
 
 :global(.react-datepicker__day) {
-    width: 48px;
-    height: 48px;
+    width: 50px;
+    /* Bigger touch targets */
+    height: 50px;
     margin: 2px;
     border-radius: 50%;
     transition: all 0.2s;
     overflow: hidden;
+    vertical-align: middle;
 }
 
 :global(.react-datepicker__day:hover) {
     background-color: #f7f7f7;
-    border-radius: 50%;
     border: 1px solid #222;
+    /* Airbnb style hover ring */
 }
 
 :global(.react-datepicker__day--selected),
@@ -243,16 +261,27 @@
     border-radius: 50% !important;
 }
 
+:global(.react-datepicker__day--selected) .dayNumber,
+:global(.react-datepicker__day--range-start) .dayNumber,
+:global(.react-datepicker__day--range-end) .dayNumber {
+    color: white;
+}
+
 :global(.react-datepicker__day--selected) .dayPrice,
 :global(.react-datepicker__day--range-start) .dayPrice,
 :global(.react-datepicker__day--range-end) .dayPrice {
     color: #eee;
 }
 
+/* Range Styling - The Strip */
 :global(.react-datepicker__day--in-range) {
-    background-color: #F7F7F7 !important;
+    background-color: #F0F0F0 !important;
     color: #222 !important;
     border-radius: 0 !important;
+}
+
+:global(.react-datepicker__day--in-selecting-range) {
+    background-color: #F0F0F0 !important;
 }
 
 :global(.react-datepicker__day--range-start) {
@@ -270,24 +299,29 @@
 }
 
 :global(.react-datepicker__navigation) {
-    top: 22px;
+    top: 25px;
 }
 
+/* Adjusted arrow position based on header padding */
 :global(.react-datepicker__navigation-icon::before) {
     border-color: #222;
     border-width: 2px 2px 0 0;
-    height: 9px;
-    width: 9px;
+    height: 10px;
+    width: 10px;
 }
 
 :global(.react-datepicker__day--disabled) {
-    color: #ddd !important;
+    color: #ccc !important;
     text-decoration: line-through;
     pointer-events: none;
 }
 
 :global(.react-datepicker__day--disabled) .dayPrice {
     display: none;
+}
+
+:global(.react-datepicker__day--disabled) .dayNumber {
+    color: #ccc;
 }
 
 

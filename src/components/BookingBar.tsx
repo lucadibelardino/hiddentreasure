@@ -210,6 +210,11 @@ const BookingBar: React.FC = () => {
 
                     {isCalendarOpen && (
                         <div className={styles.calendarWrapper} onClick={e => e.stopPropagation()}>
+                            {selectionError && (
+                                <div className={styles.inlineError}>
+                                    {selectionError}
+                                </div>
+                            )}
                             <DatePicker
                                 selected={startDate}
                                 onChange={handleDateChange}
