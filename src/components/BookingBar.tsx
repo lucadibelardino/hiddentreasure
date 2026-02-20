@@ -95,6 +95,7 @@ const BookingBar: React.FC = () => {
     };
 
     const handleDateChange = (update: [Date | null, Date | null]) => {
+        setSelectionError(null);
         const [newStart, newEnd] = update;
 
         // Validation: Check if range includes any blocked date
@@ -114,7 +115,7 @@ const BookingBar: React.FC = () => {
             }
 
             if (isBlocked) {
-                alert("Some dates in this range are unavailable. Please select free dates.");
+                setSelectionError("Selected dates include unavailable days.");
                 // If invalid, keep only the start date or reset
                 setDateRange([newStart, null]);
                 return;
