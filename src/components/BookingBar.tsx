@@ -95,7 +95,6 @@ const BookingBar: React.FC = () => {
 
     const handleDateChange = (update: [Date | null, Date | null]) => {
         setDateRange(update);
-        const [start, end] = update;
         // Optional: Auto-close if needed, but per user request we might want to keep it open
         // until they click outside or click "check availability"
     };
