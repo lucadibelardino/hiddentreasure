@@ -1,4 +1,5 @@
 import React from 'react';
+import BookingBar from './BookingBar';
 import styles from './Hero.module.css';
 
 const Hero: React.FC = () => {
@@ -8,7 +9,7 @@ const Hero: React.FC = () => {
             <div className={styles.content}>
                 <h1 className={styles.title}>Hidden Treasure</h1>
                 <p className={styles.subtitle}>A minimalist sanctuary in Villasimius</p>
-                <a href="#contact" className={styles.cta}>Discover More</a>
+                <BookingBar />
             </div>
         </section>
     );

@@ -1,0 +1,187 @@
+.bar {
+    display: flex;
+    align-items: center;
+    background: var(--color-white);
+    padding: 1rem;
+    border-radius: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    max-width: 850px;
+    margin: 2rem auto 0;
+    position: relative;
+    z-index: 10;
+}
+
+.field {
+    padding: 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.field label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    color: var(--color-text-light);
+}
+
+.input {
+    border: none;
+    font-size: 0.9rem;
+    font-family: var(--font-family-sans);
+    color: var(--color-text);
+    width: 100%;
+    outline: none;
+    background: transparent;
+}
+
+.divider {
+    width: 1px;
+    height: 30px;
+    background-color: #ddd;
+}
+
+.searchBtn {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+    white-space: nowrap;
+    margin-left: 1rem;
+}
+
+.searchBtn:hover {
+    background: var(--color-secondary);
+}
+
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
+
+.closeBtn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #666;
+}
+
+.modal h3 {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: var(--color-primary);
+}
+
+.summary {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.summary p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+.formGroup {
+    margin-bottom: 1rem;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.formGroup input,
+.formGroup textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-family: inherit;
+}
+
+.confirmBtn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--color-secondary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.successMessage {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .bar {
+        flex-direction: column;
+        border-radius: 20px;
+        padding: 1.5rem;
+        gap: 1rem;
+    }
+
+    .divider {
+        display: none;
+    }
+
+    .field {
+        width: 100%;
+        padding: 0;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+
+    .field:last-of-type {
+        border-bottom: none;
+    }
+
+    .searchBtn {
+        width: 100%;
+        margin: 0;
+    }
+}
