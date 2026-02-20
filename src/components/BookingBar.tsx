@@ -94,9 +94,33 @@ const BookingBar: React.FC = () => {
     };
 
     const handleDateChange = (update: [Date | null, Date | null]) => {
+        const [newStart, newEnd] = update;
+
+        // Validation: Check if range includes any blocked date
+        if (newStart && newEnd && blockedDates.length > 0) {
+            let isBlocked = false;
+            // Iterate through range
+            for (let dt = new Date(newStart); dt <= newEnd; dt.setDate(dt.getDate() + 1)) {
+                // Check if this date matches any in blockedDates
+                // Using string comparison for safety (YYYY-MM-DD) or time comparison
+                const time = dt.getTime();
+                if (blockedDates.some(blocked => {
+                    return Math.abs(blocked.getTime() - time) < 24 * 60 * 60 * 1000 && blocked.getDate() === dt.getDate();
+                })) {
+                    isBlocked = true;
+                    break;
+                }
+            }
+
+            if (isBlocked) {
+                alert("Some dates in this range are unavailable. Please select free dates.");
+                // If invalid, keep only the start date or reset
+                setDateRange([newStart, null]);
+                return;
+            }
+        }
+
         setDateRange(update);
-        // Optional: Auto-close if needed, but per user request we might want to keep it open
-        // until they click outside or click "check availability"
     };
 
     const toggleCalendar = (e: React.MouseEvent) => {
