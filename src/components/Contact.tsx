@@ -17,6 +17,10 @@ const Contact: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!supabase) {
+            alert('Bookings are currently disabled (missing configuration). Please email us directly.');
+            return;
+        }
         setStatus('submitting');
 
         try {
