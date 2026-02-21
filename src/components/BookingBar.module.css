@@ -105,7 +105,7 @@
     top: 50%;
     left: 50%;
     width: 100%;
-    max-height: 600px;
+    max-height: 550px;
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
     pointer-events: auto;
@@ -117,7 +117,7 @@
     left: calc(100% - 170px);
     /* Centers roughly on the guest button since width is 340px */
     width: 340px;
-    max-height: 240px;
+    max-height: 200px;
     transform: translate(-50%, 0) scale(1);
     opacity: 1;
     pointer-events: auto;
@@ -125,9 +125,6 @@
 }
 
 .popoverContent {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     padding: 1.5rem;
     box-sizing: border-box;
@@ -137,6 +134,7 @@
 }
 
 .popoverContent.active {
+    position: relative;
     opacity: 1;
     transform: scale(1);
     pointer-events: auto;
@@ -144,9 +142,13 @@
 }
 
 .popoverContent.inactive {
+    position: absolute;
+    top: 0;
+    left: 0;
     opacity: 0;
     transform: scale(0.95);
     pointer-events: none;
+    visibility: hidden;
 }
 
 /* Floating error message inside calendar */
@@ -572,6 +574,7 @@
         transform: translate(-50%, -50%);
         width: 95%;
         max-width: 400px;
+        max-height: 90vh;
         z-index: 2000;
     }
 
