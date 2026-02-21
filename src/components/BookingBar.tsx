@@ -237,7 +237,10 @@ const BookingBar: React.FC = () => {
                 <div className={styles.field} onClick={toggleGuest} ref={guestRef}>
                     <label>Guests</label>
                     <div className={styles.displayRow}>
-                        <span>{totalGuests} Person{totalGuests > 1 ? 'e' : 'a'}</span>
+                        <span>
+                            {adults} Adult{adults > 1 ? 'i' : 'o'}
+                            {infants > 0 ? `, ${infants} Neona${infants > 1 ? 'ti' : 'to'}` : ''}
+                        </span>
                     </div>
                 </div>
 
