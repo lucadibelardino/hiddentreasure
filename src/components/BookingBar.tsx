@@ -123,6 +123,14 @@ const BookingBar: React.FC = () => {
         }
 
         setDateRange(update);
+
+        if (newStart && newEnd) {
+            // Give user a brief moment to see the selected end date
+            setTimeout(() => {
+                setIsCalendarOpen(false);
+                setIsGuestOpen(true);
+            }, 350);
+        }
     };
 
     const toggleCalendar = (e: React.MouseEvent) => {

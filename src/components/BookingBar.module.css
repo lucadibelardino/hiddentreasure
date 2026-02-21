@@ -264,83 +264,61 @@
 }
 
 :global(.react-datepicker__day:hover) {
-    background-color: #f0f8ff;
-    /* Light blue hover */
+    background-color: rgba(0, 31, 63, 0.1);
+    /* Navy blue hover */
     border-radius: 50%;
 }
 
-/* SELECTED / START / END -> SOLID BLUE */
+/* SELECTED / START / END -> NAVY BLUE SEMI-TRANSPARENT */
 :global(.react-datepicker__day--selected),
 :global(.react-datepicker__day--range-end),
-:global(.react-datepicker__day--range-start) {
-    background-color: #007AFF !important;
-    /* BLUE */
-    color: white !important;
-    border-radius: 50% !important;
+:global(.react-datepicker__day--range-start),
+:global(.react-datepicker__day--in-selecting-range),
+:global(.react-datepicker__day--in-range) {
+    background-color: rgba(0, 31, 63, 0.15) !important;
+    color: #001f3f !important;
     border: none !important;
+    border-radius: 0 !important;
     position: relative;
     z-index: 10;
 }
 
+/* Hovering over a selected/range date should keep it continuous */
+:global(.react-datepicker__day--in-selecting-range:hover),
+:global(.react-datepicker__day--in-range:hover) {
+    background-color: rgba(0, 31, 63, 0.25) !important;
+}
+
+/* Text colors for range */
 :global(.react-datepicker__day--selected) .dayNumber,
 :global(.react-datepicker__day--range-start) .dayNumber,
-:global(.react-datepicker__day--range-end) .dayNumber {
-    color: white;
+:global(.react-datepicker__day--range-end) .dayNumber,
+:global(.react-datepicker__day--in-range) .dayNumber,
+:global(.react-datepicker__day--in-selecting-range) .dayNumber {
+    color: #001f3f;
 }
 
 :global(.react-datepicker__day--selected) .dayPrice,
 :global(.react-datepicker__day--range-start) .dayPrice,
-:global(.react-datepicker__day--range-end) .dayPrice {
-    color: #e0e0e0;
+:global(.react-datepicker__day--range-end) .dayPrice,
+:global(.react-datepicker__day--in-range) .dayPrice,
+:global(.react-datepicker__day--in-selecting-range) .dayPrice {
+    color: #4a5d73;
 }
 
-/* RANGE STRIP -> CONTINUOUS LIGHT BLUE */
-:global(.react-datepicker__day--in-range),
-:global(.react-datepicker__day--in-selecting-range) {
-    background-color: rgba(0, 122, 255, 0.1) !important;
-    /* Very light blue transparent */
-    color: #007AFF !important;
-    border-radius: 0 !important;
-}
-
-/* Visual connections for start/end */
+/* Shapes for Start and End */
 :global(.react-datepicker__day--range-start) {
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-    /* Create visual connection to right */
-    background: linear-gradient(90deg, #007AFF 50%, rgba(0, 122, 255, 0.1) 50%) !important;
-    /* But wait, if we want the circle to be #007AFF and the strip to be light... 
-       Actually simplest way to get "circle + strip" is to let the day be the circle (z-index high)
-       and use a pseudo element for the strip. But react-datepicker handles this logic class-wise.
-       
-       Better approach for "half-circle half-square": 
-       Set background to the light color, and use a pseudo-element for the dark circle? 
-       Or just keep it simple: Start is a circle, but has a :after rect connecting it?
-       
-       Let's stick to the trusted method:
-       Start: Rounded Left
-       End: Rounded Right
-    */
-    background-color: #007AFF !important;
     border-radius: 50% 0 0 50% !important;
 }
 
 :global(.react-datepicker__day--range-end) {
-    background-color: #007AFF !important;
     border-radius: 0 50% 50% 0 !important;
 }
 
-/* If it's a single selected day or start==end */
-:global(.react-datepicker__day--selected) {
-    border-radius: 50% !important;
-}
-
+/* If it's a single selected day or start==end, make it a full circle */
+:global(.react-datepicker__day--selected),
 :global(.react-datepicker__day--range-start.react-datepicker__day--range-end) {
     border-radius: 50% !important;
-}
-
-:global(.react-datepicker__day--in-range) .dayNumber {
-    color: #007AFF;
 }
 
 :global(.react-datepicker__triangle) {
