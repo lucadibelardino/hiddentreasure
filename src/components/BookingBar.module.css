@@ -85,15 +85,17 @@
 /* POPOVERS */
 .calendarWrapper {
     position: absolute;
-    top: 0;
-    left: 0;
+    /* Center it slightly below the bar or exactly over it */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 0);
     width: 100%;
     background: white;
     padding: 1.5rem;
-    border-radius: 50px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-    z-index: 200;
-    animation: slideDownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    border-radius: 40px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+    animation: scaleFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     box-sizing: border-box;
     display: flex;
     justify-content: center;
@@ -483,15 +485,15 @@
     }
 }
 
-@keyframes slideDownFade {
+@keyframes scaleFadeIn {
     from {
         opacity: 0;
-        transform: translateY(-20px) scale(0.98);
+        transform: translate(-50%, -10px) scale(0.98);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translate(-50%, 0) scale(1);
     }
 }
 
@@ -523,6 +525,19 @@
         max-width: 400px;
         overflow-y: auto;
         max-height: 90vh;
+        animation: mobileScaleFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes mobileScaleFadeIn {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -45%) scale(0.95);
+        }
+
+        to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
     }
 
     .guestPopover {
