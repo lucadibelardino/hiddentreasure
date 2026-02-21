@@ -219,8 +219,27 @@ const BookingBar: React.FC = () => {
                     </div>
                 </div>
 
-                {isCalendarOpen && (
-                    <div className={styles.calendarWrapper} onClick={e => e.stopPropagation()} ref={calendarRef}>
+                <div className={styles.divider}></div>
+
+                {/* Guest Trigger */}
+                <div className={styles.field} onClick={toggleGuest} ref={guestRef}>
+                    <label>Guests</label>
+                    <div className={styles.displayRow}>
+                        <span>{guests} Guest{guests > 1 ? 's' : ''}</span>
+                    </div>
+                </div>
+
+                <button className={styles.searchBtn} onClick={handleBookClick}>
+                    Check Availability
+                </button>
+
+                {/* SHARED POPOVER TRANSITION */}
+                <div
+                    className={`${styles.popoverBase} ${isCalendarOpen ? styles.calendarOpen : isGuestOpen ? styles.guestOpen : ''}`}
+                    onClick={e => e.stopPropagation()}
+                >
+                    {/* Calendar Content */}
+                    <div className={`${styles.popoverContent} ${isCalendarOpen ? styles.active : styles.inactive}`} ref={calendarRef}>
                         {selectionError && (
                             <div className={styles.inlineError}>
                                 {selectionError}
@@ -240,45 +259,31 @@ const BookingBar: React.FC = () => {
                             calendarClassName={styles.customCalendar}
                         />
                     </div>
-                )}
 
-                <div className={styles.divider}></div>
-
-                {/* Guest Trigger */}
-                <div className={styles.field} onClick={toggleGuest} ref={guestRef}>
-                    <label>Guests</label>
-                    <div className={styles.displayRow}>
-                        <span>{guests} Guest{guests > 1 ? 's' : ''}</span>
-                    </div>
-
-                    {isGuestOpen && (
-                        <div className={styles.guestPopover} onClick={e => e.stopPropagation()}>
-                            <div className={styles.guestRow}>
-                                <div>
-                                    <h4>Adults</h4>
-                                    <p>ages 13 or above</p>
-                                </div>
-                                <div className={styles.guestControls}>
-                                    <button
-                                        className={styles.roundBtn}
-                                        onClick={() => updateGuests('dec')}
-                                        disabled={guests <= 1}
-                                    >-</button>
-                                    <span className={styles.guestCount}>{guests}</span>
-                                    <button
-                                        className={styles.roundBtn}
-                                        onClick={() => updateGuests('inc')}
-                                        disabled={guests >= 6}
-                                    >+</button>
-                                </div>
+                    {/* Guest Content */}
+                    <div className={`${styles.popoverContent} ${isGuestOpen ? styles.active : styles.inactive}`}>
+                        <div className={styles.guestRow}>
+                            <div>
+                                <h4>Adults</h4>
+                                <p>ages 13 or above</p>
+                            </div>
+                            <div className={styles.guestControls}>
+                                <button
+                                    className={styles.roundBtn}
+                                    onClick={() => updateGuests('dec')}
+                                    disabled={guests <= 1}
+                                >-</button>
+                                <span className={styles.guestCount}>{guests}</span>
+                                <button
+                                    className={styles.roundBtn}
+                                    onClick={() => updateGuests('inc')}
+                                    disabled={guests >= 6}
+                                >+</button>
                             </div>
                         </div>
-                    )}
+                    </div>
                 </div>
 
-                <button className={styles.searchBtn} onClick={handleBookClick}>
-                    Check Availability
-                </button>
             </div>
 
             {isModalOpen && (
@@ -343,7 +348,8 @@ const BookingBar: React.FC = () => {
                         )}
                     </div>
                 </div>
-            )}
+            )
+            }
         </>
     );
 };
