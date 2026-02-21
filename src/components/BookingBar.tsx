@@ -7,8 +7,10 @@ import { supabase } from '../lib/supabase';
 const BookingBar: React.FC = () => {
     const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
     const [startDate, endDate] = dateRange;
-    const [guests, setGuests] = useState(2);
+    const [adults, setAdults] = useState(2);
+    const [infants, setInfants] = useState(0);
 
+    const totalGuests = adults + infants;
     // Popover States
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
     const [isGuestOpen, setIsGuestOpen] = useState(false);
@@ -145,9 +147,14 @@ const BookingBar: React.FC = () => {
         setIsCalendarOpen(false);
     };
 
-    const updateGuests = (operation: 'inc' | 'dec') => {
-        if (operation === 'inc' && guests < 6) setGuests(prev => prev + 1);
-        if (operation === 'dec' && guests > 1) setGuests(prev => prev - 1);
+    const updateAdults = (operation: 'inc' | 'dec') => {
+        if (operation === 'inc' && totalGuests < 6) setAdults(prev => prev + 1);
+        if (operation === 'dec' && adults > 1) setAdults(prev => prev - 1);
+    };
+
+    const updateInfants = (operation: 'inc' | 'dec') => {
+        if (operation === 'inc' && totalGuests < 6) setInfants(prev => prev + 1);
+        if (operation === 'dec' && infants > 0) setInfants(prev => prev - 1);
     };
 
     const handleBookClick = () => {
@@ -172,7 +179,7 @@ const BookingBar: React.FC = () => {
                 message: formData.message,
                 check_in: startDate,
                 check_out: endDate,
-                guests: guests,
+                guests: totalGuests,
                 total_price: calculateTotal(),
                 created_at: new Date().toISOString()
             }]);
@@ -184,7 +191,8 @@ const BookingBar: React.FC = () => {
                 setStatus('idle');
                 setDateRange([null, null]);
                 setFormData({ name: '', email: '', message: '' });
-                setGuests(2);
+                setAdults(2);
+                setInfants(0);
             }, 3000);
         } catch (err) {
             console.error(err);
@@ -221,11 +229,10 @@ const BookingBar: React.FC = () => {
 
                 <div className={styles.divider}></div>
 
-                {/* Guest Trigger */}
                 <div className={styles.field} onClick={toggleGuest} ref={guestRef}>
                     <label>Guests</label>
                     <div className={styles.displayRow}>
-                        <span>{guests} Guest{guests > 1 ? 's' : ''}</span>
+                        <span>{totalGuests} Person{totalGuests > 1 ? 'e' : 'a'}</span>
                     </div>
                 </div>
 
@@ -262,23 +269,46 @@ const BookingBar: React.FC = () => {
 
                     {/* Guest Content */}
                     <div className={`${styles.popoverContent} ${isGuestOpen ? styles.active : styles.inactive}`}>
-                        <div className={styles.guestRow}>
-                            <div>
-                                <h4>Adults</h4>
-                                <p>ages 13 or above</p>
+                        <div className={styles.guestContentStack}>
+                            {/* Adults */}
+                            <div className={styles.guestRow}>
+                                <div>
+                                    <h4>Adulti</h4>
+                                    <p>Età 13+</p>
+                                </div>
+                                <div className={styles.guestControls}>
+                                    <button
+                                        className={styles.roundBtn}
+                                        onClick={() => updateAdults('dec')}
+                                        disabled={adults <= 1}
+                                    >-</button>
+                                    <span className={styles.guestCount}>{adults}</span>
+                                    <button
+                                        className={styles.roundBtn}
+                                        onClick={() => updateAdults('inc')}
+                                        disabled={totalGuests >= 6}
+                                    >+</button>
+                                </div>
                             </div>
-                            <div className={styles.guestControls}>
-                                <button
-                                    className={styles.roundBtn}
-                                    onClick={() => updateGuests('dec')}
-                                    disabled={guests <= 1}
-                                >-</button>
-                                <span className={styles.guestCount}>{guests}</span>
-                                <button
-                                    className={styles.roundBtn}
-                                    onClick={() => updateGuests('inc')}
-                                    disabled={guests >= 6}
-                                >+</button>
+                            {/* Infants */}
+                            <div className={styles.guestRow}>
+                                <div>
+                                    <h4>Bambini</h4>
+                                    <p>Sotto i 2 anni</p>
+                                </div>
+                                <div className={styles.guestControls}>
+                                    <button
+                                        className={styles.roundBtn}
+                                        onClick={() => updateInfants('dec')}
+                                        disabled={infants <= 0}
+                                    >-</button>
+                                    <span className={styles.guestCount}>{infants}</span>
+                                    <button
+                                        className={styles.roundBtn}
+                                        onClick={() => updateInfants('inc')}
+                                        disabled={totalGuests >= 6}
+                                    >+</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -307,7 +337,7 @@ const BookingBar: React.FC = () => {
                                     </div>
                                     <div className={styles.summaryRow}>
                                         <span>Guests</span>
-                                        <span>{guests} People</span>
+                                        <span>{totalGuests} Persone ({adults} Adulti, {infants} Bambini)</span>
                                     </div>
                                     <div className={styles.summaryRow}>
                                         <span>Total</span>

@@ -113,12 +113,12 @@
 }
 
 .popoverBase.guestOpen {
-    top: 120%;
+    top: -20px;
     left: calc(100% - 170px);
     /* Centers roughly on the guest button since width is 340px */
     width: 340px;
-    max-height: 200px;
-    transform: translate(-50%, 0) scale(1);
+    max-height: 300px;
+    transform: translate(-50%, -100%) scale(1);
     opacity: 1;
     pointer-events: auto;
     visibility: visible;
@@ -192,6 +192,13 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+.guestContentStack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
 }
 
 .roundBtn {
@@ -287,8 +294,9 @@
 }
 
 :global(.react-datepicker__week) {
-    display: flex;
-    justify-content: center;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 0 !important;
 }
 
 :global(.react-datepicker__day-names) {
@@ -326,18 +334,32 @@
     border-radius: 50%;
 }
 
-/* SELECTED / START / END -> NAVY BLUE SEMI-TRANSPARENT */
+/* SELECTED / START / END -> SOLID NAVY BLUE */
 :global(.react-datepicker__day--selected),
 :global(.react-datepicker__day--range-end),
 :global(.react-datepicker__day--range-start),
 :global(.react-datepicker__day--in-selecting-range),
 :global(.react-datepicker__day--in-range) {
-    background-color: rgba(0, 31, 63, 0.25) !important;
-    color: #001f3f !important;
+    background-color: #001f3f !important;
+    color: white !important;
     border: none !important;
     border-radius: 0 !important;
     position: relative;
     z-index: 10;
+}
+
+/* Text colors inside solids should be white */
+:global(.react-datepicker__day--selected) .dayPrice,
+:global(.react-datepicker__day--range-start) .dayPrice,
+:global(.react-datepicker__day--range-end) .dayPrice,
+:global(.react-datepicker__day--in-range) .dayPrice,
+:global(.react-datepicker__day--in-selecting-range) .dayPrice,
+:global(.react-datepicker__day--selected) .dayNumber,
+:global(.react-datepicker__day--range-start) .dayNumber,
+:global(.react-datepicker__day--range-end) .dayNumber,
+:global(.react-datepicker__day--in-range) .dayNumber,
+:global(.react-datepicker__day--in-selecting-range) .dayNumber {
+    color: white !important;
 }
 
 /* If ONLY selected is applied without range start/end, make it a full circle */
@@ -348,25 +370,10 @@
 /* Hovering over a selected/range date should keep it continuous */
 :global(.react-datepicker__day--in-selecting-range:hover),
 :global(.react-datepicker__day--in-range:hover) {
-    background-color: rgba(0, 31, 63, 0.35) !important;
+    background-color: #0a2b4e !important;
 }
 
-/* Text colors for range */
-:global(.react-datepicker__day--selected) .dayNumber,
-:global(.react-datepicker__day--range-start) .dayNumber,
-:global(.react-datepicker__day--range-end) .dayNumber,
-:global(.react-datepicker__day--in-range) .dayNumber,
-:global(.react-datepicker__day--in-selecting-range) .dayNumber {
-    color: #001f3f;
-}
-
-:global(.react-datepicker__day--selected) .dayPrice,
-:global(.react-datepicker__day--range-start) .dayPrice,
-:global(.react-datepicker__day--range-end) .dayPrice,
-:global(.react-datepicker__day--in-range) .dayPrice,
-:global(.react-datepicker__day--in-selecting-range) .dayPrice {
-    color: #4a5d73;
-}
+/* (Replaced above to avoid conflicting selectors) */
 
 /* Shapes for Start and End */
 :global(.react-datepicker__day--range-start) {
