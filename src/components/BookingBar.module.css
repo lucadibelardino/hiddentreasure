@@ -307,7 +307,8 @@
 :global(.react-datepicker__day) {
     width: 56px;
     height: 56px;
-    margin: 0;
+    margin: 0 !important;
+    /* Force 0 margin to prevent react-datepicker gaps */
     /* Continuous strip: no margin */
     border-radius: 50%;
     transition: background-color 0.2s, color 0.2s;
@@ -331,7 +332,7 @@
 :global(.react-datepicker__day--range-start),
 :global(.react-datepicker__day--in-selecting-range),
 :global(.react-datepicker__day--in-range) {
-    background-color: rgba(0, 31, 63, 0.15) !important;
+    background-color: rgba(0, 31, 63, 0.25) !important;
     color: #001f3f !important;
     border: none !important;
     border-radius: 0 !important;
@@ -347,7 +348,7 @@
 /* Hovering over a selected/range date should keep it continuous */
 :global(.react-datepicker__day--in-selecting-range:hover),
 :global(.react-datepicker__day--in-range:hover) {
-    background-color: rgba(0, 31, 63, 0.25) !important;
+    background-color: rgba(0, 31, 63, 0.35) !important;
 }
 
 /* Text colors for range */
@@ -374,12 +375,6 @@
 
 :global(.react-datepicker__day--range-end) {
     border-radius: 0 50% 50% 0 !important;
-}
-
-/* If it's a single selected day or start==end, make it a full circle */
-:global(.react-datepicker__day--selected),
-:global(.react-datepicker__day--range-start.react-datepicker__day--range-end) {
-    border-radius: 50% !important;
 }
 
 :global(.react-datepicker__triangle) {
