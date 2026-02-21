@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import { DayPicker, type DateRange } from 'react-day-picker';
+import "react-day-picker/dist/style.css";
 import styles from './BookingBar.module.css';
 import { supabase } from '../lib/supabase';
 
 const BookingBar: React.FC = () => {
-    const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
-    const [startDate, endDate] = dateRange;
+    const [dateRange, setDateRange] = useState<DateRange | undefined>();
+    const startDate = dateRange?.from || null;
+    const endDate = dateRange?.to || null;
     const [adults, setAdults] = useState(2);
     const [infants, setInfants] = useState(0);
 
@@ -101,19 +102,19 @@ const BookingBar: React.FC = () => {
         return isValid;
     };
 
-    const handleDateChange = (update: [Date | null, Date | null]) => {
+    const handleDateChange = (range: DateRange | undefined) => {
         setSelectionError(null);
-        const [newStart, newEnd] = update;
+
+        const newStart = range?.from;
+        const newEnd = range?.to;
 
         // Validation: Check if range includes any blocked date
         if (newStart && newEnd && blockedDates.length > 0) {
             let isBlocked = false;
             // Iterate through range
             for (let dt = new Date(newStart); dt <= newEnd; dt.setDate(dt.getDate() + 1)) {
-                // Check if this date matches any in blockedDates
-                // Using string comparison for safety (YYYY-MM-DD) or time comparison
                 const time = dt.getTime();
-                if (blockedDates.some(blocked => {
+                if (blockedDates.some((blocked: Date) => {
                     return Math.abs(blocked.getTime() - time) < 24 * 60 * 60 * 1000 && blocked.getDate() === dt.getDate();
                 })) {
                     isBlocked = true;
@@ -124,12 +125,12 @@ const BookingBar: React.FC = () => {
             if (isBlocked) {
                 setSelectionError("Selected dates include unavailable days.");
                 // If invalid, keep only the start date or reset
-                setDateRange([newStart, null]);
+                setDateRange({ from: newStart, to: undefined });
                 return;
             }
         }
 
-        setDateRange(update);
+        setDateRange(range);
 
         if (newStart && newEnd) {
             // Give user a brief moment to see the selected end date
@@ -153,13 +154,13 @@ const BookingBar: React.FC = () => {
     };
 
     const updateAdults = (operation: 'inc' | 'dec') => {
-        if (operation === 'inc' && totalGuests < 6) setAdults(prev => prev + 1);
-        if (operation === 'dec' && adults > 1) setAdults(prev => prev - 1);
+        if (operation === 'inc' && totalGuests < 6) setAdults((prev: number) => prev + 1);
+        if (operation === 'dec' && adults > 1) setAdults((prev: number) => prev - 1);
     };
 
     const updateInfants = (operation: 'inc' | 'dec') => {
-        if (operation === 'inc' && totalGuests < 6) setInfants(prev => prev + 1);
-        if (operation === 'dec' && infants > 0) setInfants(prev => prev - 1);
+        if (operation === 'inc' && totalGuests < 6) setInfants((prev: number) => prev + 1);
+        if (operation === 'dec' && infants > 0) setInfants((prev: number) => prev - 1);
     };
 
     const handleBookClick = () => {
@@ -194,7 +195,7 @@ const BookingBar: React.FC = () => {
             setTimeout(() => {
                 setIsModalOpen(false);
                 setStatus('idle');
-                setDateRange([null, null]);
+                setDateRange(undefined);
                 setFormData({ name: '', email: '', message: '' });
                 setAdults(2);
                 setInfants(0);
@@ -205,16 +206,6 @@ const BookingBar: React.FC = () => {
             alert("Error submitting request.");
         }
     };
-
-    const renderDayContents = (day: number) => {
-        return (
-            <div className={styles.dayContainer}>
-                <span className={styles.dayNumber}>{day}</span>
-                <span className={styles.dayPrice}>€{PRICE_PER_NIGHT}</span>
-            </div>
-        );
-    };
-
     return (
         <>
             <div className={styles.bar}>
@@ -261,18 +252,22 @@ const BookingBar: React.FC = () => {
                                 {selectionError}
                             </div>
                         )}
-                        <DatePicker
-                            selected={startDate}
-                            onChange={handleDateChange}
-                            startDate={startDate}
-                            endDate={endDate}
-                            selectsRange
-                            inline
-                            monthsShown={2}
-                            minDate={new Date()}
-                            excludeDates={blockedDates}
-                            renderDayContents={renderDayContents}
-                            calendarClassName={styles.customCalendar}
+                        <DayPicker
+                            mode="range"
+                            selected={dateRange}
+                            onSelect={handleDateChange}
+                            numberOfMonths={2}
+                            disabled={[
+                                { before: new Date() },
+                                ...blockedDates
+                            ]}
+                            className={styles.customCalendar}
+                            modifiersClassNames={{
+                                selected: styles.rdpSelected,
+                                range_start: styles.rdpRangeStart,
+                                range_end: styles.rdpRangeEnd,
+                                range_middle: styles.rdpRangeMiddle
+                            }}
                         />
                     </div>
 
