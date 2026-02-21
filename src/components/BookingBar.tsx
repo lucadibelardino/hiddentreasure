@@ -209,30 +209,30 @@ const BookingBar: React.FC = () => {
                             {endDate ? endDate.toLocaleDateString() : 'Add dates'}
                         </span>
                     </div>
-
-                    {isCalendarOpen && (
-                        <div className={styles.calendarWrapper} onClick={e => e.stopPropagation()}>
-                            {selectionError && (
-                                <div className={styles.inlineError}>
-                                    {selectionError}
-                                </div>
-                            )}
-                            <DatePicker
-                                selected={startDate}
-                                onChange={handleDateChange}
-                                startDate={startDate}
-                                endDate={endDate}
-                                selectsRange
-                                inline
-                                monthsShown={2}
-                                minDate={new Date()}
-                                excludeDates={blockedDates}
-                                renderDayContents={renderDayContents}
-                                calendarClassName={styles.customCalendar}
-                            />
-                        </div>
-                    )}
                 </div>
+
+                {isCalendarOpen && (
+                    <div className={styles.calendarWrapper} onClick={e => e.stopPropagation()} ref={calendarRef}>
+                        {selectionError && (
+                            <div className={styles.inlineError}>
+                                {selectionError}
+                            </div>
+                        )}
+                        <DatePicker
+                            selected={startDate}
+                            onChange={handleDateChange}
+                            startDate={startDate}
+                            endDate={endDate}
+                            selectsRange
+                            inline
+                            monthsShown={2}
+                            minDate={new Date()}
+                            excludeDates={blockedDates}
+                            renderDayContents={renderDayContents}
+                            calendarClassName={styles.customCalendar}
+                        />
+                    </div>
+                )}
 
                 <div className={styles.divider}></div>
 
