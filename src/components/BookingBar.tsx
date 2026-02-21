@@ -30,13 +30,18 @@ const BookingBar: React.FC = () => {
     // Click outside to close popovers
     const calendarRef = useRef<HTMLDivElement>(null);
     const guestRef = useRef<HTMLDivElement>(null);
+    const popoverRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+            if (isCalendarOpen || isGuestOpen) {
+                // If they clicked inside the popover base, do nothing
+                if (popoverRef.current && popoverRef.current.contains(event.target as Node)) {
+                    return;
+                }
+
+                // Clicking outside closes whatever is open
                 setIsCalendarOpen(false);
-            }
-            if (guestRef.current && !guestRef.current.contains(event.target as Node)) {
                 setIsGuestOpen(false);
             }
         };
@@ -242,11 +247,12 @@ const BookingBar: React.FC = () => {
 
                 {/* SHARED POPOVER TRANSITION */}
                 <div
+                    ref={popoverRef}
                     className={`${styles.popoverBase} ${isCalendarOpen ? styles.calendarOpen : isGuestOpen ? styles.guestOpen : ''}`}
                     onClick={e => e.stopPropagation()}
                 >
                     {/* Calendar Content */}
-                    <div className={`${styles.popoverContent} ${isCalendarOpen ? styles.active : styles.inactive}`} ref={calendarRef}>
+                    <div className={`${styles.popoverContent} ${isCalendarOpen ? styles.active : styles.inactive}`}>
                         {selectionError && (
                             <div className={styles.inlineError}>
                                 {selectionError}

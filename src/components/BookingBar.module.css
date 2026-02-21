@@ -329,64 +329,124 @@
 }
 
 :global(.react-datepicker__day:hover) {
-    background-color: rgba(0, 31, 63, 0.1);
-    /* Navy blue hover */
     border-radius: 50%;
 }
 
-/* SELECTED / START / END -> SOLID NAVY BLUE */
+/* SELECTED / START / END -> DOT WITH BRIDGE DESIGN */
 :global(.react-datepicker__day--selected),
 :global(.react-datepicker__day--range-end),
 :global(.react-datepicker__day--range-start),
 :global(.react-datepicker__day--in-selecting-range),
 :global(.react-datepicker__day--in-range) {
-    background-color: #001f3f !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 0 !important;
     position: relative;
     z-index: 10;
+    background-color: transparent !important;
+    border-radius: 50% !important;
+    /* Keep the actual day circular */
+    border: none !important;
+}
+
+/* Background circles for the days */
+:global(.react-datepicker__day--selected)::after,
+:global(.react-datepicker__day--range-end)::after,
+:global(.react-datepicker__day--range-start)::after,
+:global(.react-datepicker__day--in-selecting-range)::after,
+:global(.react-datepicker__day--in-range)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    z-index: -1;
+}
+
+/* Specific colors for the circles */
+:global(.react-datepicker__day--range-start)::after,
+:global(.react-datepicker__day--range-end)::after,
+:global(.react-datepicker__day--selected)::after {
+    background-color: #001f3f !important;
+    /* Dark solid circle for ends */
+}
+
+:global(.react-datepicker__day--in-range):not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end)::after,
+:global(.react-datepicker__day--in-selecting-range):not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end)::after {
+    background-color: rgba(0, 31, 63, 0.15) !important;
+    /* Light circle for middle */
+}
+
+/* The connecting bridges (pseudo-element before) */
+:global(.react-datepicker__day--in-range)::before,
+:global(.react-datepicker__day--in-selecting-range)::before,
+:global(.react-datepicker__day--range-start)::before,
+:global(.react-datepicker__day--range-end)::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: rgba(0, 31, 63, 0.15);
+    /* Light blue bridge */
+    z-index: -2;
+}
+
+/* Bridge boundaries (don't extend out of the start/end) */
+:global(.react-datepicker__day--range-start)::before {
+    left: 50%;
+    /* Only bridge to the right */
+    width: 50%;
+}
+
+:global(.react-datepicker__day--range-end)::before {
+    right: 50%;
+    /* Only bridge to the left */
+    width: 50%;
+}
+
+/* No bridge if it's the exact same day */
+:global(.react-datepicker__day--range-start.react-datepicker__day--range-end)::before,
+:global(.react-datepicker__day--selected):not(.react-datepicker__day--in-range):not(.react-datepicker__day--in-selecting-range)::before {
+    display: none;
 }
 
 /* Text colors inside solids should be white */
 :global(.react-datepicker__day--selected) .dayPrice,
 :global(.react-datepicker__day--range-start) .dayPrice,
 :global(.react-datepicker__day--range-end) .dayPrice,
-:global(.react-datepicker__day--in-range) .dayPrice,
-:global(.react-datepicker__day--in-selecting-range) .dayPrice,
 :global(.react-datepicker__day--selected) .dayNumber,
 :global(.react-datepicker__day--range-start) .dayNumber,
-:global(.react-datepicker__day--range-end) .dayNumber,
-:global(.react-datepicker__day--in-range) .dayNumber,
-:global(.react-datepicker__day--in-selecting-range) .dayNumber {
+:global(.react-datepicker__day--range-end) .dayNumber {
     color: white !important;
 }
 
-/* If ONLY selected is applied without range start/end, make it a full circle */
-:global(.react-datepicker__day--selected):not(.react-datepicker__day--in-range):not(.react-datepicker__day--in-selecting-range) {
-    border-radius: 50% !important;
+/* Text colors for middle days */
+:global(.react-datepicker__day--in-range):not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end) .dayPrice,
+:global(.react-datepicker__day--in-selecting-range):not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end) .dayPrice {
+    color: #4a5d73 !important;
 }
 
-/* Hovering over a selected/range date should keep it continuous */
-:global(.react-datepicker__day--in-selecting-range:hover),
-:global(.react-datepicker__day--in-range:hover) {
-    background-color: #0a2b4e !important;
+:global(.react-datepicker__day--in-range):not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end) .dayNumber,
+:global(.react-datepicker__day--in-selecting-range):not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end) .dayNumber {
+    color: #001f3f !important;
+}
+
+/* Hovering */
+:global(.react-datepicker__day:hover)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    background-color: rgba(0, 31, 63, 0.1);
+    z-index: -1;
 }
 
 /* (Replaced above to avoid conflicting selectors) */
 
-/* Shapes for Start and End */
-:global(.react-datepicker__day--range-start) {
-    border-radius: 50% 0 0 50% !important;
-}
-
-:global(.react-datepicker__day--range-end) {
-    border-radius: 0 50% 50% 0 !important;
-}
-
-:global(.react-datepicker__triangle) {
-    display: none;
-}
+/* Shapes for Start and End already handled by relative/absolute pseudo elements above */
 
 :global(.react-datepicker__navigation) {
     top: 25px;
