@@ -279,6 +279,8 @@
     /* Start & End of selecting range styles natively match our pill design */
     --rdp-range_start-date-background-color: var(--rdp-accent-color);
     --rdp-range_end-date-background-color: var(--rdp-accent-color);
+    --rdp-range_start-color: white;
+    --rdp-range_end-color: white;
     --rdp-today-color: var(--rdp-accent-color);
 
     font-family: inherit;
@@ -314,6 +316,8 @@
 :global(.rdp-day_button) {
     transition: background-color 0.2s, color 0.2s;
     font-size: 1rem;
+    font-weight: 600;
+    color: #222;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -347,6 +351,10 @@
 }
 
 /* The middle of the range should keep the price text solid blue / gray for legibility */
+:global(.rdp-range_middle) :global(.rdp-day_button) {
+    color: #001f3f !important;
+}
+
 :global(.rdp-range_middle) :global(.rdp-day_button)::after {
     color: #4a5d73;
 }

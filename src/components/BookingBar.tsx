@@ -132,7 +132,7 @@ const BookingBar: React.FC = () => {
 
         setDateRange(range);
 
-        if (newStart && newEnd) {
+        if (newStart && newEnd && newStart.getTime() !== newEnd.getTime()) {
             // Give user a brief moment to see the selected end date
             setTimeout(() => {
                 setIsCalendarOpen(false);
