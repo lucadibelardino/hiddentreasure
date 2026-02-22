@@ -261,12 +261,27 @@
     margin-top: 2px;
 }
 
-/* OVERRIDE REACT DAY PICKER */
-:global(.rdp) {
-    font-family: inherit;
-    --rdp-cell-size: 56px;
+/* OVERRIDE REACT DAY PICKER V9 */
+:global(.rdp-root) {
     --rdp-accent-color: #001f3f;
-    --rdp-background-color: rgba(0, 31, 63, 0.1);
+    --rdp-accent-background-color: rgba(0, 31, 63, 0.15);
+
+    /* Square cells, 56px each to match our bar */
+    --rdp-day-width: 56px;
+    --rdp-day-height: 56px;
+    --rdp-day_button-width: 56px;
+    --rdp-day_button-height: 56px;
+
+    /* Native continuous range bridging */
+    --rdp-range_middle-background-color: var(--rdp-accent-background-color);
+    --rdp-range_middle-color: var(--rdp-accent-color);
+
+    /* Start & End of selecting range styles natively match our pill design */
+    --rdp-range_start-date-background-color: var(--rdp-accent-color);
+    --rdp-range_end-date-background-color: var(--rdp-accent-color);
+    --rdp-today-color: var(--rdp-accent-color);
+
+    font-family: inherit;
     margin: 0;
     width: 100%;
     display: flex;
@@ -296,27 +311,18 @@
     text-transform: uppercase;
 }
 
-:global(.rdp-day) {
-    border-radius: 50%;
+:global(.rdp-day_button) {
     transition: background-color 0.2s, color 0.2s;
     font-size: 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
 }
 
-:global(.rdp-day)::after {
-    content: '€250';
-    display: block;
-    font-size: 0.7rem;
-    color: #717171;
-    font-weight: 500;
-    margin-top: 2px;
-}
-
-:global(.rdp-day:hover:not(.rdp-day_disabled)) {
-    background-color: var(--rdp-background-color);
+:global(.rdp-day_button:hover:not(:disabled)) {
+    background-color: rgba(0, 31, 63, 0.1);
 }
 
 :global(.rdp-day_disabled) {
@@ -325,48 +331,28 @@
     text-decoration: line-through;
 }
 
-/* Custom Modifiers defined in TSX */
-.rdpSelected {
-    background-color: #001f3f !important;
-    color: white !important;
+/* Add the 250 Euro Price inside the Day Button */
+:global(.rdp-day_button)::after {
+    content: '€250';
+    display: block;
+    font-size: 0.70rem;
+    font-weight: 500;
+    color: #717171;
+    margin-top: 2px;
 }
 
-.rdpRangeMiddle {
-    background-color: rgba(0, 31, 63, 0.15) !important;
-    color: #001f3f !important;
-    border-radius: 0 !important;
+/* Ensure the price turns white on solid blue selected bubbles */
+:global(.rdp-selected) :global(.rdp-day_button)::after {
+    color: white;
 }
 
-.rdpRangeStart {
-    background-color: #001f3f !important;
-    color: white !important;
-    border-radius: 50% 0 0 50% !important;
+/* The middle of the range should keep the price text solid blue / gray for legibility */
+:global(.rdp-range_middle) :global(.rdp-day_button)::after {
+    color: #4a5d73;
 }
 
-.rdpRangeEnd {
-    background-color: #001f3f !important;
-    color: white !important;
-    border-radius: 0 50% 50% 0 !important;
-}
-
-/* Fix colors inside the custom day cells */
-.rdpSelected::after,
-.rdpRangeStart::after,
-.rdpRangeEnd::after {
-    color: white !important;
-}
-
-.rdpRangeMiddle::after {
-    color: #4a5d73 !important;
-}
-
-/* If single day is selected, it should be a perfect circle */
-.rdpRangeStart.rdpRangeEnd {
-    border-radius: 50% !important;
-}
-
-/* Disabled days hide price */
-:global(.rdp-day_disabled)::after {
+/* Disabled days have no price */
+:global(.rdp-day_disabled) :global(.rdp-day_button)::after {
     display: none;
 }
 

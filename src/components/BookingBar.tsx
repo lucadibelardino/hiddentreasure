@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DayPicker, type DateRange } from 'react-day-picker';
-import "react-day-picker/dist/style.css";
+import "react-day-picker/style.css";
 import styles from './BookingBar.module.css';
 import { supabase } from '../lib/supabase';
 
@@ -262,12 +262,6 @@ const BookingBar: React.FC = () => {
                                 ...blockedDates
                             ]}
                             className={styles.customCalendar}
-                            modifiersClassNames={{
-                                selected: styles.rdpSelected,
-                                range_start: styles.rdpRangeStart,
-                                range_end: styles.rdpRangeEnd,
-                                range_middle: styles.rdpRangeMiddle
-                            }}
                         />
                     </div>
 
