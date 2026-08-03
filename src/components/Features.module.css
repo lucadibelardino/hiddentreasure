@@ -1,0 +1,230 @@
+.section {
+    padding-block: var(--section-y);
+    background: var(--c-shell);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: start;
+}
+
+/* ── Colonna immagine ─────────────────────────── */
+.mediaCol {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-lg));
+}
+
+.media {
+    position: relative;
+    margin: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--c-sand);
+    box-shadow: var(--shadow-md);
+}
+
+.media img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    transition: transform 1.2s var(--ease-out);
+}
+
+.media:hover img {
+    transform: scale(1.03);
+}
+
+.caption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 3rem 1.25rem 1rem;
+    background: linear-gradient(to top, rgba(16, 42, 58, 0.75), transparent);
+    color: var(--c-white);
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+}
+
+/* ── Colonna testo ────────────────────────────── */
+.eyebrow {
+    display: block;
+    margin-bottom: var(--space-sm);
+}
+
+.title {
+    font-size: var(--fs-h2);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.005em;
+    margin-bottom: var(--space-lg);
+    max-width: 16ch;
+}
+
+.title em {
+    font-style: italic;
+    font-weight: 600;
+    color: var(--c-sea);
+}
+
+/* I tre numeri: la sintesi della villa */
+.stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    padding-bottom: var(--space-lg);
+    margin-bottom: var(--space-2xs);
+    border-bottom: 1px solid var(--c-line);
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.statValue {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 1.8rem + 2.4vw, 3.75rem);
+    font-weight: 400;
+    line-height: 1;
+    color: var(--c-deep);
+    letter-spacing: -0.005em;
+}
+
+.statUnit {
+    font-family: var(--font-body);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    color: var(--c-brass);
+}
+
+.statLabel {
+    margin: 0.35rem 0 0;
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+}
+
+/* ── Elenco caratteristiche ───────────────────── */
+.list {
+    display: flex;
+    flex-direction: column;
+}
+
+.item {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: var(--space-md);
+    align-items: baseline;
+    padding-block: var(--space-md);
+    border-bottom: 1px solid var(--c-line);
+}
+
+.itemLabel {
+    font-size: var(--fs-eyebrow);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    color: var(--c-brass);
+    padding-top: 0.35rem;
+}
+
+.itemTitle {
+    font-family: var(--font-body);
+    font-size: var(--fs-h3);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--c-deep);
+    margin-bottom: 0.3rem;
+}
+
+.itemText {
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+    max-width: 52ch;
+}
+
+/* ── Azioni ───────────────────────────────────── */
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-top: var(--space-lg);
+}
+
+.primary,
+.secondary {
+    min-height: 48px;
+    padding: 0.8rem 1.75rem;
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.primary {
+    background: var(--c-deep);
+    color: var(--c-white);
+}
+
+.primary:hover {
+    background: var(--c-sea);
+}
+
+.secondary {
+    border: 1px solid var(--c-line-strong);
+    color: var(--c-deep);
+}
+
+.secondary:hover {
+    border-color: var(--c-deep);
+    background: var(--c-sand);
+}
+
+@media (max-width: 960px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mediaCol {
+        position: static;
+    }
+
+    .media img {
+        aspect-ratio: 4 / 3;
+    }
+
+    .title {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 560px) {
+    .item {
+        grid-template-columns: 1fr;
+        gap: 0.35rem;
+        padding-block: var(--space-md);
+    }
+
+    .itemLabel {
+        padding-top: 0;
+    }
+
+    .stats {
+        gap: var(--space-md);
+        justify-content: space-between;
+    }
+
+    .actions .primary,
+    .actions .secondary {
+        flex: 1 1 100%;
+        text-align: center;
+    }
+}

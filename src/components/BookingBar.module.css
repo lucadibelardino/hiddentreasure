@@ -1,0 +1,364 @@
+/* ── Barra nella hero ─────────────────────────── */
+.bar {
+    display: flex;
+    align-items: stretch;
+    gap: 0.35rem;
+    margin-top: var(--space-lg);
+    padding: 0.4rem;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    box-shadow: var(--shadow-float);
+    animation: barIn 1s var(--ease-out) 0.24s both;
+}
+
+@keyframes barIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.availability {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.6rem 1.25rem;
+    min-height: 48px;
+    border-radius: var(--radius-pill);
+    color: var(--c-white);
+    text-align: left;
+    transition: background-color var(--transition-fast);
+}
+
+.availability:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.availabilityText {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.availabilityLabel {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    opacity: 0.7;
+}
+
+.availabilityValue {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.divider {
+    width: 1px;
+    background: rgba(255, 255, 255, 0.25);
+    margin: 0.5rem 0;
+}
+
+.cta {
+    padding: 0.6rem 1.6rem;
+    min-height: 48px;
+    border-radius: var(--radius-pill);
+    background: var(--c-brass);
+    color: var(--c-deep);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.cta:hover {
+    background: var(--c-brass-soft);
+}
+
+.cta:active {
+    transform: scale(0.98);
+}
+
+/* ── Finestra del calendario ──────────────────── */
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    background: rgba(16, 42, 58, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: grid;
+    place-items: center;
+    padding: var(--space-sm);
+    animation: fade var(--dur-med) var(--ease-out);
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.dialog {
+    width: min(100%, 780px);
+    max-height: 90vh;
+    max-height: min(92svh, 900px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--c-shell);
+    color: var(--c-ink);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    animation: pop var(--dur-med) var(--ease-out);
+    text-align: left;
+}
+
+@keyframes pop {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.dialogHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-md) var(--space-sm);
+}
+
+.dialogEyebrow {
+    font-size: var(--fs-eyebrow);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    color: var(--c-brass);
+    margin-bottom: 0.2rem;
+}
+
+.dialogTitle {
+    font-size: clamp(1.35rem, 1.1rem + 1vw, 1.75rem);
+    font-weight: 500;
+}
+
+.iconClose {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    margin: -6px -6px 0 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--c-ink-soft);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.iconClose:hover {
+    background: var(--c-sand);
+    color: var(--c-ink);
+}
+
+.calendarWrap {
+    padding: 0 var(--space-sm) var(--space-sm);
+    display: flex;
+    justify-content: center;
+}
+
+.loading {
+    padding: var(--space-xl) 0;
+    color: var(--c-ink-soft);
+    font-size: var(--fs-sm);
+}
+
+.dialogFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+    border-top: 1px solid var(--c-line);
+}
+
+.legend {
+    display: flex;
+    gap: var(--space-md);
+    font-size: var(--fs-xs);
+    color: var(--c-ink-soft);
+}
+
+.legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.dotFree {
+    background: var(--c-sand);
+    border: 1px solid var(--c-line-strong);
+}
+
+.dotBusy {
+    background: repeating-linear-gradient(-45deg, var(--c-ink-soft) 0 2px, transparent 2px 4px);
+    border: 1px solid var(--c-line-strong);
+}
+
+.footerCta {
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
+    border-radius: var(--radius-pill);
+    background: var(--c-deep);
+    color: var(--c-white);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    transition: background-color var(--transition-fast);
+}
+
+.footerCta:hover {
+    background: var(--c-sea);
+}
+
+/* ── react-day-picker v9 ──────────────────────── */
+.calendar {
+    --rdp-accent-color: var(--c-sea);
+    --rdp-accent-background-color: rgba(46, 124, 138, 0.12);
+    --rdp-day-width: 44px;
+    --rdp-day-height: 44px;
+    --rdp-day_button-width: 40px;
+    --rdp-day_button-height: 40px;
+    --rdp-day_button-border-radius: 50%;
+    --rdp-today-color: var(--c-brass);
+    --rdp-outside-opacity: 0;
+    font-family: var(--font-body);
+    margin: 0;
+}
+
+.calendar :global(.rdp-months) {
+    justify-content: center;
+    gap: var(--space-lg);
+}
+
+.calendar :global(.rdp-month_caption) {
+    justify-content: center;
+    padding-bottom: 0.5rem;
+}
+
+.calendar :global(.rdp-caption_label) {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    color: var(--c-deep);
+}
+
+.calendar :global(.rdp-nav) button {
+    color: var(--c-deep);
+    border-radius: 50%;
+}
+
+.calendar :global(.rdp-weekday) {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--c-ink-soft);
+}
+
+.calendar :global(.rdp-day_button) {
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--c-ink);
+    border: none;
+    cursor: default;
+    transition: background-color var(--transition-fast);
+}
+
+/* Le date occupate sono barrate a tratteggio: si legge anche in bianco e nero */
+.calendar :global(.rdp-disabled) {
+    opacity: 1;
+}
+
+.calendar :global(.rdp-disabled) :global(.rdp-day_button) {
+    color: var(--c-ink-soft);
+    opacity: 0.45;
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
+.calendar :global(.rdp-today) :global(.rdp-day_button) {
+    color: var(--c-brass);
+    font-weight: 700;
+}
+
+@media (max-width: 640px) {
+    .bar {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        max-width: 380px;
+        gap: 0.4rem;
+        border-radius: var(--radius-lg);
+        padding: 0.5rem;
+    }
+
+    .availability {
+        justify-content: center;
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .divider {
+        display: none;
+    }
+
+    .cta {
+        border-radius: var(--radius-md);
+        justify-content: center;
+        text-align: center;
+    }
+
+    .dialog {
+        width: 100%;
+        max-height: 92svh;
+    }
+
+    .dialogFooter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .legend {
+        justify-content: center;
+    }
+
+    .footerCta {
+        width: 100%;
+    }
+}

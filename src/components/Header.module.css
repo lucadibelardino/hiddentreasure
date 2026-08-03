@@ -1,0 +1,288 @@
+.header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: var(--z-header);
+    transition:
+        background-color var(--dur-med) var(--ease-out),
+        box-shadow var(--dur-med) var(--ease-out),
+        color var(--dur-med) var(--ease-out);
+    padding-top: env(safe-area-inset-top);
+}
+
+/* Sopra la hero: nessun fondo, testo chiaro.
+   Una velatura in cima garantisce il contrasto sulle foto piu' luminose. */
+.transparent {
+    background-color: transparent;
+    color: var(--c-white);
+}
+
+.transparent::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 180%;
+    background: linear-gradient(to bottom, rgba(16, 42, 58, 0.38), rgba(16, 42, 58, 0));
+    pointer-events: none;
+}
+
+/* Dopo lo scroll e su tutte le pagine chiare: pannello solido */
+.solid {
+    background-color: rgba(247, 244, 238, 0.88);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    color: var(--c-ink);
+    box-shadow: 0 1px 0 var(--c-line), var(--shadow-sm);
+}
+
+.inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    height: var(--header-h);
+}
+
+/* ── Logo ─────────────────────────────────────── */
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0;
+    color: inherit;
+}
+
+/* Il segno: un cerchio tagliato da una linea d'orizzonte */
+.logoMark {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    position: relative;
+    flex: none;
+    opacity: 0.9;
+    transition: transform var(--dur-med) var(--ease-out);
+}
+
+.logoMark::after {
+    content: '';
+    position: absolute;
+    left: -3px;
+    right: -3px;
+    top: 50%;
+    height: 1px;
+    background: currentColor;
+}
+
+.logo:hover .logoMark {
+    transform: rotate(90deg);
+}
+
+.logoText {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
+/* ── Navigazione desktop ─────────────────────── */
+.deskNav {
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 2.2vw, 2.25rem);
+}
+
+.link {
+    position: relative;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    padding: 0.35rem 0;
+}
+
+.link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 1px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform var(--dur-med) var(--ease-out);
+}
+
+.link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.cta {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    padding: 0.6rem 1.3rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid currentColor;
+    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.transparent .cta:hover {
+    background: var(--c-white);
+    border-color: var(--c-white);
+    color: var(--c-deep);
+}
+
+.solid .cta {
+    background: var(--c-deep);
+    border-color: var(--c-deep);
+    color: var(--c-white);
+}
+
+.solid .cta:hover {
+    background: var(--c-sea);
+    border-color: var(--c-sea);
+}
+
+/* ── Burger ───────────────────────────────────── */
+.burger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    width: 44px;
+    height: 44px;
+    margin-right: -10px;
+    align-items: flex-end;
+    color: inherit;
+}
+
+.burger span {
+    display: block;
+    height: 1.5px;
+    background: currentColor;
+    border-radius: 2px;
+    transition: width var(--dur-med) var(--ease-out);
+}
+
+.burger span:nth-child(1) {
+    width: 24px;
+}
+
+.burger span:nth-child(2) {
+    width: 16px;
+}
+
+.burger:hover span:nth-child(2) {
+    width: 24px;
+}
+
+/* ── Menu mobile ──────────────────────────────── */
+.mobileMenu {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-menu);
+    background: var(--c-deep);
+    color: var(--c-white);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: calc(var(--space-xl) + env(safe-area-inset-top)) var(--gutter) calc(var(--space-xl) + env(safe-area-inset-bottom));
+    opacity: 0;
+    animation: menuIn var(--dur-med) var(--ease-out) forwards;
+}
+
+.mobileMenu[hidden] {
+    display: none;
+}
+
+@keyframes menuIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.mobileNav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.mobileNav a {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 8vw, 2.6rem);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--c-white);
+    padding: 0.15rem 0.5rem;
+}
+
+.mobileNav a:active {
+    color: var(--c-brass-soft);
+}
+
+.mobileCta {
+    margin-top: var(--space-2xs);
+    padding: 0.95rem 2.2rem;
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-pill);
+    background: var(--c-brass);
+    color: var(--c-deep);
+    font-weight: 700;
+    font-size: var(--fs-body);
+    letter-spacing: 0.01em;
+}
+
+.mobileMeta {
+    position: absolute;
+    bottom: calc(var(--space-lg) + env(safe-area-inset-bottom));
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    opacity: 0.5;
+}
+
+.closeMenu {
+    position: absolute;
+    top: calc(1rem + env(safe-area-inset-top));
+    right: max(1rem, var(--gutter));
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: var(--c-white);
+}
+
+/* Quando il menu e' aperto, la barra in alto non deve competere */
+.menuIsOpen .inner {
+    opacity: 0;
+    pointer-events: none;
+}
+
+@media (max-width: 860px) {
+    .deskNav {
+        display: none;
+    }
+
+    .burger {
+        display: flex;
+    }
+
+    .logoText {
+        font-size: 1.05rem;
+    }
+}

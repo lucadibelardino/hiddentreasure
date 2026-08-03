@@ -1,0 +1,300 @@
+.page {
+    min-height: 100vh;
+    min-height: 100svh;
+    padding-top: calc(var(--header-h) + var(--space-xl));
+    padding-bottom: var(--section-y);
+    background: var(--c-shell);
+}
+
+/* Doppia classe: vince sulla .container globale a prescindere
+   dall'ordine con cui i fogli di stile finiscono nel bundle. */
+.container.container {
+    max-width: 860px;
+}
+
+/* ── Intestazione ─────────────────────────────── */
+.header {
+    max-width: 620px;
+    margin-bottom: var(--space-xl);
+}
+
+.title {
+    font-size: var(--fs-h1);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.005em;
+    margin: var(--space-2xs) 0 var(--space-sm);
+}
+
+.title em {
+    font-style: italic;
+    font-weight: 600;
+    color: var(--c-sea);
+}
+
+.subtitle {
+    font-size: var(--fs-lead);
+    font-weight: 300;
+    color: var(--c-ink-soft);
+    max-width: 52ch;
+}
+
+/* ── Canale principale ────────────────────────── */
+.primary {
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    background: var(--c-deep);
+    background-image: linear-gradient(140deg, var(--c-deep) 0%, var(--c-deep-2) 100%);
+    color: var(--c-white);
+    box-shadow: var(--shadow-md);
+}
+
+.primaryHead {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.primaryIcon {
+    flex: none;
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-sm);
+    background: rgba(37, 211, 102, 0.16);
+    color: #4BD787;
+}
+
+.primaryEyebrow {
+    font-size: var(--fs-eyebrow);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    color: var(--c-brass-soft);
+}
+
+.primaryTitle {
+    font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
+    font-weight: 400;
+    color: var(--c-white);
+    line-height: 1.2;
+}
+
+/* I due numeri, uno accanto all'altro: nessun doppione fra chat e chiamata */
+.numbers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-xs);
+}
+
+.numberBtn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    min-height: 56px;
+    padding: 0.85rem 1.25rem;
+    border-radius: var(--radius-md);
+    background: var(--c-white);
+    color: var(--c-deep);
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.numberBtn:hover {
+    background: var(--c-brass-soft);
+    transform: translateY(-2px);
+}
+
+.numberBtn svg {
+    flex: none;
+    transition: transform var(--dur-med) var(--ease-out);
+}
+
+.numberBtn:hover svg {
+    transform: translateX(3px);
+}
+
+.numberValue {
+    font-size: var(--fs-body);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.primaryFoot {
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: var(--fs-sm);
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.telLink {
+    color: var(--c-white);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(255, 255, 255, 0.35);
+    white-space: nowrap;
+}
+
+.telLink:hover {
+    text-decoration-color: var(--c-white);
+}
+
+/* ── Canali secondari ─────────────────────────── */
+.secondary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xs);
+    margin-top: var(--space-xs);
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: var(--space-md);
+    background: var(--c-white);
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-md);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    border-color: transparent;
+    box-shadow: var(--shadow-md);
+}
+
+.cardKind {
+    font-size: var(--fs-eyebrow);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    color: var(--c-ink-soft);
+}
+
+.cardValue {
+    font-size: var(--fs-body);
+    font-weight: 600;
+    color: var(--c-deep);
+    overflow-wrap: anywhere;
+}
+
+.cardAction {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: var(--space-2xs);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-sea);
+}
+
+.cardAction svg {
+    transition: transform var(--dur-med) var(--ease-out);
+}
+
+.card:hover .cardAction svg {
+    transform: translateX(3px);
+}
+
+/* ── Informazioni pratiche ────────────────────── */
+.facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--c-line);
+}
+
+.factValue {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--c-deep);
+}
+
+.factLabel {
+    margin-top: 0.3rem;
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+    max-width: 26ch;
+}
+
+/* ── Riga finale ──────────────────────────────── */
+.where {
+    margin-top: var(--space-xl);
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+}
+
+.mapLink {
+    color: var(--c-sea);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.mapLink:hover {
+    color: var(--c-deep);
+}
+
+@media (max-width: 720px) {
+    .facts {
+        grid-template-columns: 1fr;
+        gap: var(--space-sm);
+    }
+
+    .fact {
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-sm);
+    }
+
+    .factValue {
+        font-size: 1.35rem;
+        min-width: 5.5rem;
+    }
+
+    .factLabel {
+        margin-top: 0;
+        max-width: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .page {
+        padding-top: calc(var(--header-h) + var(--space-lg));
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .primary {
+        padding: var(--space-md);
+    }
+
+    .secondary {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        padding: var(--space-sm) var(--space-md);
+    }
+
+    .primaryFoot {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    /* Su mobile il separatore fra i due numeri di telefono non serve */
+    .primaryFoot span[aria-hidden] {
+        display: none;
+    }
+}
