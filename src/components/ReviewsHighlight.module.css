@@ -1,125 +1,53 @@
-/* Fascia recensioni: titolo al centro con filetti ottone,
-   sotto le frasi degli ospiti che scorrono da un lato all'altro. */
+/* Fascia recensioni: fondo sabbia caldo, riconoscimento Airbnb con alloro,
+   commenti su card bianche che scorrono a scatti. */
 .band {
-    padding-block: clamp(2.5rem, 1.8rem + 2.5vw, 3.75rem);
-    border-block: 1px solid var(--c-line);
-    background: var(--c-white);
+    padding-block: clamp(2.75rem, 2rem + 2.5vw, 4rem);
+    background:
+        radial-gradient(120% 140% at 50% 0%, #F3ECE0 0%, #E9DFCF 100%);
+    border-block: 1px solid rgba(181, 133, 74, 0.18);
     overflow: hidden;
 }
 
-/* ── Intestazione ─────────────────────────────── */
+/* ── Riconoscimento ───────────────────────────── */
 .head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding-inline: var(--gutter);
     text-align: center;
 }
 
-.titleRow {
+.award {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: clamp(1rem, 3vw, 2rem);
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+    color: var(--c-brass);
 }
 
-.rule {
-    flex: 0 1 120px;
-    height: 1px;
-    background: linear-gradient(to right, transparent, var(--c-brass));
+.laurel {
+    flex: none;
+    width: clamp(40px, 5vw, 54px);
+    height: auto;
 }
 
-.rule:last-child {
-    background: linear-gradient(to left, transparent, var(--c-brass));
+.awardText {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.badgeTitle {
+.awardTitle {
     margin: 0;
     font-family: var(--font-display);
-    font-size: clamp(1.75rem, 1.4rem + 1.3vw, 2.4rem);
-    font-style: italic;
-    font-weight: 500;
+    font-size: clamp(1.65rem, 1.35rem + 1.2vw, 2.3rem);
+    font-weight: 600;
     line-height: 1.05;
     color: var(--c-deep);
     white-space: nowrap;
 }
 
-.badgeMeta {
-    margin-top: 0.45rem;
-    font-size: var(--fs-sm);
-    color: var(--c-ink-soft);
-}
-
-.badgeStar {
-    margin-right: 0.3rem;
-    color: var(--c-brass);
-}
-
-.badgeLink {
-    color: var(--c-sea);
-    text-decoration: underline;
-    text-decoration-color: rgba(46, 124, 138, 0.35);
-    text-underline-offset: 3px;
-    transition: text-decoration-color var(--transition-fast);
-}
-
-.badgeLink:hover {
-    text-decoration-color: currentColor;
-}
-
-/* ── Scorrimento continuo ─────────────────────── */
-.viewport {
-    margin-top: clamp(1.75rem, 1.3rem + 1.5vw, 2.5rem);
-    /* bordi sfumati: le frasi entrano ed escono morbide */
-    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-}
-
-.track {
-    display: flex;
-    width: max-content;
-}
-
-.row {
-    flex: none;
-    display: flex;
-    align-items: baseline;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    animation: scroll 80s linear infinite;
-}
-
-.band:hover .row {
-    animation-play-state: paused;
-}
-
-@keyframes scroll {
-    from { transform: translateX(0); }
-    to { transform: translateX(-100%); }
-}
-
-.item {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-    white-space: nowrap;
-}
-
-/* Separatore tra una frase e l'altra */
-.item::after {
-    content: '✦';
-    margin-inline: clamp(1.5rem, 1rem + 2vw, 2.75rem);
-    font-size: 0.7rem;
-    color: var(--c-brass-soft);
-    align-self: center;
-}
-
-.quote {
-    font-family: var(--font-display);
-    font-size: clamp(1.3rem, 1.15rem + 0.6vw, 1.6rem);
-    color: var(--c-deep);
-    quotes: '“' '”';
-}
-
-.name {
+.awardSource {
+    margin-top: 0.3rem;
     font-size: var(--fs-eyebrow);
     font-weight: 600;
     text-transform: uppercase;
@@ -127,23 +55,112 @@
     color: var(--c-brass);
 }
 
+.score {
+    margin-top: var(--space-xs);
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+}
+
+.score strong {
+    color: var(--c-deep);
+}
+
+.link {
+    color: var(--c-sea-dark);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: rgba(35, 95, 107, 0.35);
+    text-underline-offset: 3px;
+}
+
+.link:hover {
+    text-decoration-color: currentColor;
+}
+
+/* ── Commenti ─────────────────────────────────── */
+.viewport {
+    margin-top: clamp(1.75rem, 1.3rem + 1.5vw, 2.5rem);
+    padding-inline: var(--gutter);
+    overflow: hidden;
+}
+
+.track {
+    display: flex;
+    gap: var(--space-md);
+    will-change: transform;
+}
+
+.slot {
+    flex: none;
+    width: min(360px, 82vw);
+}
+
+.card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-md);
+    background: var(--c-white);
+    border-radius: var(--radius-md);
+    box-shadow: 0 1px 2px rgba(16, 42, 58, 0.05), 0 8px 24px rgba(120, 88, 40, 0.08);
+}
+
+.cardHead {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.avatar {
+    flex: none;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--c-white);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.who {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+    line-height: 1.25;
+}
+
+.name {
+    font-weight: 600;
+    color: var(--c-ink);
+}
+
+.meta {
+    font-size: var(--fs-xs);
+    color: var(--c-ink-soft);
+}
+
+.stars {
+    color: var(--c-brass);
+    align-self: flex-start;
+    margin-top: 0.2rem;
+}
+
+.text {
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: var(--c-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 /* Chi preferisce meno movimento scorre a mano */
 @media (prefers-reduced-motion: reduce) {
     .viewport {
         overflow-x: auto;
     }
-
-    .row {
-        animation: none;
-    }
-
-    .row[aria-hidden='true'] {
-        display: none;
-    }
-}
-
-@media (max-width: 600px) {
-    .rule { flex-basis: 36px; }
-
-    .badgeMeta { font-size: var(--fs-xs); }
 }
