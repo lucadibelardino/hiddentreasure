@@ -1,0 +1,67 @@
+{
+  "_istruzioni": "Per aggiungere una recensione copia un blocco in 'reviews' e cambia i campi. source: 'airbnb' oppure 'google'. date: 'AAAA-MM'. rating: da 1 a 5. In 'sources' aggiorna voto medio e numero totale come li mostra la piattaforma. ATTENZIONE: le recensioni qui sotto sono di prova, vanno sostituite con quelle vere prima di pubblicare.",
+  "sources": {
+    "airbnb": {
+      "label": "Airbnb",
+      "rating": 4.94,
+      "count": 37,
+      "url": "https://www.airbnb.it/rooms/38283678/reviews"
+    },
+    "google": {
+      "label": "Google",
+      "rating": 4.9,
+      "count": 21,
+      "url": "https://www.google.com/maps/place/Hidden+treasure+villasimius+(I.U.N.+S0174)/@39.1074963,9.0945192,51316m/data=!3m1!1e3!4m6!3m5!1s0x12e0c33df2d8c7bd:0xe25528c67767b9eb!8m2!3d39.1085644!4d9.5031886!16s%2Fg%2F11sbspqsr8"
+    }
+  },
+  "reviews": [
+    {
+      "name": "Giulia",
+      "from": "Milano",
+      "date": "2026-08",
+      "rating": 5,
+      "source": "airbnb",
+      "text": "Casa splendida, pulitissima e ancora più bella che in foto. La veranda la sera è il posto perfetto per cenare all'aperto. Luca è stato sempre disponibile e ci ha consigliato spiagge meravigliose."
+    },
+    {
+      "name": "Thomas",
+      "from": "Monaco di Baviera",
+      "date": "2026-07",
+      "rating": 5,
+      "source": "google",
+      "text": "Wonderful stay. The house is quiet, well equipped and only a short drive from the most beautiful beaches of Villasimius. We will definitely come back."
+    },
+    {
+      "name": "Francesca e Marco",
+      "from": "Roma",
+      "date": "2026-07",
+      "rating": 5,
+      "source": "airbnb",
+      "text": "Una settimana di relax totale con i bambini. Spazi ampi, giardino curato e tutto quello che serve in cucina. Arrivo e check-in semplicissimi."
+    },
+    {
+      "name": "Sophie",
+      "from": "Lione",
+      "date": "2026-06",
+      "rating": 5,
+      "source": "airbnb",
+      "text": "Maison très agréable et bien située. Accueil chaleureux, conseils précieux pour les plages et les restaurants."
+    },
+    {
+      "name": "Andrea",
+      "from": "Cagliari",
+      "date": "2025-09",
+      "rating": 4,
+      "source": "google",
+      "text": "Posizione ottima e casa molto curata. Unico appunto: servirebbe un'auto per muoversi, ma per chi conosce la zona non è un problema."
+    },
+    {
+      "name": "Elena",
+      "from": "Torino",
+      "date": "2025-08",
+      "rating": 5,
+      "source": "airbnb",
+      "text": "Il nome dice tutto: un vero tesoro nascosto. Silenzio, cielo stellato e il mare a pochi minuti. Comunicazione rapida e precisa prima e durante il soggiorno."
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import Hero from './components/Hero';
 import Features from './components/Features';
 import GalleryPage from './components/GalleryPage';
 import ContactPage from './components/ContactPage';
+import ReviewsPage from './components/ReviewsPage';
 import Footer from './components/Footer';
 
 /** Ogni cambio pagina riparte dall'alto, tranne quando si punta a una sezione. */
@@ -46,6 +47,7 @@ const App: React.FC = () => (
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/gallery" element={<GalleryPage />} />
+                <Route path="/recensioni" element={<ReviewsPage />} />
                 <Route path="/contatti" element={<ContactPage />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>

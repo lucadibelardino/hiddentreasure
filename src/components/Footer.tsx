@@ -21,6 +21,7 @@ const Footer: React.FC = () => (
                 <p className={styles.colTitle}>Pagine</p>
                 <Link to="/">Home</Link>
                 <Link to="/gallery">Galleria</Link>
+                <Link to="/recensioni">Recensioni</Link>
                 <Link to="/contatti">Contatti</Link>
             </nav>
 
