@@ -1,65 +1,152 @@
-import React from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { reviews, sources, fmt } from '../data/reviewsData';
+import Stars from './Stars';
+import { reviews, sources, formatDate, fmt } from '../data/reviewsData';
+import type { Review } from '../data/reviewsData';
 import styles from './ReviewsHighlight.module.css';
 
-/* Fascia sottile in home: frasi brevi dalle recensioni che scorrono
-   da un lato all'altro, con il riconoscimento Airbnb e il rimando
-   alla pagina Recensioni. Compaiono le recensioni con "featured": true
-   in src/data/reviews.json (altrimenti tutte quelle da 5 stelle). */
+/* Fascia recensioni in home.
+   In alto il riconoscimento Airbnb con la corona d'alloro; sotto i commenti
+   degli ospiti che scorrono a scatti: uno resta fermo da leggere, poi
+   la fila scivola veloce al successivo. Compaiono le recensioni con
+   "featured": true in src/data/reviews.json (altrimenti quelle da 5 stelle). */
 
-const MAX_CHARS = 110;
-
-/* Prima frase (o le prime parole) della recensione, senza emoji */
-const snippet = (text: string) => {
-    const clean = text.replace(/\p{Extended_Pictographic}/gu, '').trim();
-    const first = clean.match(/^.+?[.!?](?=\s|$)/u)?.[0] ?? clean;
-    if (first.length <= MAX_CHARS) return first;
-    const cut = first.slice(0, MAX_CHARS);
-    return `${cut.slice(0, cut.lastIndexOf(' '))}…`;
-};
+const HOLD_MS = 4500;   // tempo di lettura per commento
+const SLIDE_MS = 650;   // durata dello scatto
 
 const featured = reviews.filter((r) => r.featured);
-const items = (featured.length ? featured : reviews.filter((r) => r.rating === 5))
-    .map((r) => ({ key: `${r.source}-${r.name}-${r.date}`, text: snippet(r.text), name: r.name }));
+const slides: Review[] = featured.length ? featured : reviews.filter((r) => r.rating === 5).slice(0, 8);
+
+const AVATAR_COLORS = ['var(--c-sea)', 'var(--c-brass)', 'var(--c-deep-2)', 'var(--c-sea-dark)'];
+const avatarColor = (name: string) =>
+    AVATAR_COLORS[[...name].reduce((s, c) => s + c.charCodeAt(0), 0) % AVATAR_COLORS.length];
 
 const airbnb = sources.airbnb;
 
-const Item: React.FC<{ text: string; name: string }> = ({ text, name }) => (
-    <li className={styles.item}>
-        <q className={styles.quote}>{text}</q>
-        <span className={styles.name}>{name}</span>
-    </li>
+/* Ramo d'alloro: coppie di foglie lungo uno stelo curvo, dal basso verso l'alto.
+   Il lato destro e' lo specchio del sinistro. */
+const LEAF_PAIRS = [0, 1, 2, 3, 4, 5, 6].map((i) => {
+    const t = i / 6;
+    return {
+        x: 28 - Math.sin(t * Math.PI * 0.85) * 14 + t * 4,
+        y: 58 - t * 50,
+        size: 1 - t * 0.3,
+        tilt: -20 + t * 25
+    };
+});
+
+const Laurel: React.FC<{ flip?: boolean }> = ({ flip }) => (
+    <svg
+        className={styles.laurel}
+        viewBox="0 0 40 66"
+        aria-hidden="true"
+        style={flip ? { transform: 'scaleX(-1)' } : undefined}
+    >
+        <path d="M31 63 C 12 52, 8 30, 19 5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        {LEAF_PAIRS.map((l, i) => (
+            <g key={i} transform={`translate(${l.x} ${l.y}) rotate(${l.tilt})`}>
+                <ellipse cx={-5.5 * l.size} cy={-1} rx={2.8 * l.size} ry={6.4 * l.size} transform={`rotate(-42 ${-5.5 * l.size} -1)`} fill="currentColor" />
+                <ellipse cx={5 * l.size} cy={-1} rx={2.6 * l.size} ry={6 * l.size} transform={`rotate(42 ${5 * l.size} -1)`} fill="currentColor" opacity="0.8" />
+            </g>
+        ))}
+        <ellipse cx="19.5" cy="4" rx="2.4" ry="5" fill="currentColor" />
+    </svg>
+);
+
+const Comment: React.FC<{ r: Review }> = ({ r }) => (
+    <article className={styles.card}>
+        <header className={styles.cardHead}>
+            <span className={styles.avatar} style={{ background: avatarColor(r.name) }} aria-hidden="true">
+                {r.name.charAt(0)}
+            </span>
+            <div className={styles.who}>
+                <span className={styles.name}>{r.name}</span>
+                <span className={styles.meta}>{formatDate(r.date)} · {sources[r.source].label}</span>
+            </div>
+            <Stars value={r.rating} size={13} className={styles.stars} />
+        </header>
+        <p className={styles.text}>{r.text}</p>
+    </article>
 );
 
 const ReviewsHighlight: React.FC = () => {
-    if (items.length === 0) return null;
+    const [index, setIndex] = useState(0);
+    const [animate, setAnimate] = useState(true);
+    const [paused, setPaused] = useState(false);
+    const [offset, setOffset] = useState(0);
+    const trackRef = useRef<HTMLDivElement>(null);
+    const n = slides.length;
+
+    // Posizione della card corrente (misurata, cosi' funziona a ogni larghezza)
+    useLayoutEffect(() => {
+        const measure = () => {
+            const card = trackRef.current?.children[index] as HTMLElement | undefined;
+            setOffset(card ? card.offsetLeft : 0);
+        };
+        measure();
+        window.addEventListener('resize', measure);
+        return () => window.removeEventListener('resize', measure);
+    }, [index]);
+
+    // Ferma, poi scatto al commento successivo
+    useEffect(() => {
+        if (paused || n < 2) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const t = window.setTimeout(() => {
+            setAnimate(true);
+            setIndex((i) => i + 1);
+        }, HOLD_MS);
+        return () => window.clearTimeout(t);
+    }, [index, paused, n]);
+
+    // Arrivati alla copia del primo commento, si torna all'inizio senza animazione
+    const onTransitionEnd = () => {
+        if (index >= n) {
+            setAnimate(false);
+            setIndex(0);
+        }
+    };
+
+    if (n === 0) return null;
 
     return (
         <section className={styles.band} aria-labelledby="ospiti-badge">
-            <header className={styles.head}>
-                <div className={styles.titleRow}>
-                    <span className={styles.rule} aria-hidden="true" />
-                    <h2 id="ospiti-badge" className={styles.badgeTitle}>{airbnb.badge ?? 'Dicono di noi'}</h2>
-                    <span className={styles.rule} aria-hidden="true" />
+            <div className={styles.head}>
+                <div className={styles.award}>
+                    <Laurel />
+                    <div className={styles.awardText}>
+                        <h2 id="ospiti-badge" className={styles.awardTitle}>{airbnb.badge ?? 'Dicono di noi'}</h2>
+                        <p className={styles.awardSource}>Riconoscimento Airbnb</p>
+                    </div>
+                    <Laurel flip />
                 </div>
-                <p className={styles.badgeMeta}>
-                    <span className={styles.badgeStar} aria-hidden="true">★</span>
-                    {fmt(airbnb.rating, 2)} su {airbnb.label}
+                <p className={styles.score}>
+                    <strong>{fmt(airbnb.rating, 2)}</strong> su {airbnb.count} recensioni Airbnb
                     <span aria-hidden="true"> · </span>
-                    <Link to="/recensioni" className={styles.badgeLink}>Leggi tutte</Link>
+                    <Link to="/recensioni" className={styles.link}>Leggi tutte</Link>
                 </p>
-            </header>
+            </div>
 
-            <div className={styles.viewport}>
-                <div className={styles.track}>
-                    {/* Due copie identiche in fila: quando la prima esce, la seconda e' al suo posto */}
-                    <ul className={styles.row}>
-                        {items.map((it) => <Item key={it.key} text={it.text} name={it.name} />)}
-                    </ul>
-                    <ul className={styles.row} aria-hidden="true">
-                        {items.map((it) => <Item key={`b-${it.key}`} text={it.text} name={it.name} />)}
-                    </ul>
+            <div
+                className={styles.viewport}
+                onMouseEnter={() => setPaused(true)}
+                onMouseLeave={() => setPaused(false)}
+            >
+                <div
+                    ref={trackRef}
+                    className={styles.track}
+                    style={{
+                        transform: `translateX(${-offset}px)`,
+                        transition: animate ? `transform ${SLIDE_MS}ms cubic-bezier(0.7, 0, 0.2, 1)` : 'none'
+                    }}
+                    onTransitionEnd={onTransitionEnd}
+                >
+                    {/* Seconda copia: permette di ripartire dall'inizio senza salti */}
+                    {[...slides, ...slides].map((r, i) => (
+                        <div key={i} className={styles.slot} aria-hidden={i >= n}>
+                            <Comment r={r} />
+                        </div>
+                    ))}
                 </div>
             </div>
         </section>
