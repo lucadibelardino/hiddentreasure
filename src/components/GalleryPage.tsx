@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useReveal from '../hooks/useReveal';
+import { ROUTES, useLang, useT } from '../i18n';
 import styles from './GalleryPage.module.css';
 
 const fileNames = [
@@ -73,6 +74,8 @@ const GalleryPage: React.FC = () => {
     const [current, setCurrent] = useState<number | null>(null);
     const revealRef = useReveal<HTMLDivElement>();
     const navigate = useNavigate();
+    const lang = useLang();
+    const t = useT().gallery;
     const touchStartX = useRef<number | null>(null);
     const isOpen = current !== null;
 
@@ -121,12 +124,9 @@ const GalleryPage: React.FC = () => {
         <main className={styles.page}>
             <div className="container">
                 <header className={styles.header}>
-                    <p className="eyebrow">{images.length} fotografie</p>
-                    <h1 className={styles.title}>La villa, <em>senza filtri</em></h1>
-                    <p className={styles.subtitle}>
-                        Le stanze, il giardino, la spiaggia a fine prato e i tramonti dalla terrazza.
-                        Tocca una foto per vederla intera.
-                    </p>
+                    <p className="eyebrow">{t.count(images.length)}</p>
+                    <h1 className={styles.title}>{t.title}<em>{t.titleAccent}</em></h1>
+                    <p className={styles.subtitle}>{t.subtitle}</p>
                 </header>
 
                 <div className={styles.masonry} ref={revealRef}>
@@ -135,9 +135,9 @@ const GalleryPage: React.FC = () => {
                             key={src}
                             className={`${styles.tile} reveal`}
                             onClick={() => setCurrent(i)}
-                            aria-label={`Apri la fotografia ${i + 1} di ${images.length}`}
+                            aria-label={t.open(i + 1, images.length)}
                         >
-                            <img src={thumbs[i]} alt={`Hidden Treasure Villasimius, fotografia ${i + 1}`} loading="lazy" decoding="async" />
+                            <img src={thumbs[i]} alt={t.alt(i + 1)} loading="lazy" decoding="async" />
                             <span className={styles.tileOverlay} aria-hidden="true">
                                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                                     <circle cx="11" cy="11" r="7" />
@@ -149,9 +149,9 @@ const GalleryPage: React.FC = () => {
                 </div>
 
                 <div className={styles.cta}>
-                    <p className={styles.ctaText}>Ti è piaciuto quello che hai visto?</p>
-                    <button className={styles.ctaBtn} onClick={() => navigate('/contatti')}>
-                        Chiedi disponibilità e prezzi
+                    <p className={styles.ctaText}>{t.ctaText}</p>
+                    <button className={styles.ctaBtn} onClick={() => navigate(ROUTES[lang].contact)}>
+                        {t.ctaBtn}
                     </button>
                 </div>
             </div>
@@ -161,12 +161,12 @@ const GalleryPage: React.FC = () => {
                     className={styles.lightbox}
                     role="dialog"
                     aria-modal="true"
-                    aria-label={`Fotografia ${current + 1} di ${images.length}`}
+                    aria-label={t.photo(current + 1, images.length)}
                     onClick={close}
                     onTouchStart={onTouchStart}
                     onTouchEnd={onTouchEnd}
                 >
-                    <button className={styles.closeBtn} onClick={close} aria-label="Chiudi">
+                    <button className={styles.closeBtn} onClick={close} aria-label={t.close}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                             <path d="M18 6 6 18M6 6l12 12" />
                         </svg>
@@ -175,7 +175,7 @@ const GalleryPage: React.FC = () => {
                     <button
                         className={`${styles.navBtn} ${styles.prevBtn}`}
                         onClick={(e) => { e.stopPropagation(); step(-1); }}
-                        aria-label="Fotografia precedente"
+                        aria-label={t.prev}
                     >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="m15 18-6-6 6-6" />
@@ -185,7 +185,7 @@ const GalleryPage: React.FC = () => {
                     <img
                         key={current}
                         src={images[current]}
-                        alt={`Hidden Treasure Villasimius, fotografia ${current + 1}`}
+                        alt={t.alt(current + 1)}
                         className={styles.lightboxImage}
                         onClick={(e) => e.stopPropagation()}
                     />
@@ -193,7 +193,7 @@ const GalleryPage: React.FC = () => {
                     <button
                         className={`${styles.navBtn} ${styles.nextBtn}`}
                         onClick={(e) => { e.stopPropagation(); step(1); }}
-                        aria-label="Fotografia successiva"
+                        aria-label={t.next}
                     >
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="m9 18 6-6-6-6" />

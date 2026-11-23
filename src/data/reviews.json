@@ -1,5 +1,5 @@
 {
-  "_istruzioni": "Per aggiungere una recensione copia un blocco in 'reviews' e cambia i campi. source: 'airbnb' oppure 'google'. date: 'AAAA-MM'. rating: da 1 a 5. Campi facoltativi: from (provenienza), translatedFrom (lingua originale, se il testo è una traduzione), reply (risposta dell'host), url (link diretto alla recensione: su Google si copia da 'Condividi recensione'), featured (true = compare nello slider della home). In 'sources' aggiorna voto medio e numero totale come li mostra la piattaforma; 'categories' è facoltativo. Le parole chiave del filtro sono in src/data/reviewKeywords.ts.",
+  "_istruzioni": "Per aggiungere una recensione copia un blocco in 'reviews' e cambia i campi. source: 'airbnb' oppure 'google'. date: 'AAAA-MM'. rating: da 1 a 5. Campi facoltativi: from (provenienza), translatedFrom (lingua originale, se il testo è una traduzione), reply (risposta dell'host), url (link diretto alla recensione: su Google si copia da 'Condividi recensione'), featured (true = compare nello slider della home). In 'sources' aggiorna voto medio e numero totale come li mostra la piattaforma; 'categories' è facoltativo. Le parole chiave del filtro sono in src/data/reviewKeywords.ts. i18n (facoltativo): traduzioni per le versioni del sito in inglese (en), tedesco (de) e francese (fr), con text e, se servono, reply e from. Se una traduzione manca, in quella lingua compare il testo italiano.",
   "sources": {
     "airbnb": {
       "label": "Airbnb",
@@ -48,7 +48,18 @@
       "rating": 5,
       "source": "airbnb",
       "text": "Questo alloggio era semplicemente perfetto! Abbiamo cercato la tranquillità e l'abbiamo trovata, e questo a metà agosto! Tornerei in qualsiasi momento 🥰",
-      "featured": true
+      "featured": true,
+      "i18n": {
+        "en": {
+          "text": "This place was simply perfect! We were looking for peace and quiet and we found it, and in mid-August at that! I would come back any time 🥰"
+        },
+        "de": {
+          "text": "Diese Unterkunft war einfach perfekt! Wir haben Ruhe gesucht und sie gefunden, und das mitten im August! Ich würde jederzeit wiederkommen 🥰"
+        },
+        "fr": {
+          "text": "Ce logement était tout simplement parfait ! Nous cherchions la tranquillité et nous l’avons trouvée, et ce en plein mois d’août ! J’y retournerais n’importe quand 🥰"
+        }
+      }
     },
     {
       "name": "Hélène",
@@ -57,14 +68,39 @@
       "source": "airbnb",
       "text": "Che posto meraviglioso! Spiaggia alla fine della terrazza. Non ci si stanca mai della terrazza sul tetto e dei suoi tramonti. Maria Lucia è reattiva e la comunicazione è stata fluida.",
       "reply": "Per favore, torna di nuovo, sarò felice di ospitarti. Goditi il resto dell'estate!!!",
-      "featured": true
+      "featured": true,
+      "i18n": {
+        "en": {
+          "text": "What a wonderful place! The beach is at the end of the terrace. You never tire of the roof terrace and its sunsets. Maria Lucia is responsive and communication was easy.",
+          "reply": "Please come back again, I will be happy to host you. Enjoy the rest of the summer!!!"
+        },
+        "de": {
+          "text": "Was für ein wunderbarer Ort! Der Strand liegt am Ende der Terrasse. Von der Dachterrasse und ihren Sonnenuntergängen bekommt man nie genug. Maria Lucia reagiert schnell und die Kommunikation lief reibungslos.",
+          "reply": "Komm bitte wieder, ich freue mich, dich wieder zu Gast zu haben. Genieß den Rest des Sommers!!!"
+        },
+        "fr": {
+          "text": "Quel endroit merveilleux ! La plage est au bout de la terrasse. On ne se lasse jamais du toit-terrasse et de ses couchers de soleil. Maria Lucia est réactive et la communication a été fluide.",
+          "reply": "Reviens quand tu veux, je serai ravie de t’accueillir à nouveau. Profite bien de la fin de l’été !!!"
+        }
+      }
     },
     {
       "name": "Guido",
       "date": "2025-10",
       "rating": 5,
       "source": "airbnb",
-      "text": "Abbiamo trascorso una splendida settimana di vacanza a casa di Maria Lucia. Una bella casa con una splendida vista sul mare e sul tramonto. Il mare a portata di mano a pochi passi dalla casa. Maria Lucia è sempre stata facilmente raggiungibile e ha fornito istruzioni utili per il check-in e il check-out. Grazie per le bevande di benvenuto. Ci torneremo volentieri."
+      "text": "Abbiamo trascorso una splendida settimana di vacanza a casa di Maria Lucia. Una bella casa con una splendida vista sul mare e sul tramonto. Il mare a portata di mano a pochi passi dalla casa. Maria Lucia è sempre stata facilmente raggiungibile e ha fornito istruzioni utili per il check-in e il check-out. Grazie per le bevande di benvenuto. Ci torneremo volentieri.",
+      "i18n": {
+        "en": {
+          "text": "We spent a wonderful week's holiday at Maria Lucia's home. A lovely house with a beautiful view of the sea and the sunset. The sea is right on your doorstep, just a few steps from the house. Maria Lucia was always easy to reach and gave us useful instructions for check-in and check-out. Thank you for the welcome drinks. We would be happy to come back."
+        },
+        "de": {
+          "text": "Wir haben eine herrliche Urlaubswoche im Haus von Maria Lucia verbracht. Ein schönes Haus mit einem traumhaften Blick auf das Meer und den Sonnenuntergang. Das Meer liegt nur wenige Schritte vom Haus entfernt. Maria Lucia war immer gut erreichbar und hat uns hilfreiche Hinweise für den Check-in und den Check-out gegeben. Danke für die Willkommensgetränke. Wir kommen gerne wieder."
+        },
+        "fr": {
+          "text": "Nous avons passé une superbe semaine de vacances dans la maison de Maria Lucia. Une belle maison avec une vue splendide sur la mer et le coucher du soleil. La mer est à quelques pas de la maison. Maria Lucia a toujours été facile à joindre et nous a donné des instructions utiles pour l’arrivée et le départ. Merci pour les boissons de bienvenue. Nous y reviendrons avec plaisir."
+        }
+      }
     },
     {
       "name": "Federico",
@@ -72,14 +108,36 @@
       "rating": 5,
       "source": "airbnb",
       "text": "Posto incantevole, con vista mozzafiato sul mare, specialmente al tramonto e quando la luna si specchia sul mare proprio di fronte al giardino. La casa è piccola, ma con tutte le comodità, perfetta per la mia famiglia composta da me, mia moglie e i miei figli di 16 e 13 anni.",
-      "featured": true
+      "featured": true,
+      "i18n": {
+        "en": {
+          "text": "An enchanting place with a breathtaking view of the sea, especially at sunset and when the moon is reflected in the water right in front of the garden. The house is small but has every comfort, perfect for my family: me, my wife and our children aged 16 and 13."
+        },
+        "de": {
+          "text": "Ein bezaubernder Ort mit atemberaubendem Blick aufs Meer, besonders bei Sonnenuntergang und wenn sich der Mond direkt vor dem Garten im Wasser spiegelt. Das Haus ist klein, bietet aber jeden Komfort, perfekt für meine Familie: meine Frau, ich und unsere Kinder mit 16 und 13 Jahren."
+        },
+        "fr": {
+          "text": "Un lieu enchanteur, avec une vue à couper le souffle sur la mer, surtout au coucher du soleil et quand la lune se reflète sur l’eau juste devant le jardin. La maison est petite mais dispose de tout le confort, parfaite pour ma famille : ma femme, moi et nos enfants de 16 et 13 ans."
+        }
+      }
     },
     {
       "name": "Ildikó",
       "date": "2024-07",
       "rating": 5,
       "source": "airbnb",
-      "text": "Abbiamo trascorso una settimana fantastica con la mia famiglia nella casa al mare di Maria Lucia. Aveva tutto ciò che cercavamo per una vacanza perfetta: era una casetta accogliente e confortevole su un promontorio a picco sul mare con una vista mozzafiato, meravigliosi tramonti durante le nostre cene sulla terrazza sul tetto, con la sua piccola spiaggia sabbiosa protetta da scogliere proprio alla fine del giardino. La casa aveva tutto il necessario per il nostro comfort ed era molto ben attrezzata: lavastoviglie, lavatrice, aria condizionata, ventilatore a soffitto, grande frigorifero, asciugacapelli, teli da mare. Abbiamo apprezzato soprattutto la doccia esterna e i due kayak per le gite nelle baie vicine. Ci siamo sentiti veramente a casa, indipendentemente da quanto a lungo saremmo rimasti. È stata una vacanza davvero rilassante e tranquilla per tutta la famiglia. Il villaggio di Villasimius, dove potevamo fare la spesa, si trova a 5 minuti di auto. L'auto è indispensabile! Maria Lucia è un host molto gentile e accogliente. Ha fornito informazioni dettagliate su come arrivare e ha persino inviato video per spiegare tutto. È stato perfetto."
+      "text": "Abbiamo trascorso una settimana fantastica con la mia famiglia nella casa al mare di Maria Lucia. Aveva tutto ciò che cercavamo per una vacanza perfetta: era una casetta accogliente e confortevole su un promontorio a picco sul mare con una vista mozzafiato, meravigliosi tramonti durante le nostre cene sulla terrazza sul tetto, con la sua piccola spiaggia sabbiosa protetta da scogliere proprio alla fine del giardino. La casa aveva tutto il necessario per il nostro comfort ed era molto ben attrezzata: lavastoviglie, lavatrice, aria condizionata, ventilatore a soffitto, grande frigorifero, asciugacapelli, teli da mare. Abbiamo apprezzato soprattutto la doccia esterna e i due kayak per le gite nelle baie vicine. Ci siamo sentiti veramente a casa, indipendentemente da quanto a lungo saremmo rimasti. È stata una vacanza davvero rilassante e tranquilla per tutta la famiglia. Il villaggio di Villasimius, dove potevamo fare la spesa, si trova a 5 minuti di auto. L'auto è indispensabile! Maria Lucia è un host molto gentile e accogliente. Ha fornito informazioni dettagliate su come arrivare e ha persino inviato video per spiegare tutto. È stato perfetto.",
+      "i18n": {
+        "en": {
+          "text": "We had a fantastic week with my family at Maria Lucia's beach house. It had everything we were looking for in a perfect holiday: a cosy, comfortable little house on a headland above the sea with a breathtaking view, wonderful sunsets during our dinners on the roof terrace, and its own small sandy beach sheltered by cliffs right at the end of the garden. The house had everything we needed to be comfortable and was very well equipped: dishwasher, washing machine, air conditioning, ceiling fan, a large fridge, hairdryer and beach towels. We especially loved the outdoor shower and the two kayaks for trips to the nearby bays. We truly felt at home, however long we might have stayed. It was a really relaxing and peaceful holiday for the whole family. The village of Villasimius, where we did our shopping, is a 5-minute drive away. A car is essential! Maria Lucia is a very kind and welcoming host. She gave us detailed directions on how to get there and even sent videos to explain everything. It was perfect."
+        },
+        "de": {
+          "text": "Wir haben mit meiner Familie eine fantastische Woche im Strandhaus von Maria Lucia verbracht. Es hatte alles, was wir uns für einen perfekten Urlaub gewünscht haben: ein gemütliches, komfortables Häuschen auf einem Felsvorsprung direkt über dem Meer mit atemberaubendem Blick, herrliche Sonnenuntergänge beim Abendessen auf der Dachterrasse und ein eigener kleiner Sandstrand, geschützt von Felsen, gleich am Ende des Gartens. Das Haus bot alles für unseren Komfort und war sehr gut ausgestattet: Geschirrspüler, Waschmaschine, Klimaanlage, Deckenventilator, großer Kühlschrank, Föhn und Strandtücher. Besonders gefallen haben uns die Außendusche und die beiden Kajaks für Ausflüge in die nahen Buchten. Wir haben uns wirklich wie zu Hause gefühlt, ganz egal, wie lange wir geblieben wären. Es war ein sehr erholsamer und ruhiger Urlaub für die ganze Familie. Der Ort Villasimius, wo wir einkaufen konnten, ist mit dem Auto 5 Minuten entfernt. Ein Auto ist unverzichtbar! Maria Lucia ist eine sehr freundliche und herzliche Gastgeberin. Sie hat uns genau beschrieben, wie wir hinkommen, und sogar Videos geschickt, um alles zu erklären. Es war perfekt."
+        },
+        "fr": {
+          "text": "Nous avons passé une semaine fantastique en famille dans la maison de bord de mer de Maria Lucia. Elle avait tout ce que nous cherchions pour des vacances parfaites : une petite maison chaleureuse et confortable sur un promontoire dominant la mer, avec une vue à couper le souffle, de merveilleux couchers de soleil pendant nos dîners sur le toit-terrasse, et sa petite plage de sable protégée par les rochers, juste au bout du jardin. La maison avait tout le nécessaire pour notre confort et était très bien équipée : lave-vaisselle, lave-linge, climatisation, ventilateur de plafond, grand réfrigérateur, sèche-cheveux, serviettes de plage. Nous avons surtout apprécié la douche extérieure et les deux kayaks pour explorer les criques voisines. Nous nous sommes vraiment sentis chez nous, quelle que soit la durée de notre séjour. Ce furent des vacances vraiment reposantes et paisibles pour toute la famille. Le village de Villasimius, où nous pouvions faire nos courses, est à 5 minutes en voiture. La voiture est indispensable ! Maria Lucia est une hôte très gentille et accueillante. Elle nous a donné des indications détaillées pour arriver et nous a même envoyé des vidéos pour tout expliquer. C’était parfait."
+        }
+      }
     },
     {
       "name": "Yann",
@@ -87,21 +145,57 @@
       "rating": 5,
       "source": "airbnb",
       "text": "Soggiorno magico! Posizione molto bella! Casa accogliente. Conserviamo ricordi molto belli! Grazie Maria Lucia.",
-      "reply": "È stato un vero piacere avere te e la tua famiglia nel nostro alloggio. Grazie per essere venuto."
+      "reply": "È stato un vero piacere avere te e la tua famiglia nel nostro alloggio. Grazie per essere venuto.",
+      "i18n": {
+        "en": {
+          "text": "A magical stay! A really beautiful location! A welcoming house. We have wonderful memories! Thank you, Maria Lucia.",
+          "reply": "It was a real pleasure to have you and your family stay with us. Thank you for coming."
+        },
+        "de": {
+          "text": "Ein zauberhafter Aufenthalt! Eine wunderschöne Lage! Ein gemütliches Haus. Wir nehmen sehr schöne Erinnerungen mit! Danke, Maria Lucia.",
+          "reply": "Es war uns eine große Freude, dich und deine Familie bei uns zu haben. Danke, dass ihr gekommen seid."
+        },
+        "fr": {
+          "text": "Séjour magique ! Très bel emplacement ! Maison accueillante. Nous gardons de très beaux souvenirs ! Merci Maria Lucia.",
+          "reply": "Ce fut un vrai plaisir de vous accueillir, toi et ta famille. Merci d’être venus."
+        }
+      }
     },
     {
       "name": "Mario",
       "date": "2022-09",
       "rating": 5,
       "source": "airbnb",
-      "text": "Abbiamo avuto il piacere di trascorrere una settimana nell'oasi di benessere di Maria e siamo rimasti molto colpiti. Il posto giusto per staccare la spina e godersi la tranquillità, soprattutto con la spiaggia privata che si trova a pochi passi dal giardino! Nel complesso, possiamo consigliare questa sistemazione molto :)"
+      "text": "Abbiamo avuto il piacere di trascorrere una settimana nell'oasi di benessere di Maria e siamo rimasti molto colpiti. Il posto giusto per staccare la spina e godersi la tranquillità, soprattutto con la spiaggia privata che si trova a pochi passi dal giardino! Nel complesso, possiamo consigliare questa sistemazione molto :)",
+      "i18n": {
+        "en": {
+          "text": "We had the pleasure of spending a week in Maria's little haven of wellbeing and were very impressed. The perfect place to switch off and enjoy the peace and quiet, especially with the private beach just a few steps from the garden! All in all, we can highly recommend this accommodation :)"
+        },
+        "de": {
+          "text": "Wir durften eine Woche in Marias Wohlfühloase verbringen und waren sehr begeistert. Der richtige Ort, um abzuschalten und die Ruhe zu genießen, vor allem mit dem Privatstrand nur wenige Schritte vom Garten entfernt! Alles in allem können wir diese Unterkunft sehr empfehlen :)"
+        },
+        "fr": {
+          "text": "Nous avons eu le plaisir de passer une semaine dans le petit havre de bien-être de Maria et nous avons été conquis. L’endroit idéal pour déconnecter et profiter du calme, surtout avec la plage privée à quelques pas du jardin ! Dans l’ensemble, nous recommandons vivement ce logement :)"
+        }
+      }
     },
     {
       "name": "Alexander",
       "date": "2022-10",
       "rating": 4,
       "source": "airbnb",
-      "text": "La casa gode di una posizione fantastica direttamente sul mare, sopra una piccola spiaggia di sabbia rocciosa, a disposizione esclusiva dei residenti del condominio. Durante il nostro soggiorno all'inizio di ottobre, l'abbiamo avuto quasi tutto per noi. In bicicletta – ne avevamo noleggiate alcune da Bike-Green nel centro del paese – si raggiungono le famose spiagge di Porto Giunco, Simius e Campulongu in 10-15 minuti. Così si può sempre scegliere la spiaggia giusta per la direzione del vento prevalente. Dalla terrazza sul tetto della casa si ha una vista mozzafiato a 360 gradi. Tuttavia, c'è solo una protezione insufficiente contro le cadute: le famiglie con bambini piccoli dovrebbero tenerne conto. La casa è arredata con cura, in modo molto personale e funzionale. Lo standard è abbastanza tipico dell'isola ed è superiore a quello delle altre case che abbiamo conosciuto in Sardegna. Abbiamo viaggiato in coppia e abbiamo utilizzato solo la più grande delle due camere da letto. La seconda camera da letto con letto a castello è molto piccola e non ha né un armadio né un ripostiglio. Per una famiglia di quattro persone, a nostro avviso, sarebbe abbastanza \"stretto e accogliente\". Per noi è stato perfetto! La comunicazione con Maria Lucia è stata assolutamente senza problemi. Per il…"
+      "text": "La casa gode di una posizione fantastica direttamente sul mare, sopra una piccola spiaggia di sabbia rocciosa, a disposizione esclusiva dei residenti del condominio. Durante il nostro soggiorno all'inizio di ottobre, l'abbiamo avuto quasi tutto per noi. In bicicletta – ne avevamo noleggiate alcune da Bike-Green nel centro del paese – si raggiungono le famose spiagge di Porto Giunco, Simius e Campulongu in 10-15 minuti. Così si può sempre scegliere la spiaggia giusta per la direzione del vento prevalente. Dalla terrazza sul tetto della casa si ha una vista mozzafiato a 360 gradi. Tuttavia, c'è solo una protezione insufficiente contro le cadute: le famiglie con bambini piccoli dovrebbero tenerne conto. La casa è arredata con cura, in modo molto personale e funzionale. Lo standard è abbastanza tipico dell'isola ed è superiore a quello delle altre case che abbiamo conosciuto in Sardegna. Abbiamo viaggiato in coppia e abbiamo utilizzato solo la più grande delle due camere da letto. La seconda camera da letto con letto a castello è molto piccola e non ha né un armadio né un ripostiglio. Per una famiglia di quattro persone, a nostro avviso, sarebbe abbastanza \"stretto e accogliente\". Per noi è stato perfetto! La comunicazione con Maria Lucia è stata assolutamente senza problemi. Per il…",
+      "i18n": {
+        "en": {
+          "text": "The house enjoys a fantastic location right on the sea, above a small sandy and rocky beach reserved for the residents of the complex. During our stay at the beginning of October we had it almost to ourselves. By bike – we hired some from Bike-Green in the centre of the village – you can reach the famous beaches of Porto Giunco, Simius and Campulongu in 10–15 minutes, so you can always pick the right beach for the prevailing wind. The roof terrace has a breathtaking 360-degree view. However, there is only limited protection against falls: families with small children should bear this in mind. The house is furnished with care, in a very personal and practical way. The standard is fairly typical of the island and higher than other houses we have stayed in on Sardinia. We travelled as a couple and only used the larger of the two bedrooms. The second bedroom with a bunk bed is very small and has neither a wardrobe nor storage space. For a family of four it would, in our opinion, be rather \"snug\". For us it was perfect! Communication with Maria Lucia was completely smooth. As for the…"
+        },
+        "de": {
+          "text": "Das Haus hat eine fantastische Lage direkt am Meer, oberhalb eines kleinen Sand- und Felsstrands, der nur den Bewohnern der Anlage zur Verfügung steht. Während unseres Aufenthalts Anfang Oktober hatten wir ihn fast für uns allein. Mit dem Fahrrad – wir hatten welche bei Bike-Green im Ortszentrum gemietet – erreicht man die berühmten Strände Porto Giunco, Simius und Campulongu in 10 bis 15 Minuten. So kann man immer den passenden Strand für die vorherrschende Windrichtung wählen. Von der Dachterrasse hat man einen atemberaubenden 360-Grad-Blick. Allerdings gibt es nur einen unzureichenden Absturzschutz: Familien mit kleinen Kindern sollten das berücksichtigen. Das Haus ist liebevoll, sehr persönlich und zweckmäßig eingerichtet. Der Standard ist recht inseltypisch und höher als in anderen Häusern, die wir auf Sardinien kennengelernt haben. Wir waren zu zweit unterwegs und haben nur das größere der beiden Schlafzimmer genutzt. Das zweite Schlafzimmer mit Etagenbett ist sehr klein und hat weder Schrank noch Ablage. Für eine vierköpfige Familie wäre es unserer Meinung nach ziemlich \"eng und gemütlich\". Für uns war es perfekt! Die Kommunikation mit Maria Lucia war völlig problemlos. Was die…"
+        },
+        "fr": {
+          "text": "La maison bénéficie d’un emplacement fantastique, directement sur la mer, au-dessus d’une petite plage de sable et de rochers réservée aux résidents de la copropriété. Pendant notre séjour début octobre, nous l’avions presque pour nous seuls. À vélo – nous en avions loué chez Bike-Green, dans le centre du village – on rejoint en 10 à 15 minutes les célèbres plages de Porto Giunco, Simius et Campulongu. On peut ainsi toujours choisir la plage la mieux abritée selon le vent dominant. Le toit-terrasse offre une vue à couper le souffle à 360 degrés. En revanche, la protection contre les chutes est insuffisante : les familles avec de jeunes enfants doivent en tenir compte. La maison est aménagée avec soin, de façon très personnelle et fonctionnelle. Le standing est assez typique de l’île et supérieur à celui des autres maisons que nous avons connues en Sardaigne. Nous voyagions en couple et n’avons utilisé que la plus grande des deux chambres. La seconde chambre, avec lits superposés, est très petite et n’a ni armoire ni rangement. Pour une famille de quatre personnes, ce serait à notre avis assez « intime ». Pour nous, c’était parfait ! La communication avec Maria Lucia s’est déroulée sans le moindre problème. Pour ce qui est du…"
+        }
+      }
     },
     {
       "name": "Linus",
@@ -109,14 +203,39 @@
       "date": "2022-07",
       "rating": 5,
       "source": "airbnb",
-      "text": "Casa molto bella, con una splendida vista sul tramonto dalla terrazza sul tetto! La casa è molto ben attrezzata per cucinare. La lavastoviglie, la lavatrice e i condizionatori nelle camere da letto sono molto utili. La \"stanza dei bambini\" è un letto a castello, mentre il letto inferiore può essere utilizzato come letto matrimoniale."
+      "text": "Casa molto bella, con una splendida vista sul tramonto dalla terrazza sul tetto! La casa è molto ben attrezzata per cucinare. La lavastoviglie, la lavatrice e i condizionatori nelle camere da letto sono molto utili. La \"stanza dei bambini\" è un letto a castello, mentre il letto inferiore può essere utilizzato come letto matrimoniale.",
+      "i18n": {
+        "en": {
+          "text": "A very beautiful house with a wonderful view of the sunset from the roof terrace! The house is very well equipped for cooking. The dishwasher, washing machine and air conditioning in the bedrooms are very handy. The \"children's room\" has a bunk bed, and the lower bed can be used as a double.",
+          "from": "Adliswil, Switzerland"
+        },
+        "de": {
+          "text": "Sehr schönes Haus mit herrlichem Blick auf den Sonnenuntergang von der Dachterrasse! Das Haus ist zum Kochen sehr gut ausgestattet. Geschirrspüler, Waschmaschine und die Klimaanlagen in den Schlafzimmern sind sehr praktisch. Im \"Kinderzimmer\" steht ein Etagenbett, das untere Bett kann als Doppelbett genutzt werden.",
+          "from": "Adliswil, Schweiz"
+        },
+        "fr": {
+          "text": "Très belle maison, avec une vue splendide sur le coucher du soleil depuis le toit-terrasse ! La maison est très bien équipée pour cuisiner. Le lave-vaisselle, le lave-linge et la climatisation dans les chambres sont très pratiques. La « chambre des enfants » a des lits superposés, et le lit du bas peut servir de lit double.",
+          "from": "Adliswil, Suisse"
+        }
+      }
     },
     {
       "name": "Famiglia Parenti",
       "date": "2022-07",
       "rating": 5,
       "source": "airbnb",
-      "text": "(originale in italiano): Grazie Maria Lucia per averci ospitato nella tua bella casa. speriamo di tornare un giorno. come ti ho detto tutto benissimo ma se vuoi fare un miglioramento ti suggerirei di cambiare il materasso matrimoniale. un caro saluto. Alberto"
+      "text": "(originale in italiano): Grazie Maria Lucia per averci ospitato nella tua bella casa. speriamo di tornare un giorno. come ti ho detto tutto benissimo ma se vuoi fare un miglioramento ti suggerirei di cambiare il materasso matrimoniale. un caro saluto. Alberto",
+      "i18n": {
+        "en": {
+          "text": "Thank you, Maria Lucia, for having us in your lovely home. We hope to come back one day. As I told you, everything was excellent, but if you would like to make one improvement, I would suggest replacing the double mattress. Warm regards, Alberto"
+        },
+        "de": {
+          "text": "Danke, Maria Lucia, dass wir in deinem schönen Haus zu Gast sein durften. Wir hoffen, eines Tages wiederzukommen. Wie ich dir schon gesagt habe, war alles bestens, aber wenn du etwas verbessern möchtest, würde ich vorschlagen, die Matratze im Doppelbett auszutauschen. Herzliche Grüße, Alberto"
+        },
+        "fr": {
+          "text": "Merci Maria Lucia de nous avoir accueillis dans ta belle maison. Nous espérons revenir un jour. Comme je te l’ai dit, tout était parfait, mais si tu veux apporter une amélioration, je te suggérerais de changer le matelas du lit double. Bien amicalement, Alberto"
+        }
+      }
     },
     {
       "name": "Liselotte",
@@ -125,21 +244,57 @@
       "rating": 5,
       "source": "airbnb",
       "text": "Questo appartamento è assolutamente al top, ha tutto il necessario, splendida posizione proprio sul mare. La spiaggia di sabbia era quasi privata, semplicemente fantastica. Ci torneremmo volentieri. Maria Lucia è stata molto disponibile e cordiale.",
-      "featured": true
+      "featured": true,
+      "i18n": {
+        "en": {
+          "text": "This apartment is absolutely top-notch: it has everything you need and a superb location right on the sea. The sandy beach was almost private, simply fantastic. We would love to come back. Maria Lucia was very helpful and friendly.",
+          "from": "Brugg, Switzerland"
+        },
+        "de": {
+          "text": "Diese Wohnung ist absolut top, es ist alles vorhanden, was man braucht, und die Lage direkt am Meer ist traumhaft. Der Sandstrand war fast privat, einfach fantastisch. Wir würden gerne wiederkommen. Maria Lucia war sehr hilfsbereit und herzlich.",
+          "from": "Brugg, Schweiz"
+        },
+        "fr": {
+          "text": "Ce logement est vraiment au top : il a tout le nécessaire et un emplacement splendide, juste au bord de la mer. La plage de sable était presque privée, tout simplement fantastique. Nous y retournerions volontiers. Maria Lucia a été très disponible et chaleureuse.",
+          "from": "Brugg, Suisse"
+        }
+      }
     },
     {
       "name": "Tasja",
       "date": "2022-05",
       "rating": 5,
       "source": "airbnb",
-      "text": "L'appartamento è situato direttamente sulla spiaggia, cosa che ci è piaciuta molto. Dalla terrazza con un piccolo giardino si può scendere direttamente dalla scogliera e si è già sulla spiaggia. Siamo stati qui le prime 2 settimane di maggio. Dal momento che non era ancora alta stagione, avevamo la spiaggia per lo più tutta per noi. Abbiamo apprezzato moltissimo questa tranquillità. L'appartamento è dotato di tutto ciò che serve. Siamo stati benissimo qui e ci torneremo volentieri."
+      "text": "L'appartamento è situato direttamente sulla spiaggia, cosa che ci è piaciuta molto. Dalla terrazza con un piccolo giardino si può scendere direttamente dalla scogliera e si è già sulla spiaggia. Siamo stati qui le prime 2 settimane di maggio. Dal momento che non era ancora alta stagione, avevamo la spiaggia per lo più tutta per noi. Abbiamo apprezzato moltissimo questa tranquillità. L'appartamento è dotato di tutto ciò che serve. Siamo stati benissimo qui e ci torneremo volentieri.",
+      "i18n": {
+        "en": {
+          "text": "The apartment is right on the beach, which we loved. From the terrace with its little garden you can climb straight down the rocks and you're already on the beach. We were here for the first 2 weeks of May. As it wasn't high season yet, we mostly had the beach to ourselves. We really appreciated the peace and quiet. The apartment has everything you need. We had a wonderful time here and would gladly come back."
+        },
+        "de": {
+          "text": "Die Wohnung liegt direkt am Strand, was uns sehr gefallen hat. Von der Terrasse mit kleinem Garten kann man direkt über die Felsen hinunterklettern und ist schon am Strand. Wir waren die ersten 2 Maiwochen hier. Da noch keine Hochsaison war, hatten wir den Strand meistens für uns allein. Diese Ruhe haben wir sehr genossen. Die Wohnung ist mit allem ausgestattet, was man braucht. Wir hatten eine wunderbare Zeit und kommen gerne wieder."
+        },
+        "fr": {
+          "text": "Le logement est situé directement sur la plage, ce qui nous a beaucoup plu. Depuis la terrasse et son petit jardin, on descend directement par les rochers et on est déjà sur la plage. Nous étions là les 2 premières semaines de mai. Comme ce n’était pas encore la haute saison, nous avions la plage presque toujours pour nous seuls. Nous avons énormément apprécié ce calme. Le logement est équipé de tout le nécessaire. Nous nous sommes sentis très bien ici et nous reviendrons avec plaisir."
+        }
+      }
     },
     {
       "name": "Geoffrey",
       "date": "2022-04",
       "rating": 5,
       "source": "airbnb",
-      "text": "Siamo stati benissimo in questa piccola casa. I dintorni e il quartiere sono magnifici, molto tranquilli e puliti, e la spiaggia alla fine del giardino è semplicemente bellissima, così come praticamente tutta la costa della regione di Villasimius. La casa dispone di tutto il necessario per una vacanza, anche se potrebbe essere arredata con mobili più nuovi. Tuttavia, ci siamo sentiti a nostro agio e la casa era molto pulita quando siamo arrivati. Il check-in e il check-out sono stati facili e, anche se non ci siamo incontrati di persona, Maria Lucia è stata molto gentile, reattiva e disponibile ad aiutare. Trascorriamo una settimana lì con un neonato e consigliamo l'alloggio a chiunque. Avrai bisogno di un'auto, le opportunità di shopping Next si trovano a circa 5 km dal cottage."
+      "text": "Siamo stati benissimo in questa piccola casa. I dintorni e il quartiere sono magnifici, molto tranquilli e puliti, e la spiaggia alla fine del giardino è semplicemente bellissima, così come praticamente tutta la costa della regione di Villasimius. La casa dispone di tutto il necessario per una vacanza, anche se potrebbe essere arredata con mobili più nuovi. Tuttavia, ci siamo sentiti a nostro agio e la casa era molto pulita quando siamo arrivati. Il check-in e il check-out sono stati facili e, anche se non ci siamo incontrati di persona, Maria Lucia è stata molto gentile, reattiva e disponibile ad aiutare. Trascorriamo una settimana lì con un neonato e consigliamo l'alloggio a chiunque. Avrai bisogno di un'auto, le opportunità di shopping Next si trovano a circa 5 km dal cottage.",
+      "i18n": {
+        "en": {
+          "text": "We had a great time in this little house. The surroundings and the neighbourhood are magnificent, very quiet and clean, and the beach at the end of the garden is simply beautiful, as is practically the whole coastline around Villasimius. The house has everything you need for a holiday, although the furniture could be newer. Even so, we felt at ease and the house was very clean when we arrived. Check-in and check-out were easy and, although we didn't meet in person, Maria Lucia was very kind, responsive and happy to help. We spent a week there with a newborn baby and would recommend the place to anyone. You will need a car: the nearest shops are about 5 km from the cottage."
+        },
+        "de": {
+          "text": "Wir hatten eine wunderbare Zeit in diesem kleinen Haus. Die Umgebung und die Nachbarschaft sind herrlich, sehr ruhig und sauber, und der Strand am Ende des Gartens ist einfach wunderschön, wie praktisch die ganze Küste rund um Villasimius. Das Haus hat alles, was man für einen Urlaub braucht, auch wenn die Möbel etwas neuer sein könnten. Trotzdem haben wir uns wohlgefühlt, und das Haus war bei unserer Ankunft sehr sauber. Check-in und Check-out waren unkompliziert, und obwohl wir uns nicht persönlich getroffen haben, war Maria Lucia sehr freundlich, schnell erreichbar und hilfsbereit. Wir haben dort eine Woche mit einem Neugeborenen verbracht und empfehlen die Unterkunft jedem. Man braucht ein Auto: Die nächsten Einkaufsmöglichkeiten sind etwa 5 km vom Häuschen entfernt."
+        },
+        "fr": {
+          "text": "Nous avons passé un excellent séjour dans cette petite maison. Les environs et le quartier sont magnifiques, très calmes et propres, et la plage au bout du jardin est tout simplement superbe, comme pratiquement toute la côte de la région de Villasimius. La maison dispose de tout le nécessaire pour des vacances, même si le mobilier pourrait être plus récent. Nous nous y sommes néanmoins sentis bien, et la maison était très propre à notre arrivée. L’arrivée et le départ ont été simples et, même si nous ne nous sommes pas rencontrés en personne, Maria Lucia a été très gentille, réactive et prête à aider. Nous y avons passé une semaine avec un nouveau-né et recommandons ce logement à tout le monde. Il vous faudra une voiture : les premiers commerces sont à environ 5 km de la maison."
+        }
+      }
     },
     {
       "name": "Tamara",
@@ -148,7 +303,21 @@
       "rating": 5,
       "source": "airbnb",
       "text": "La casa e soprattutto la cucina sono molto ben attrezzate e pratiche. La posizione è mozzafiato. La bellissima spiaggia direttamente davanti alla casa invita a fare il bagno, arrampicarsi e divertirsi. Ideale anche con bambini piccoli. Molte altre belle spiagge sono facilmente e rapidamente raggiungibili. Maria Lucia è molto cordiale e disponibile.",
-      "featured": true
+      "featured": true,
+      "i18n": {
+        "en": {
+          "text": "The house, and especially the kitchen, is very well equipped and practical. The location is breathtaking. The beautiful beach right in front of the house invites you to swim, climb and have fun. Ideal with small children, too. Many other lovely beaches are quick and easy to reach. Maria Lucia is very friendly and helpful.",
+          "from": "Klingnau, Switzerland"
+        },
+        "de": {
+          "text": "Das Haus und vor allem die Küche sind sehr gut ausgestattet und praktisch. Die Lage ist atemberaubend. Der wunderschöne Strand direkt vor dem Haus lädt zum Baden, Klettern und Spielen ein. Auch mit kleinen Kindern ideal. Viele weitere schöne Strände sind schnell und einfach erreichbar. Maria Lucia ist sehr herzlich und hilfsbereit.",
+          "from": "Klingnau, Schweiz"
+        },
+        "fr": {
+          "text": "La maison, et surtout la cuisine, est très bien équipée et pratique. L’emplacement est à couper le souffle. La magnifique plage juste devant la maison invite à la baignade, à l’escalade et à l’amusement. Idéal aussi avec de jeunes enfants. Beaucoup d’autres belles plages sont accessibles facilement et rapidement. Maria Lucia est très chaleureuse et disponible.",
+          "from": "Klingnau, Suisse"
+        }
+      }
     },
     {
       "name": "Sophie",
@@ -157,28 +326,75 @@
       "rating": 5,
       "source": "airbnb",
       "text": "Abbiamo trascorso un meraviglioso soggiorno nella casa. Il mare è alla fine del giardino e la terrazza sul tetto è perfetta per gli aperitivi al tramonto di fronte al mare. La casa è ben attrezzata per cucinare. Si può fare la doccia all'esterno tornando dalla spiaggia. Un vero piacere.",
-      "featured": true
+      "featured": true,
+      "i18n": {
+        "en": {
+          "text": "We had a wonderful stay in the house. The sea is at the end of the garden and the roof terrace is perfect for sunset drinks facing the sea. The house is well equipped for cooking. You can shower outside on your way back from the beach. A real treat.",
+          "from": "Fribourg, Switzerland"
+        },
+        "de": {
+          "text": "Wir hatten einen wunderbaren Aufenthalt in dem Haus. Das Meer liegt am Ende des Gartens, und die Dachterrasse ist perfekt für einen Aperitif bei Sonnenuntergang mit Blick aufs Meer. Das Haus ist zum Kochen gut ausgestattet. Wenn man vom Strand zurückkommt, kann man draußen duschen. Ein echter Genuss.",
+          "from": "Freiburg, Schweiz"
+        },
+        "fr": {
+          "text": "Nous avons passé un merveilleux séjour dans la maison. La mer est au bout du jardin et le toit-terrasse est parfait pour l’apéritif au coucher du soleil face à la mer. La maison est bien équipée pour cuisiner. On peut se doucher dehors en revenant de la plage. Un vrai bonheur.",
+          "from": "Fribourg, Suisse"
+        }
+      }
     },
     {
       "name": "Regina",
       "date": "2021-10",
       "rating": 5,
       "source": "airbnb",
-      "text": "Posizione meravigliosa, spiagge stupende! Ci siamo trovati benissimo."
+      "text": "Posizione meravigliosa, spiagge stupende! Ci siamo trovati benissimo.",
+      "i18n": {
+        "en": {
+          "text": "A wonderful location and stunning beaches! We had a great time."
+        },
+        "de": {
+          "text": "Wunderbare Lage, traumhafte Strände! Wir haben uns sehr wohlgefühlt."
+        },
+        "fr": {
+          "text": "Emplacement merveilleux, plages superbes ! Nous nous sommes sentis très bien."
+        }
+      }
     },
     {
       "name": "Isabella",
       "date": "2021-06",
       "rating": 4,
       "source": "airbnb",
-      "text": "Ottima posizione, direttamente sul mare, tramonto mozzafiato, molta privacy sulla spiaggia direttamente davanti alla casa."
+      "text": "Ottima posizione, direttamente sul mare, tramonto mozzafiato, molta privacy sulla spiaggia direttamente davanti alla casa.",
+      "i18n": {
+        "en": {
+          "text": "Excellent location right on the sea, breathtaking sunsets and lots of privacy on the beach directly in front of the house."
+        },
+        "de": {
+          "text": "Hervorragende Lage direkt am Meer, atemberaubende Sonnenuntergänge und viel Privatsphäre am Strand direkt vor dem Haus."
+        },
+        "fr": {
+          "text": "Excellent emplacement directement sur la mer, coucher de soleil à couper le souffle et beaucoup d’intimité sur la plage juste devant la maison."
+        }
+      }
     },
     {
       "name": "Alice",
       "date": "2021-06",
       "rating": 5,
       "source": "airbnb",
-      "text": "Questa casa è un luogo dove potersi rilassare completamente godendosi un panorama e un mare magnifici. Il mare a cui si ha accesso diretto dalla casa è pulitissimo e perfetto per chi ama fare snorkeling perché è ricco di numerose specie di pesci. Il contesto è davvero esclusivo anche se un po' isolato (è necessario spostarsi in automobile per qualsiasi esigenza): il centro di Villasimius è comunque a soli 10 minuti di macchina. Non lontano da questa casa sono raggiungibili anche altre spiagge molto belle. Maria Lucia è un'ospite disponibilissima e desiderosa di far scoprire le bellezze del luogo."
+      "text": "Questa casa è un luogo dove potersi rilassare completamente godendosi un panorama e un mare magnifici. Il mare a cui si ha accesso diretto dalla casa è pulitissimo e perfetto per chi ama fare snorkeling perché è ricco di numerose specie di pesci. Il contesto è davvero esclusivo anche se un po' isolato (è necessario spostarsi in automobile per qualsiasi esigenza): il centro di Villasimius è comunque a soli 10 minuti di macchina. Non lontano da questa casa sono raggiungibili anche altre spiagge molto belle. Maria Lucia è un'ospite disponibilissima e desiderosa di far scoprire le bellezze del luogo.",
+      "i18n": {
+        "en": {
+          "text": "This house is a place where you can relax completely while enjoying a magnificent view and sea. The sea, which you can reach directly from the house, is crystal clear and perfect for snorkelling lovers, as it is full of fish of many species. The setting is truly exclusive, if a little secluded (you need a car for everything): the centre of Villasimius is only a 10-minute drive away anyway. Other very beautiful beaches are also within easy reach. Maria Lucia is an extremely helpful host who is keen to show you the beauty of the area."
+        },
+        "de": {
+          "text": "Dieses Haus ist ein Ort, an dem man vollkommen entspannen und eine herrliche Aussicht und ein wunderbares Meer genießen kann. Das Meer, zu dem man vom Haus aus direkten Zugang hat, ist glasklar und perfekt für alle, die gerne schnorcheln, denn es gibt dort zahlreiche Fischarten. Die Umgebung ist wirklich exklusiv, wenn auch etwas abgelegen (für alles braucht man das Auto): Das Zentrum von Villasimius ist aber nur 10 Autominuten entfernt. Auch andere sehr schöne Strände sind nicht weit. Maria Lucia ist eine äußerst hilfsbereite Gastgeberin, die einem gerne die Schönheiten der Gegend zeigt."
+        },
+        "fr": {
+          "text": "Cette maison est un lieu où l’on peut se détendre complètement en profitant d’une vue et d’une mer magnifiques. La mer, à laquelle on accède directement depuis la maison, est d’une grande limpidité et parfaite pour les amateurs de snorkeling, car elle regorge de nombreuses espèces de poissons. Le cadre est vraiment exclusif, quoique un peu isolé (il faut prendre la voiture pour tout) : le centre de Villasimius n’est toutefois qu’à 10 minutes en voiture. D’autres très belles plages sont également accessibles non loin de la maison. Maria Lucia est une hôte extrêmement disponible, désireuse de faire découvrir les beautés de la région."
+        }
+      }
     },
     {
       "name": "Judith",
@@ -186,14 +402,39 @@
       "rating": 5,
       "source": "airbnb",
       "text": "Posizione eccezionale vicino al mare con una splendida terrazza sul tetto per godersi bei tramonti. C'è una doccia esterna calda con vista mare per lavare via la sabbia o fare una doccia comodamente prima di entrare in casa. La spiaggia di sabbia non è affollata perché è privata e accessibile solo ai proprietari di case in questa zona. La cucina dispone di lavastoviglie, forno a microonde e un grande frigorifero/congelatore nuovo. L'attrezzatura della cucina potrebbe non essere la più moderna, ma ha tutto il necessario per preparare un buon pasto, come un frullatore, diverse padelle e pentole e un fornello a gas. La terrazza coperta ha un grande tavolo per goderti un'atmosfera fantastica con vista sul mare durante tutti i pasti. Abbiamo soggiornato a casa Marias con 2 bambini piccoli ed è stata un'esperienza meravigliosa per tutti noi. Maria e Marco sono molto gentili e disponibili e ci hanno dato ottimi consigli per la spesa e la zona. Sono stati molto veloci a rispondere ogni volta che li abbiamo contattati. Siamo molto grati per la loro ospitalità…",
-      "reply": "È stato un piacere e un privilegio avere ospiti come Judith e Benjamin con i bellissimi bambini."
+      "reply": "È stato un piacere e un privilegio avere ospiti come Judith e Benjamin con i bellissimi bambini.",
+      "i18n": {
+        "en": {
+          "text": "An exceptional location close to the sea with a beautiful roof terrace for enjoying lovely sunsets. There is a hot outdoor shower with a sea view to rinse off the sand or shower in comfort before going inside. The sandy beach is never crowded because it is private and only accessible to home owners in this area. The kitchen has a dishwasher, a microwave and a large new fridge-freezer. The kitchen equipment may not be the most modern, but it has everything you need to cook a good meal, such as a blender, several pans and pots and a gas hob. The covered terrace has a large table so you can enjoy a fantastic atmosphere with a sea view at every meal. We stayed at Maria's house with 2 small children and it was a wonderful experience for all of us. Maria and Marco are very kind and helpful and gave us great tips for shopping and the area. They were very quick to reply every time we contacted them. We are very grateful for their hospitality…",
+          "reply": "It was a pleasure and a privilege to have guests like Judith and Benjamin with their beautiful children."
+        },
+        "de": {
+          "text": "Außergewöhnliche Lage nah am Meer mit einer herrlichen Dachterrasse, um schöne Sonnenuntergänge zu genießen. Es gibt eine warme Außendusche mit Meerblick, um den Sand abzuspülen oder bequem zu duschen, bevor man ins Haus geht. Der Sandstrand ist nicht überlaufen, weil er privat ist und nur den Hausbesitzern in dieser Gegend offensteht. Die Küche hat Geschirrspüler, Mikrowelle und einen großen neuen Kühl-Gefrierschrank. Die Küchenausstattung ist vielleicht nicht die modernste, aber es ist alles da, um ein gutes Essen zuzubereiten, etwa ein Mixer, mehrere Pfannen und Töpfe und ein Gasherd. Auf der überdachten Terrasse steht ein großer Tisch, an dem man bei jeder Mahlzeit eine fantastische Atmosphäre mit Meerblick genießt. Wir waren mit 2 kleinen Kindern in Marias Haus, und es war für uns alle ein wunderbares Erlebnis. Maria und Marco sind sehr freundlich und hilfsbereit und haben uns tolle Tipps zum Einkaufen und zur Umgebung gegeben. Sie haben jedes Mal sehr schnell geantwortet, wenn wir uns gemeldet haben. Wir sind ihnen für ihre Gastfreundschaft sehr dankbar…",
+          "reply": "Es war uns eine Freude und eine Ehre, Gäste wie Judith und Benjamin mit ihren wunderbaren Kindern zu haben."
+        },
+        "fr": {
+          "text": "Emplacement exceptionnel près de la mer, avec un superbe toit-terrasse pour profiter de beaux couchers de soleil. Il y a une douche extérieure chaude avec vue sur la mer pour se débarrasser du sable ou se doucher confortablement avant de rentrer. La plage de sable n’est pas bondée car elle est privée et accessible uniquement aux propriétaires du secteur. La cuisine dispose d’un lave-vaisselle, d’un micro-ondes et d’un grand réfrigérateur-congélateur neuf. L’équipement de la cuisine n’est peut-être pas le plus moderne, mais il y a tout le nécessaire pour préparer un bon repas : un mixeur, plusieurs poêles et casseroles et une cuisinière à gaz. La terrasse couverte a une grande table pour profiter d’une ambiance fantastique avec vue sur la mer à chaque repas. Nous avons séjourné chez Maria avec 2 jeunes enfants et ce fut une expérience merveilleuse pour nous tous. Maria et Marco sont très gentils et disponibles et nous ont donné d’excellents conseils pour les courses et la région. Ils ont toujours répondu très rapidement chaque fois que nous les avons contactés. Nous leur sommes très reconnaissants pour leur hospitalité…",
+          "reply": "Ce fut un plaisir et un privilège d’accueillir des voyageurs comme Judith et Benjamin, avec leurs magnifiques enfants."
+        }
+      }
     },
     {
       "name": "Alberto",
       "date": "2020-08",
       "rating": 5,
       "source": "airbnb",
-      "text": "Ottimo soggiorno grazie Maria Lucia"
+      "text": "Ottimo soggiorno grazie Maria Lucia",
+      "i18n": {
+        "en": {
+          "text": "A great stay, thank you Maria Lucia"
+        },
+        "de": {
+          "text": "Ein toller Aufenthalt, danke Maria Lucia"
+        },
+        "fr": {
+          "text": "Excellent séjour, merci Maria Lucia"
+        }
+      }
     },
     {
       "name": "Rebecca",
@@ -202,14 +443,39 @@
       "rating": 5,
       "source": "airbnb",
       "text": "La posizione ha superato le aspettative! Essere a pochi passi dalla spiaggia privata è stato fantastico!! Torneremo sicuramente presto a visitare di nuovo la tua casa. Grazie per l'ottimo soggiorno 💖",
-      "featured": true
+      "featured": true,
+      "i18n": {
+        "en": {
+          "text": "The location exceeded our expectations! Being just a few steps from the private beach was fantastic!! We will definitely be back soon to visit your home again. Thank you for a wonderful stay 💖",
+          "from": "San Diego, California"
+        },
+        "de": {
+          "text": "Die Lage hat unsere Erwartungen übertroffen! Nur wenige Schritte vom Privatstrand entfernt zu sein, war fantastisch!! Wir kommen sicher bald wieder in dein Haus. Danke für den tollen Aufenthalt 💖",
+          "from": "San Diego, Kalifornien"
+        },
+        "fr": {
+          "text": "L’emplacement a dépassé nos attentes ! Être à quelques pas de la plage privée, c’était fantastique !! Nous reviendrons très bientôt dans ta maison, c’est sûr. Merci pour ce super séjour 💖",
+          "from": "San Diego, Californie"
+        }
+      }
     },
     {
       "name": "Frederic",
       "date": "2019-10",
       "rating": 5,
       "source": "airbnb",
-      "text": "Se siete in cerca di un lusso sfarzoso negli interni, questa non è la filosofia di questa casa, ma se cercate un rifugio tranquillo e confortevole, dal fascino semplice e accogliente, è semplicemente un vero paradiso… Un posto magico in riva al mare, con il suo piccolo giardino fiorito che scende su una splendida piccola insenatura, accanto a una tranquilla spiaggia di sabbia… Cosa chiedere di meglio? Una terrazza su ogni lato della piccola casa, una delle quali sul mare, e un'altra ancora sul tetto, ideale per gli aperitivi al tramonto… Eravamo nella quarta dimensione, soprattutto in questa stagione. L'accoglienza da parte di Maria Lucia e Marco è molto premurosa e discreta, e sono sempre disponibili a darvi informazioni o ad aiutarvi. No, davvero, di più sarebbe quasi troppo. Grazie mille a loro per averci fatto condividere questo luogo da sogno e a questa piccola stella che ce l'ha fatto scoprire… Ci torneremo il prima possibile…"
+      "text": "Se siete in cerca di un lusso sfarzoso negli interni, questa non è la filosofia di questa casa, ma se cercate un rifugio tranquillo e confortevole, dal fascino semplice e accogliente, è semplicemente un vero paradiso… Un posto magico in riva al mare, con il suo piccolo giardino fiorito che scende su una splendida piccola insenatura, accanto a una tranquilla spiaggia di sabbia… Cosa chiedere di meglio? Una terrazza su ogni lato della piccola casa, una delle quali sul mare, e un'altra ancora sul tetto, ideale per gli aperitivi al tramonto… Eravamo nella quarta dimensione, soprattutto in questa stagione. L'accoglienza da parte di Maria Lucia e Marco è molto premurosa e discreta, e sono sempre disponibili a darvi informazioni o ad aiutarvi. No, davvero, di più sarebbe quasi troppo. Grazie mille a loro per averci fatto condividere questo luogo da sogno e a questa piccola stella che ce l'ha fatto scoprire… Ci torneremo il prima possibile…",
+      "i18n": {
+        "en": {
+          "text": "If you are looking for lavish luxury in the interiors, that is not the philosophy of this house, but if you are looking for a peaceful, comfortable retreat with simple, welcoming charm, it is simply a true paradise… A magical spot by the sea, with its little flower garden running down to a beautiful small cove, next to a quiet sandy beach… What more could you ask for? A terrace on every side of the little house, one of them facing the sea, and yet another on the roof, ideal for drinks at sunset… We were in another dimension, especially at this time of year. Maria Lucia and Marco's welcome is very thoughtful and discreet, and they are always available to give you information or help. Honestly, any more would almost be too much. A big thank you to them for sharing this dream place with us, and to the little star who led us to discover it… We will come back as soon as we can…"
+        },
+        "de": {
+          "text": "Wer im Inneren üppigen Luxus sucht, für den ist dieses Haus nicht gedacht. Wer aber einen ruhigen, gemütlichen Rückzugsort mit schlichtem, herzlichem Charme sucht, findet hier ein wahres Paradies… Ein magischer Ort am Meer, mit seinem kleinen Blumengarten, der zu einer wunderschönen kleinen Bucht neben einem ruhigen Sandstrand hinabführt… Was will man mehr? Eine Terrasse auf jeder Seite des kleinen Hauses, eine davon zum Meer hin, und noch eine auf dem Dach, ideal für den Aperitif bei Sonnenuntergang… Wir waren wie in einer anderen Welt, besonders zu dieser Jahreszeit. Maria Lucia und Marco empfangen einen sehr aufmerksam und diskret und sind immer da, um Auskunft zu geben oder zu helfen. Wirklich, mehr wäre fast zu viel. Vielen Dank an sie, dass sie diesen Traumort mit uns geteilt haben, und an den kleinen Stern, der uns hierhergeführt hat… Wir kommen so bald wie möglich wieder…"
+        },
+        "fr": {
+          "text": "Si vous cherchez un luxe fastueux à l’intérieur, ce n’est pas la philosophie de cette maison, mais si vous cherchez un refuge paisible et confortable, au charme simple et chaleureux, c’est tout simplement un vrai paradis… Un endroit magique au bord de la mer, avec son petit jardin fleuri qui descend vers une superbe petite crique, à côté d’une tranquille plage de sable… Que demander de plus ? Une terrasse de chaque côté de la petite maison, dont une face à la mer, et encore une autre sur le toit, idéale pour l’apéritif au coucher du soleil… Nous étions dans la quatrième dimension, surtout en cette saison. L’accueil de Maria Lucia et Marco est très attentionné et discret, et ils sont toujours disponibles pour vous renseigner ou vous aider. Non, vraiment, plus serait presque trop. Un grand merci à eux de nous avoir fait partager ce lieu de rêve, et à cette petite étoile qui nous l’a fait découvrir… Nous y reviendrons dès que possible…"
+        }
+      }
     },
     {
       "name": "Ildikó",
@@ -217,7 +483,18 @@
       "rating": 5,
       "source": "google",
       "text": "Ho trascorso un soggiorno meraviglioso qui con la mia famiglia, consiglierei questo posto a tutti. Anche l'host è stata molto gentile con noi, non abbiamo avuto alcun problema, tutto è filato liscio. La casa è vicino al mare, è pulita, spaziosa e ben attrezzata, perfetta per una famiglia. Torneremo sicuramente, perché per me visitare questo posto incredibile è una fuga dallo stress infinito della vita quotidiana.",
-      "translatedFrom": "inglese"
+      "translatedFrom": "inglese",
+      "i18n": {
+        "en": {
+          "text": "I had a wonderful stay here with my family and would recommend this place to everyone. The host was also very kind to us, we didn't have any problems and everything went smoothly. The house is close to the sea, clean, spacious and well equipped, perfect for a family. We will definitely be back, because for me visiting this incredible place is an escape from the endless stress of everyday life."
+        },
+        "de": {
+          "text": "Ich hatte hier mit meiner Familie einen wunderbaren Aufenthalt und würde diesen Ort jedem empfehlen. Auch die Gastgeberin war sehr freundlich zu uns, wir hatten keinerlei Probleme und alles lief reibungslos. Das Haus liegt nah am Meer, ist sauber, geräumig und gut ausgestattet, perfekt für eine Familie. Wir kommen ganz sicher wieder, denn dieser unglaubliche Ort ist für mich eine Flucht aus dem endlosen Stress des Alltags."
+        },
+        "fr": {
+          "text": "J’ai passé un séjour merveilleux ici avec ma famille et je recommanderais cet endroit à tout le monde. L’hôte a aussi été très gentille avec nous, nous n’avons eu aucun problème, tout s’est parfaitement déroulé. La maison est proche de la mer, propre, spacieuse et bien équipée, parfaite pour une famille. Nous reviendrons sans aucun doute, car pour moi, venir dans cet endroit incroyable est une échappée loin du stress sans fin du quotidien."
+        }
+      }
     },
     {
       "name": "Galia",
@@ -225,7 +502,18 @@
       "rating": 5,
       "source": "google",
       "text": "Non si può descrivere questo posto a parole… E se si potessero dare 10 stelle, è quello che daremmo! La comunicazione con Maria Lucia è stata ottima fin dall'inizio, ci ha accolti con un grande sorriso ed era lì per qualsiasi cosa ci servisse. Una casa semplice, con un'atmosfera serena e rilassata, interamente affacciata sul mare, con un'ottima doccia esterna, attrezzata con tutto il necessario (e di più! compreso un kayak, attrezzatura da mare, giochi). Ci sono buoni condizionatori nelle camere, una cucina attrezzata, una cucina esterna. E il pezzo forte: si trova su uno dei tratti di spiaggia più belli che vedrete, una baia tranquilla e privata, bellissima e incredibile! Il tetto si affaccia su tutto il mare e non c'è niente di più bello che sedersi lì al tramonto con un bicchiere di vino (ci aspettava anche una bottiglia di vino in frigo quando siamo arrivati!). Siamo rimasti una settimana e semplicemente non volevamo andarcene, speriamo di tornarci il prima possibile!",
-      "translatedFrom": "ebraico"
+      "translatedFrom": "ebraico",
+      "i18n": {
+        "en": {
+          "text": "Words cannot describe this place… And if we could give 10 stars, that's what we would give! Communication with Maria Lucia was excellent from the start; she welcomed us with a big smile and was there for anything we needed. A simple house with a calm, relaxed atmosphere, looking straight out over the sea, with a great outdoor shower and equipped with everything you need (and more! including a kayak, beach gear and games). There are good air conditioners in the bedrooms, a well-equipped kitchen and an outdoor kitchen. And the highlight: it sits on one of the most beautiful stretches of beach you will ever see, a quiet, private bay, beautiful and incredible! The roof looks out over the whole sea and there is nothing better than sitting up there at sunset with a glass of wine (there was even a bottle of wine waiting for us in the fridge when we arrived!). We stayed a week and simply didn't want to leave; we hope to come back as soon as possible!"
+        },
+        "de": {
+          "text": "Diesen Ort kann man nicht in Worte fassen… Und wenn man 10 Sterne vergeben könnte, würden wir genau das tun! Die Kommunikation mit Maria Lucia war von Anfang an hervorragend, sie hat uns mit einem breiten Lächeln empfangen und war für alles da, was wir brauchten. Ein schlichtes Haus mit einer ruhigen, entspannten Atmosphäre, ganz zum Meer hin ausgerichtet, mit einer tollen Außendusche und ausgestattet mit allem Nötigen (und mehr! darunter ein Kajak, Strandausrüstung und Spiele). Es gibt gute Klimaanlagen in den Zimmern, eine ausgestattete Küche und eine Außenküche. Und das Highlight: Es liegt an einem der schönsten Strandabschnitte, die man je sehen wird, einer ruhigen, privaten Bucht, wunderschön und unglaublich! Vom Dach überblickt man das ganze Meer, und es gibt nichts Schöneres, als dort bei Sonnenuntergang mit einem Glas Wein zu sitzen (bei unserer Ankunft wartete sogar eine Flasche Wein im Kühlschrank auf uns!). Wir sind eine Woche geblieben und wollten einfach nicht abreisen. Wir hoffen, so bald wie möglich wiederzukommen!"
+        },
+        "fr": {
+          "text": "Impossible de décrire cet endroit avec des mots… Et si l’on pouvait donner 10 étoiles, c’est ce que nous donnerions ! La communication avec Maria Lucia a été excellente dès le début, elle nous a accueillis avec un grand sourire et était là pour tout ce dont nous avions besoin. Une maison simple, à l’atmosphère sereine et détendue, entièrement tournée vers la mer, avec une excellente douche extérieure, équipée de tout le nécessaire (et plus encore ! dont un kayak, du matériel de plage et des jeux). Il y a de bons climatiseurs dans les chambres, une cuisine équipée et une cuisine extérieure. Et le clou du spectacle : elle se trouve sur l’une des plus belles portions de plage que vous verrez jamais, une baie tranquille et privée, magnifique et incroyable ! Le toit donne sur toute la mer et il n’y a rien de plus beau que de s’y asseoir au coucher du soleil avec un verre de vin (une bouteille de vin nous attendait même au frigo à notre arrivée !). Nous sommes restés une semaine et nous n’avions tout simplement pas envie de partir, nous espérons revenir le plus vite possible !"
+        }
+      }
     }
   ]
 }

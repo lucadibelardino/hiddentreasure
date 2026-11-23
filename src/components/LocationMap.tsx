@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { MAPS_URL, VILLA_COORDS } from '../data/location';
+import { useT } from '../i18n';
 import styles from './LocationMap.module.css';
 
 /**
@@ -10,6 +11,9 @@ import styles from './LocationMap.module.css';
  */
 const LocationMap: React.FC = () => {
     const mapRef = useRef<HTMLDivElement>(null);
+    const dict = useT();
+    const t = dict.map;
+    const { attribution, openInMaps } = t;
 
     useEffect(() => {
         const el = mapRef.current;
@@ -36,7 +40,7 @@ const LocationMap: React.FC = () => {
             // Vista satellitare Esri World Imagery: nessuna chiave API, basta l'attribuzione
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 maxZoom: 18,
-                attribution: 'Immagini &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a>, Maxar, Earthstar Geographics'
+                attribution: `${attribution} &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a>, Maxar, Earthstar Geographics`
             }).addTo(map);
 
             const icon = L.divIcon({
@@ -45,7 +49,7 @@ const LocationMap: React.FC = () => {
                 iconSize: [44, 44],
                 iconAnchor: [22, 22]
             });
-            L.marker(center, { icon, title: 'Apri in Google Maps', alt: 'Hidden Treasure' })
+            L.marker(center, { icon, title: openInMaps, alt: 'Hidden Treasure' })
                 .addTo(map)
                 .on('click', () => window.open(MAPS_URL, '_blank', 'noopener'));
         };
@@ -73,19 +77,19 @@ const LocationMap: React.FC = () => {
             io.disconnect();
             map?.remove();
         };
-    }, []);
+    }, [attribution, openInMaps]);
 
     return (
         <section id="dove-siamo" className={styles.section} aria-labelledby="dove-siamo-title">
             <div className="container">
                 <header className={styles.head}>
-                    <p className="eyebrow">Villasimius · Sardegna</p>
+                    <p className="eyebrow">{dict.common.place}</p>
                     <h2 id="dove-siamo-title" className={styles.title}>
-                        Dove <em>sarete</em>
+                        {t.title} <em>{t.titleAccent}</em>
                     </h2>
                 </header>
                 <div className={styles.frame}>
-                    <div ref={mapRef} className={styles.map} role="region" aria-label="Mappa con la posizione della villa a Villasimius" />
+                    <div ref={mapRef} className={styles.map} role="region" aria-label={t.aria} />
                 </div>
             </div>
         </section>

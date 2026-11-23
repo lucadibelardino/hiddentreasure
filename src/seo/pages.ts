@@ -1,53 +1,53 @@
 /**
- * Titolo e descrizione di ogni pagina. Usati sia dal prerender (HTML statico
- * letto da Google e dalle anteprime social) sia dal browser al cambio pagina.
+ * Titolo, descrizione e indirizzo di ogni pagina in ogni lingua. Usati sia dal
+ * prerender (HTML statico letto da Google e dalle anteprime social) sia dal
+ * browser al cambio pagina. I testi stanno in src/i18n/strings.ts (chiave "meta").
  */
+import { LANGS, PAGE_KEYS, ROUTES, DEFAULT_LANG, langFromPath, pageFromPath, type Lang, type PageKey } from '../i18n/langs';
+import { STRINGS } from '../i18n/strings';
+
 export const SITE_URL = 'https://hiddentreasurevillasimius.com';
 
 export interface PageMeta {
+    lang: Lang;
+    /** null = pagina 404 */
+    page: PageKey | null;
     path: string;
     title: string;
     description: string;
 }
 
-export const PAGES: PageMeta[] = [
-    {
-        path: '/',
-        title: 'Hidden Treasure | Villa sul Mare a Villasimius, Sardegna',
-        description:
-            'Villa in affitto a Villasimius con il giardino che finisce sulla spiaggia. Terrazza con vista a 270°, spiaggia semiprivata, 4-6 posti letto. Prenota diretto e risparmia.',
-    },
-    {
-        path: '/gallery',
-        title: 'Foto della villa | Hidden Treasure Villasimius',
-        description:
-            'Le fotografie della villa Hidden Treasure a Villasimius: terrazza panoramica, giardino sulla spiaggia, interni, camere e il mare del sud Sardegna.',
-    },
-    {
-        path: '/recensioni',
-        title: 'Recensioni degli ospiti | Hidden Treasure Villasimius',
-        description:
-            'Cosa dicono gli ospiti della villa Hidden Treasure a Villasimius: 4,91 su Airbnb e 5,0 su Google. Leggi le recensioni vere di chi ci ha soggiornato.',
-    },
-    {
-        path: '/contatti',
-        title: 'Contatti e prenotazioni | Hidden Treasure Villasimius',
-        description:
-            'Prenota direttamente la villa Hidden Treasure a Villasimius: scrivici su WhatsApp, chiamaci o mandaci una email. Ti rispondiamo noi, senza intermediari.',
-    },
-];
+const metaOf = (lang: Lang, page: PageKey): PageMeta => ({
+    lang,
+    page,
+    path: ROUTES[lang][page],
+    ...STRINGS[lang].meta[page],
+});
 
-export const NOT_FOUND: PageMeta = {
+/** Tutte le pagine indicizzabili: ogni pagina in ogni lingua. */
+export const PAGES: PageMeta[] = LANGS.flatMap((lang) => PAGE_KEYS.map((page) => metaOf(lang, page)));
+
+export const notFoundMeta = (lang: Lang): PageMeta => ({
+    lang,
+    page: null,
     path: '/404',
-    title: 'Pagina non trovata | Hidden Treasure Villasimius',
-    description: 'Questa pagina non esiste. Torna alla home della villa Hidden Treasure a Villasimius.',
-};
+    ...STRINGS[lang].meta.notFound,
+});
+
+export const NOT_FOUND = notFoundMeta(DEFAULT_LANG);
 
 export function metaFor(pathname: string): PageMeta {
-    const clean = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
-    return PAGES.find((p) => p.path === clean) ?? NOT_FOUND;
+    const lang = langFromPath(pathname);
+    const page = pageFromPath(pathname);
+    return page ? metaOf(lang, page) : notFoundMeta(lang);
 }
 
-export function canonicalUrl(path: string): string {
-    return path === '/' ? `${SITE_URL}/` : `${SITE_URL}${path}`;
+export const canonicalUrl = (path: string) => `${SITE_URL}${path}`;
+
+/** Le versioni linguistiche di una pagina, per i link hreflang (piu' x-default = italiano). */
+export function alternates(page: PageKey): { hreflang: string; href: string }[] {
+    return [
+        ...LANGS.map((lang) => ({ hreflang: lang, href: canonicalUrl(ROUTES[lang][page]) })),
+        { hreflang: 'x-default', href: canonicalUrl(ROUTES[DEFAULT_LANG][page]) },
+    ];
 }

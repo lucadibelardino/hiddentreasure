@@ -2,22 +2,11 @@ import React from 'react';
 import useReveal from '../hooks/useReveal';
 import styles from './ContactPage.module.css';
 import { MAPS_URL } from '../data/location';
-
-/* Il messaggio arriva gia' scritto: chi contatta fa meno fatica
-   e noi riceviamo subito periodo e numero di persone. */
-const PREFILLED = encodeURIComponent(
-    'Salve, vorrei informazioni su Hidden Treasure per il periodo ____, siamo in ____ persone.'
-);
+import { useT } from '../i18n';
 
 const contacts = [
-    { label: 'Numero 1', display: '+39 351 808 5256', raw: '393518085256' },
-    { label: 'Numero 2', display: '+39 347 713 6981', raw: '393477136981' }
-];
-
-const facts = [
-    { value: '7 notti', label: 'Soggiorno minimo in alta stagione' },
-    { value: 'IT / EN', label: 'Si parla italiano e inglese' },
-    { value: 'Diretta', label: 'Nessuna commissione di piattaforma' }
+    { display: '+39 351 808 5256', raw: '393518085256' },
+    { display: '+39 347 713 6981', raw: '393477136981' }
 ];
 
 const WhatsAppIcon = () => (
@@ -34,18 +23,21 @@ const Arrow = () => (
 
 const ContactPage: React.FC = () => {
     const ref = useReveal<HTMLElement>();
+    const dict = useT();
+    const t = dict.contact;
+    const { facts } = t;
+    /* Il messaggio arriva gia' scritto, nella lingua del visitatore: chi contatta
+       fa meno fatica e noi riceviamo subito periodo e numero di persone. */
+    const PREFILLED = encodeURIComponent(t.prefilled);
 
     return (
         <main ref={ref} className={styles.page}>
             <div className={`container ${styles.container}`}>
 
                 <header className={styles.header}>
-                    <p className="eyebrow">Contatti</p>
-                    <h1 className={styles.title}>Rispondiamo <em>noi</em>, non un portale</h1>
-                    <p className={styles.subtitle}>
-                        Dicci il periodo e quante persone siete: ti diciamo se la villa è libera
-                        e quanto costa il soggiorno, senza commissioni di intermediazione.
-                    </p>
+                    <p className="eyebrow">{t.eyebrow}</p>
+                    <h1 className={styles.title}>{t.title}<em>{t.titleAccent}</em>{t.titleEnd}</h1>
+                    <p className={styles.subtitle}>{t.subtitle}</p>
                 </header>
 
                 {/* Canale principale */}
@@ -53,8 +45,8 @@ const ContactPage: React.FC = () => {
                     <div className={styles.primaryHead}>
                         <span className={styles.primaryIcon}><WhatsAppIcon /></span>
                         <div>
-                            <p className={styles.primaryEyebrow}>Il modo più rapido</p>
-                            <h2 id="wa-title" className={styles.primaryTitle}>Scrivici su WhatsApp</h2>
+                            <p className={styles.primaryEyebrow}>{t.waEyebrow}</p>
+                            <h2 id="wa-title" className={styles.primaryTitle}>{t.waTitle}</h2>
                         </div>
                     </div>
 
@@ -74,12 +66,12 @@ const ContactPage: React.FC = () => {
                     </div>
 
                     <p className={styles.primaryFoot}>
-                        Preferisci parlare?{' '}
+                        {t.preferTalk}{' '}
                         {contacts.map((c, i) => (
                             <React.Fragment key={c.raw}>
                                 {i > 0 && <span aria-hidden="true"> · </span>}
                                 <a href={`tel:+${c.raw}`} className={styles.telLink}>
-                                    Chiama {c.display}
+                                    {t.call} {c.display}
                                 </a>
                             </React.Fragment>
                         ))}
@@ -89,9 +81,9 @@ const ContactPage: React.FC = () => {
                 {/* Canali secondari */}
                 <div className={styles.secondary}>
                     <a href="mailto:gestionehtv@gmail.com" className={`${styles.card} reveal`}>
-                        <span className={styles.cardKind}>Email</span>
+                        <span className={styles.cardKind}>{t.email}</span>
                         <span className={styles.cardValue}>gestionehtv@gmail.com</span>
-                        <span className={styles.cardAction}>Scrivi una mail <Arrow /></span>
+                        <span className={styles.cardAction}>{t.writeEmail} <Arrow /></span>
                     </a>
 
                     <a
@@ -102,13 +94,13 @@ const ContactPage: React.FC = () => {
                         style={{ '--reveal-delay': '80ms' } as React.CSSProperties}
                     >
                         <span className={styles.cardKind}>Airbnb</span>
-                        <span className={styles.cardValue}>Recensioni e annuncio</span>
-                        <span className={styles.cardAction}>Apri su Airbnb <Arrow /></span>
+                        <span className={styles.cardValue}>{t.airbnbValue}</span>
+                        <span className={styles.cardAction}>{t.openAirbnb} <Arrow /></span>
                     </a>
                 </div>
 
                 {/* Informazioni pratiche */}
-                <section className={`${styles.facts} reveal`} aria-label="Informazioni pratiche">
+                <section className={`${styles.facts} reveal`} aria-label={t.factsAria}>
                     {facts.map((f) => (
                         <div key={f.value} className={styles.fact}>
                             <p className={styles.factValue}>{f.value}</p>
@@ -118,9 +110,9 @@ const ContactPage: React.FC = () => {
                 </section>
 
                 <p className={styles.where}>
-                    Hidden Treasure · Villasimius, Sardegna ·{' '}
+                    Hidden Treasure · {dict.footer.place.replace(/\.$/, '')} ·{' '}
                     <a className={styles.mapLink} href={MAPS_URL} target="_blank" rel="noopener noreferrer">
-                        Vedi sulla mappa
+                        {t.seeMap}
                     </a>
                 </p>
             </div>

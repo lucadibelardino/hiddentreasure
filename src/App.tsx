@@ -10,6 +10,7 @@ import ContactPage from './components/ContactPage';
 import ReviewsPage from './components/ReviewsPage';
 import Footer from './components/Footer';
 import PageHead from './seo/PageHead';
+import { LANGS, DEFAULT_LANG, ROUTES, useLang, useT, type PageKey } from './i18n';
 
 /** Ogni cambio pagina riparte dall'alto, tranne quando si punta a una sezione. */
 const ScrollToTop: React.FC = () => {
@@ -29,37 +30,56 @@ const HomePage: React.FC = () => (
     </>
 );
 
-const NotFound: React.FC = () => (
-    <main className="notFound">
-        <div className="container">
-            <p className="eyebrow">Errore 404</p>
-            <h1>Questa pagina non esiste</h1>
-            <p>Il link potrebbe essere vecchio. Torna alla home o guarda le fotografie della villa.</p>
-            <div className="notFoundActions">
-                <Link to="/">Torna alla home</Link>
-                <Link to="/gallery">Vedi la galleria</Link>
+const NotFound: React.FC = () => {
+    const lang = useLang();
+    const t = useT().notFound;
+    return (
+        <main className="notFound">
+            <div className="container">
+                <p className="eyebrow">{t.eyebrow}</p>
+                <h1>{t.title}</h1>
+                <p>{t.text}</p>
+                <div className="notFoundActions">
+                    <Link to={ROUTES[lang].home}>{t.home}</Link>
+                    <Link to={ROUTES[lang].gallery}>{t.gallery}</Link>
+                </div>
             </div>
-        </div>
-    </main>
-);
+        </main>
+    );
+};
 
-const App: React.FC = () => (
-    <>
-        <a className="skipLink" href="#main">Vai al contenuto</a>
-        <PageHead />
-        <Header />
-        <ScrollToTop />
-        <div id="main">
-            <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/gallery" element={<GalleryPage />} />
-                <Route path="/recensioni" element={<ReviewsPage />} />
-                <Route path="/contatti" element={<ContactPage />} />
-                <Route path="*" element={<NotFound />} />
-            </Routes>
-        </div>
-        <Footer />
-    </>
-);
+const PAGE_ELEMENTS: Record<PageKey, React.ReactElement> = {
+    home: <HomePage />,
+    gallery: <GalleryPage />,
+    reviews: <ReviewsPage />,
+    contact: <ContactPage />,
+};
+
+/* Ogni pagina esiste in ogni lingua: /gallery, /en/gallery, /de/galerie, /fr/galerie... */
+const routes = LANGS.flatMap((lang) => [
+    ...(Object.keys(PAGE_ELEMENTS) as PageKey[]).map((page) => (
+        <Route key={`${lang}-${page}`} path={ROUTES[lang][page]} element={PAGE_ELEMENTS[page]} />
+    )),
+    ...(lang === DEFAULT_LANG ? [] : [<Route key={`${lang}-404`} path={`/${lang}/*`} element={<NotFound />} />]),
+]);
+
+const App: React.FC = () => {
+    const t = useT();
+    return (
+        <>
+            <a className="skipLink" href="#main">{t.common.skipLink}</a>
+            <PageHead />
+            <Header />
+            <ScrollToTop />
+            <div id="main">
+                <Routes>
+                    {routes}
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+            </div>
+            <Footer />
+        </>
+    );
+};
 
 export default App;

@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
+import { langFromPath } from './i18n/langs'
 import './styles/global.css'
 
 // I vecchi indirizzi con il cancelletto (/#/gallery) diventano indirizzi puliti (/gallery).
@@ -22,7 +23,10 @@ const app = (
 )
 
 // Le pagine sono pre-renderizzate in fase di build: React riprende l'HTML esistente.
-if (container.hasChildNodes() && !redirected) {
+// Se la lingua dell'HTML non e' quella dell'indirizzo (il 404.html unico, in italiano,
+// servito sotto /en/...), la pagina si ridisegna da capo nella lingua giusta.
+const sameLang = document.documentElement.lang === langFromPath(window.location.pathname)
+if (container.hasChildNodes() && !redirected && sameLang) {
   ReactDOM.hydrateRoot(container, app)
 } else {
   container.textContent = ''
