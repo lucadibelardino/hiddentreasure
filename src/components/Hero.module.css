@@ -32,7 +32,14 @@
 
 .slide.active {
     opacity: 1;
-    /* Ken Burns lentissimo: il mare non sta mai fermo */
+    z-index: 1;
+}
+
+/* Ken Burns lentissimo: il mare non sta mai fermo.
+   La stessa animazione resta applicata anche alla foto che esce (.leaving):
+   cosi' continua a zoomare mentre sfuma invece di tornare di colpo a scale(1.06). */
+.slide.active,
+.slide.leaving {
     animation: drift 18s var(--ease-out) forwards;
 }
 
@@ -279,6 +286,7 @@
 @media (prefers-reduced-motion: reduce) {
 
     .slide.active,
+    .slide.leaving,
     .indicatorActive .indicatorFill,
     .scrollLine {
         animation: none;
