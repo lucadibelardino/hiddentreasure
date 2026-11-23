@@ -7,6 +7,7 @@ import GalleryPage from './components/GalleryPage';
 import ContactPage from './components/ContactPage';
 import ReviewsPage from './components/ReviewsPage';
 import Footer from './components/Footer';
+import PageHead from './seo/PageHead';
 
 /** Ogni cambio pagina riparte dall'alto, tranne quando si punta a una sezione. */
 const ScrollToTop: React.FC = () => {
@@ -41,6 +42,7 @@ const NotFound: React.FC = () => (
 const App: React.FC = () => (
     <>
         <a className="skipLink" href="#main">Vai al contenuto</a>
+        <PageHead />
         <Header />
         <ScrollToTop />
         <div id="main">
