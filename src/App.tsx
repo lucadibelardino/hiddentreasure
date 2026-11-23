@@ -65,13 +65,16 @@ const routes = LANGS.flatMap((lang) => [
 
 const App: React.FC = () => {
     const t = useT();
+    const lang = useLang();
     return (
         <>
             <a className="skipLink" href="#main">{t.common.skipLink}</a>
             <PageHead />
             <Header />
             <ScrollToTop />
-            <div id="main">
+            {/* key={lang}: cambiando lingua le pagine ripartono da zero, cosi' le animazioni
+                di comparsa (useReveal) agganciano i nuovi elementi */}
+            <div id="main" key={lang}>
                 <Routes>
                     {routes}
                     <Route path="*" element={<NotFound />} />

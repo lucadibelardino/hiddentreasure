@@ -24,33 +24,78 @@ const avatarColor = (name: string) =>
 
 const airbnb = sources.airbnb;
 
-/* Ramo d'alloro: coppie di foglie lungo uno stelo curvo, dal basso verso l'alto.
-   Il lato destro e' lo specchio del sinistro. */
-const LEAF_PAIRS = [0, 1, 2, 3, 4, 5, 6].map((i) => {
-    const t = i / 6;
+/* Ramo d'alloro: uno stelo curvo (curva di Bezier, dal basso verso l'alto) con coppie
+   di foglie attaccate allo stelo e orientate lungo la sua direzione, piu' una foglia
+   in punta. Il lato destro e' lo specchio del sinistro. */
+type Pt = [number, number];
+const STEM: [Pt, Pt, Pt, Pt] = [[30, 64], [11, 56], [5, 32], [17, 6]];
+
+const bezier = (t: number): Pt => {
+    const u = 1 - t;
+    const [p0, p1, p2, p3] = STEM;
+    return [0, 1].map((k) => u * u * u * p0[k] + 3 * u * u * t * p1[k] + 3 * u * t * t * p2[k] + t * t * t * p3[k]) as Pt;
+};
+const tangentDeg = (t: number) => {
+    const u = 1 - t;
+    const [p0, p1, p2, p3] = STEM;
+    const [dx, dy] = [0, 1].map(
+        (k) => 3 * u * u * (p1[k] - p0[k]) + 6 * u * t * (p2[k] - p1[k]) + 3 * t * t * (p3[k] - p2[k])
+    );
+    return (Math.atan2(dy, dx) * 180) / Math.PI;
+};
+
+const r1 = (n: number) => Math.round(n * 10) / 10;
+const LEAF_SPREAD = 38; // gradi tra stelo e foglia
+
+/* Foglia: ellisse con la base sullo stelo, inclinata di `side * LEAF_SPREAD` gradi rispetto allo stelo */
+const leaf = (t: number, side: -1 | 0 | 1, size: number) => {
+    const [x, y] = bezier(t);
+    const dir = ((tangentDeg(t) + side * LEAF_SPREAD) * Math.PI) / 180;
+    const ry = 6.2 * size;
     return {
-        x: 28 - Math.sin(t * Math.PI * 0.85) * 14 + t * 4,
-        y: 58 - t * 50,
-        size: 1 - t * 0.3,
-        tilt: -20 + t * 25
+        cx: r1(x + Math.cos(dir) * ry * 0.92),
+        cy: r1(y + Math.sin(dir) * ry * 0.92),
+        rx: r1(2.7 * size),
+        ry: r1(ry),
+        rot: r1(tangentDeg(t) + side * LEAF_SPREAD + 90),
+        outer: side <= 0,
     };
-});
+};
+
+const LEAVES = [
+    ...[0.1, 0.23, 0.36, 0.49, 0.62, 0.75, 0.87].flatMap((t, i) => {
+        const size = 1 - i * 0.055;
+        return [leaf(t, -1, size), leaf(t, 1, size * 0.92)];
+    }),
+    leaf(0.995, 0, 0.8),
+];
 
 const Laurel: React.FC<{ flip?: boolean }> = ({ flip }) => (
     <svg
         className={styles.laurel}
-        viewBox="0 0 40 66"
+        viewBox="-2 -4 42 72"
         aria-hidden="true"
         style={flip ? { transform: 'scaleX(-1)' } : undefined}
     >
-        <path d="M31 63 C 12 52, 8 30, 19 5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        {LEAF_PAIRS.map((l, i) => (
-            <g key={i} transform={`translate(${l.x} ${l.y}) rotate(${l.tilt})`}>
-                <ellipse cx={-5.5 * l.size} cy={-1} rx={2.8 * l.size} ry={6.4 * l.size} transform={`rotate(-42 ${-5.5 * l.size} -1)`} fill="currentColor" />
-                <ellipse cx={5 * l.size} cy={-1} rx={2.6 * l.size} ry={6 * l.size} transform={`rotate(42 ${5 * l.size} -1)`} fill="currentColor" opacity="0.8" />
-            </g>
+        <path
+            d={`M${STEM[0].join(' ')} C ${STEM[1].join(' ')}, ${STEM[2].join(' ')}, ${STEM[3].join(' ')}`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+        />
+        {LEAVES.map((l, i) => (
+            <ellipse
+                key={i}
+                cx={l.cx}
+                cy={l.cy}
+                rx={l.rx}
+                ry={l.ry}
+                transform={`rotate(${l.rot} ${l.cx} ${l.cy})`}
+                fill="currentColor"
+                opacity={l.outer ? 1 : 0.8}
+            />
         ))}
-        <ellipse cx="19.5" cy="4" rx="2.4" ry="5" fill="currentColor" />
     </svg>
 );
 
