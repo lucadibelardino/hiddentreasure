@@ -1,208 +1,133 @@
-.section {
-    padding-block: var(--section-y);
-    background-image: linear-gradient(160deg, var(--c-deep) 0%, var(--c-deep-2) 100%);
-    color: var(--c-white);
+/* Fascia sottile: titolo fisso a sinistra, recensioni che scorrono a destra */
+.band {
+    display: flex;
+    align-items: stretch;
+    border-block: 1px solid var(--c-line);
+    background: var(--c-white);
+    overflow: hidden;
 }
 
-.inner {
+.badge {
+    position: relative;
+    z-index: 1;
+    flex: none;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-/* ── Intestazione ─────────────────────────────── */
-.head {
-    max-width: 640px;
-}
-
-.title {
-    margin: var(--space-2xs) 0 var(--space-sm);
-    font-size: var(--fs-h2);
-    font-weight: 400;
-    line-height: 1.05;
-    color: var(--c-white);
-}
-
-.title em {
-    font-style: italic;
-    font-weight: 600;
-    color: var(--c-brass-soft);
-}
-
-.score {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: center;
     justify-content: center;
-    gap: 0.4rem 0.7rem;
-    font-size: var(--fs-sm);
-    color: rgba(255, 255, 255, 0.72);
+    gap: 0.1rem;
+    padding: var(--space-sm) var(--space-md) var(--space-sm) var(--gutter);
+    background: var(--c-white);
+    border-right: 1px solid var(--c-line);
+    color: var(--c-deep);
+    transition: color var(--transition-fast);
 }
 
-.scoreValue {
+/* Sfumatura che fa "entrare" le recensioni sotto il titolo */
+.badge::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 100%;
+    width: 2.5rem;
+    background: linear-gradient(to right, var(--c-white), transparent);
+    pointer-events: none;
+}
+
+.badgeTitle {
     font-family: var(--font-display);
-    font-size: 1.7rem;
-    line-height: 1;
-    color: var(--c-white);
+    font-size: 1.2rem;
+    font-style: italic;
+    line-height: 1.1;
+    white-space: nowrap;
 }
 
-.stars {
-    color: var(--c-brass-soft);
+.badgeMeta {
+    font-size: var(--fs-xs);
+    color: var(--c-ink-soft);
+    white-space: nowrap;
 }
 
-/* ── Slider ───────────────────────────────────── */
-.slider {
-    width: 100%;
-    max-width: 820px;
-    margin-top: var(--space-xl);
+.badge:hover .badgeMeta {
+    color: var(--c-sea);
 }
 
-/* Tutte le slide occupano la stessa cella: l'altezza e' quella della piu' lunga,
-   cosi' la pagina non salta quando cambia recensione. */
-.viewport {
-    display: grid;
-}
-
-.slide {
-    grid-area: 1 / 1;
+/* ── Scorrimento continuo ─────────────────────── */
+.track {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-md);
-    margin: 0;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(10px);
-    transition:
-        opacity var(--dur-slow) var(--ease-out),
-        transform var(--dur-slow) var(--ease-out),
-        visibility 0s linear var(--dur-slow);
+    flex: 1;
+    min-width: 0;
+    width: max-content;
 }
 
-.active {
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    transition:
-        opacity var(--dur-slow) var(--ease-out),
-        transform var(--dur-slow) var(--ease-out),
-        visibility 0s;
+.row {
+    flex: none;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    animation: scroll 70s linear infinite;
+}
+
+.band:hover .row {
+    animation-play-state: paused;
+}
+
+@keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+}
+
+.item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: var(--space-sm) var(--space-lg);
+    white-space: nowrap;
+    border-right: 1px solid var(--c-line);
+}
+
+.star {
+    color: var(--c-brass);
+    font-size: 0.8rem;
 }
 
 .quote {
-    margin: 0;
     font-family: var(--font-display);
-    font-size: clamp(1.35rem, 1.05rem + 1.3vw, 2.05rem);
-    font-weight: 400;
-    line-height: 1.35;
-    color: var(--c-white);
-}
-
-.author {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-}
-
-.authorName {
-    font-weight: 600;
-}
-
-.authorMeta {
-    font-size: var(--fs-sm);
-    color: rgba(255, 255, 255, 0.65);
-}
-
-/* ── Controlli ────────────────────────────────── */
-.controls {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-md);
-    margin-top: var(--space-lg);
-}
-
-.arrow {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    background: transparent;
-    color: var(--c-white);
-    cursor: pointer;
-    transition: background var(--transition-fast), border-color var(--transition-fast);
-}
-
-.arrow:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
-}
-
-.dots {
-    display: flex;
-    gap: 0.25rem;
-}
-
-/* Area cliccabile ampia, pallino piccolo */
-.dot {
-    position: relative;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    border: 0;
-    background: none;
-    cursor: pointer;
-}
-
-.dot::after {
-    content: '';
-    position: absolute;
-    inset: 50% auto auto 50%;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: background var(--transition-fast), width var(--transition-fast);
-}
-
-.dotActive::after {
-    width: 20px;
-    border-radius: var(--radius-pill);
-    background: var(--c-brass-soft);
-}
-
-/* ── Rimando ──────────────────────────────────── */
-.cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: var(--space-xl);
-    padding: 0.85rem 1.5rem;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--c-brass-soft);
-    color: var(--c-brass-soft);
-    font-weight: 600;
-    transition: background var(--transition-fast), color var(--transition-fast);
-}
-
-.cta:hover {
-    background: var(--c-brass-soft);
+    font-size: 1.15rem;
     color: var(--c-deep);
+    quotes: '“' '”';
 }
 
+.name {
+    font-size: var(--fs-xs);
+    color: var(--c-ink-soft);
+}
+
+/* Chi preferisce meno movimento scorre a mano */
 @media (prefers-reduced-motion: reduce) {
-    .slide,
-    .active {
-        transition: none;
-        transform: none;
+    .track {
+        overflow-x: auto;
+    }
+
+    .row {
+        animation: none;
+    }
+
+    .row[aria-hidden='true'] {
+        display: none;
     }
 }
 
 @media (max-width: 600px) {
-    .controls { gap: var(--space-xs); }
+    .badge {
+        padding-inline: var(--gutter) var(--space-sm);
+    }
+
+    .badgeTitle { font-size: 1.05rem; }
+
+    .item { padding-inline: var(--space-md); }
+
+    .quote { font-size: 1.05rem; }
 }
