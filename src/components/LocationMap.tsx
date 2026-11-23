@@ -76,8 +76,14 @@ const LocationMap: React.FC = () => {
     }, []);
 
     return (
-        <section id="dove-siamo" className={styles.section} aria-label="Dove siamo">
+        <section id="dove-siamo" className={styles.section} aria-labelledby="dove-siamo-title">
             <div className="container">
+                <header className={styles.head}>
+                    <p className="eyebrow">Villasimius · Sardegna</p>
+                    <h2 id="dove-siamo-title" className={styles.title}>
+                        Dove <em>sarete</em>
+                    </h2>
+                </header>
                 <div className={styles.frame}>
                     <div ref={mapRef} className={styles.map} role="region" aria-label="Mappa con la posizione della villa a Villasimius" />
                 </div>
