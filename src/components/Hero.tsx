@@ -9,13 +9,16 @@ const SLIDE_MS = 8000;
 const TRANSITION_MS = 1300;
 
 // I testi alternativi sono in src/i18n/strings.ts (hero.imageAlts), nello stesso ordine
-const heroImages = [
-    '/images/hero/hero-bg-resized.webp',
-    '/images/hero/20230804_115659.webp',
-    '/images/hero/20230804_203514.webp',
-    '/images/hero/1cdb0be8-1741-41fa-b1a7-02258c4b72cd.webp',
-    '/images/hero/20230804_115710.webp'
-].map((src, i) => ({ src, i }));
+// `veil`: velo scuro sfumato dietro il testo, solo per le foto troppo chiare
+// (0 = nessuno, 1 = pieno). Compare e sparisce in dissolvenza insieme alla sua foto.
+const heroImages: { src: string; i: number; veil?: number }[] = [
+    { src: '/images/hero/hero-bg-resized.webp' },
+    { src: '/images/hero/20230804_115659.webp' },
+    { src: '/images/hero/20230804_203514.webp' },
+    // Muro bianco con palma e ulivo: senza velo il titolo bianco non si legge
+    { src: '/images/hero/1cdb0be8-1741-41fa-b1a7-02258c4b72cd.webp', veil: 1 },
+    { src: '/images/hero/20230804_115710.webp' }
+].map((img, i) => ({ ...img, i }));
 
 /* Decodifica anticipata: una foto grande decodificata solo quando diventa visibile
    blocca qualche frame proprio all'inizio del passaggio (lo "scatto"). Qui ogni foto
@@ -103,18 +106,24 @@ const Hero: React.FC = () => {
                 aria-hidden="true"
             >
                 {heroImages.map((img, i) => (
-                    <img
+                    <div
                         key={img.src}
-                        src={img.src}
-                        alt={t.imageAlts[img.i]}
-                        decoding="async"
-                        fetchPriority={i === 0 ? 'high' : 'low'}
                         className={`${styles.slide} ${i === index ? styles.active : i === leaving ? styles.leaving : ''} ${
                             leaving !== null && (i === index || i === leaving) ? styles.moving : ''
                         }`}
-                    />
+                    >
+                        <img
+                            src={img.src}
+                            alt={t.imageAlts[img.i]}
+                            decoding="async"
+                            fetchPriority={i === 0 ? 'high' : 'low'}
+                            className={styles.slideImg}
+                        />
+                        {img.veil ? (
+                            <div className={styles.veil} style={{ opacity: img.veil }} />
+                        ) : null}
+                    </div>
                 ))}
-                <div className={styles.scrim} />
             </div>
 
             <div className={`container ${styles.content}`}>
