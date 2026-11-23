@@ -3,7 +3,7 @@ import { MAPS_URL, VILLA_COORDS } from '../data/location';
 import styles from './LocationMap.module.css';
 
 /**
- * Mappa OpenStreetMap con Leaflet: niente chiave API e niente cookie di terze parti.
+ * Mappa satellitare (Esri World Imagery) con Leaflet: niente chiave API e niente cookie di terze parti.
  * Leaflet si scarica solo quando la sezione sta per entrare nello schermo.
  * Il div della mappa non deve mai cambiare className da React: Leaflet ci
  * aggiunge le sue classi (leaflet-container…) e un re-render le cancellerebbe.
@@ -28,14 +28,15 @@ const LocationMap: React.FC = () => {
             const center: [number, number] = [VILLA_COORDS.lat, VILLA_COORDS.lng];
             map = L.map(el, {
                 center,
-                zoom: 13,
+                zoom: 15,
                 scrollWheelZoom: false,      // la rotella scorre la pagina, non la mappa
                 dragging: !L.Browser.mobile  // su telefono un dito scorre la pagina
             });
 
-            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            // Vista satellitare Esri World Imagery: nessuna chiave API, basta l'attribuzione
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                 maxZoom: 18,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
+                attribution: 'Immagini &copy; <a href="https://www.esri.com/" target="_blank" rel="noopener noreferrer">Esri</a>, Maxar, Earthstar Geographics'
             }).addTo(map);
 
             const icon = L.divIcon({
