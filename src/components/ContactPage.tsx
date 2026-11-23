@@ -1,6 +1,7 @@
 import React from 'react';
 import useReveal from '../hooks/useReveal';
 import styles from './ContactPage.module.css';
+import { MAPS_URL } from '../data/location';
 
 /* Il messaggio arriva gia' scritto: chi contatta fa meno fatica
    e noi riceviamo subito periodo e numero di persone. */
@@ -18,9 +19,6 @@ const facts = [
     { value: 'IT / EN', label: 'Si parla italiano e inglese' },
     { value: 'Diretta', label: 'Nessuna commissione di piattaforma' }
 ];
-
-const MAPS_URL =
-    'https://www.google.com/maps/place/Hidden+treasure+villasimius+(I.U.N.+S0174)/@39.1074963,9.0945192,51316m/data=!3m1!1e3!4m6!3m5!1s0x12e0c33df2d8c7bd:0xe25528c67767b9eb!8m2!3d39.1085644!4d9.5031886!16s%2Fg%2F11sbspqsr8';
 
 const WhatsAppIcon = () => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

@@ -4,6 +4,7 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import Features from './components/Features';
 import ReviewsHighlight from './components/ReviewsHighlight';
+import LocationMap from './components/LocationMap';
 import GalleryPage from './components/GalleryPage';
 import ContactPage from './components/ContactPage';
 import ReviewsPage from './components/ReviewsPage';
@@ -24,6 +25,7 @@ const HomePage: React.FC = () => (
         <Hero />
         <Features />
         <ReviewsHighlight />
+        <LocationMap />
     </>
 );
 
