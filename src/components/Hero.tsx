@@ -6,11 +6,11 @@ import styles from './Hero.module.css';
 const SLIDE_MS = 8000;
 
 const heroImages = [
-    { src: '/images/hero/hero-bg-resized.jpg', alt: 'La villa Hidden Treasure vista dal giardino sul mare' },
-    { src: '/images/hero/20230804_115659.jpg', alt: 'La spiaggia semiprivata davanti alla villa' },
-    { src: '/images/hero/20230804_203514.jpg', alt: 'Tramonto sul mare visto dalla terrazza' },
-    { src: '/images/hero/1cdb0be8-1741-41fa-b1a7-02258c4b72cd.jpg', alt: 'Scorcio della costa di Villasimius' },
-    { src: '/images/hero/20230804_115710.jpg', alt: 'Il prato della villa che si apre sulla spiaggia' }
+    { src: '/images/hero/hero-bg-resized.webp', alt: 'La villa Hidden Treasure vista dal giardino sul mare' },
+    { src: '/images/hero/20230804_115659.webp', alt: 'La spiaggia semiprivata davanti alla villa' },
+    { src: '/images/hero/20230804_203514.webp', alt: 'Tramonto sul mare visto dalla terrazza' },
+    { src: '/images/hero/1cdb0be8-1741-41fa-b1a7-02258c4b72cd.webp', alt: 'Scorcio della costa di Villasimius' },
+    { src: '/images/hero/20230804_115710.webp', alt: 'Il prato della villa che si apre sulla spiaggia' }
 ];
 
 const Hero: React.FC = () => {
