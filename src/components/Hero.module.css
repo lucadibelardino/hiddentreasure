@@ -51,11 +51,11 @@
 .slide.moving {
     animation-duration: var(--hero-dur);
     animation-fill-mode: both;
-    will-change: transform, opacity;
+    will-change: opacity;
 }
 
-/* ── 1. Dissolvenza: la nuova sfuma sopra la vecchia, che resta piena sotto ── */
-[data-transition='fade'] .slide.active.moving {
+/* Dissolvenza: la nuova sfuma sopra la vecchia, che resta piena sotto */
+.slide.active.moving {
     animation-name: fadeIn;
     animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -63,65 +63,6 @@
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
-}
-
-/* ── 2. Scorrimento: la nuova spinge via la vecchia, in orizzontale ── */
-[data-transition='slide'] .slide.moving {
-    animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
-}
-
-[data-transition='slide'][data-dir='next'] .slide.active.moving { animation-name: inFromRight; }
-[data-transition='slide'][data-dir='next'] .slide.leaving.moving { animation-name: outToLeft; }
-[data-transition='slide'][data-dir='prev'] .slide.active.moving { animation-name: inFromLeft; }
-[data-transition='slide'][data-dir='prev'] .slide.leaving.moving { animation-name: outToRight; }
-
-@keyframes inFromRight { from { transform: translate3d(100%, 0, 0); } to { transform: none; } }
-@keyframes outToLeft { from { transform: none; } to { transform: translate3d(-100%, 0, 0); } }
-@keyframes inFromLeft { from { transform: translate3d(-100%, 0, 0); } to { transform: none; } }
-@keyframes outToRight { from { transform: none; } to { transform: translate3d(100%, 0, 0); } }
-
-/* ── 3. Tendina: la nuova si apre come un sipario sopra la vecchia,
-       che scivola appena di lato (effetto profondita') ── */
-[data-transition='wipe'] .slide.moving {
-    animation-timing-function: cubic-bezier(0.77, 0, 0.18, 1);
-}
-
-[data-transition='wipe'][data-dir='next'] .slide.active.moving { animation-name: wipeFromRight; }
-[data-transition='wipe'][data-dir='next'] .slide.leaving.moving { animation-name: driftLeft; }
-[data-transition='wipe'][data-dir='prev'] .slide.active.moving { animation-name: wipeFromLeft; }
-[data-transition='wipe'][data-dir='prev'] .slide.leaving.moving { animation-name: driftRight; }
-
-@keyframes wipeFromRight { from { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0); } }
-@keyframes wipeFromLeft { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
-@keyframes driftLeft { from { transform: none; } to { transform: translate3d(-12%, 0, 0); } }
-@keyframes driftRight { from { transform: none; } to { transform: translate3d(12%, 0, 0); } }
-
-/* ── Selettore di prova (solo con ?hero= nell'indirizzo) ── */
-.picker {
-    position: absolute;
-    top: calc(var(--header-h) + 0.75rem);
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 4;
-    display: flex;
-    gap: 2px;
-    padding: 3px;
-    border-radius: 999px;
-    background: rgba(16, 42, 58, 0.55);
-    backdrop-filter: blur(6px);
-}
-
-.picker button {
-    padding: 0.45rem 0.9rem;
-    border-radius: 999px;
-    color: var(--c-white);
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.picker button[aria-pressed='true'] {
-    background: var(--c-white);
-    color: #102a3a;
 }
 
 /* La velatura e' costruita come un orizzonte: scura in alto per l'header,
