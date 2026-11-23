@@ -4,6 +4,8 @@ import BookingBar from './BookingBar';
 import styles from './Hero.module.css';
 
 const SLIDE_MS = 8000;
+// Deve coincidere con la durata della transition di opacita' in Hero.module.css
+const FADE_MS = 2200;
 
 const heroImages = [
     { src: '/images/hero/hero-bg-resized.webp', alt: 'La villa Hidden Treasure vista dal giardino sul mare' },
@@ -14,19 +16,33 @@ const heroImages = [
 ];
 
 const Hero: React.FC = () => {
-    const [index, setIndex] = useState(0);
+    // `leaving` e' la foto che sta sfumando via: deve conservare lo zoom raggiunto finche'
+    // non e' invisibile, altrimenti torna di colpo alla scala iniziale (lo "scatto" al cambio foto).
+    // Va aggiornata nello stesso render di `index`: anche un solo frame senza classe riavvia l'animazione.
+    const [{ index, leaving }, setSlide] = useState<{ index: number; leaving: number | null }>({ index: 0, leaving: null });
     const [paused, setPaused] = useState(false);
     const navigate = useNavigate();
 
     const go = useCallback((next: number) => {
-        setIndex(((next % heroImages.length) + heroImages.length) % heroImages.length);
+        const n = ((next % heroImages.length) + heroImages.length) % heroImages.length;
+        setSlide((s) => (s.index === n ? s : { index: n, leaving: s.index }));
     }, []);
 
     useEffect(() => {
         if (paused) return;
-        const t = window.setInterval(() => setIndex((i) => (i + 1) % heroImages.length), SLIDE_MS);
+        const t = window.setInterval(
+            () => setSlide((s) => ({ index: (s.index + 1) % heroImages.length, leaving: s.index })),
+            SLIDE_MS
+        );
         return () => window.clearInterval(t);
     }, [paused]);
+
+    // A dissolvenza finita la foto uscita torna "a riposo", pronta a ripartire da capo
+    useEffect(() => {
+        if (leaving === null) return;
+        const t = window.setTimeout(() => setSlide((s) => ({ ...s, leaving: null })), FADE_MS + 100);
+        return () => window.clearTimeout(t);
+    }, [index, leaving]);
 
     // Non far girare lo slideshow quando la scheda e' in secondo piano
     useEffect(() => {
@@ -41,7 +57,7 @@ const Hero: React.FC = () => {
                 {heroImages.map((img, i) => (
                     <div
                         key={img.src}
-                        className={`${styles.slide} ${i === index ? styles.active : ''}`}
+                        className={`${styles.slide} ${i === index ? styles.active : i === leaving ? styles.leaving : ''}`}
                         style={{ backgroundImage: `url("${img.src}")` }}
                         role="img"
                         aria-label={img.alt}
