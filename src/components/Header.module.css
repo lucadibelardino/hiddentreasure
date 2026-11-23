@@ -380,3 +380,95 @@
     border-color: var(--c-white);
     color: var(--c-deep);
 }
+
+/* ── Avviso lingue (solo pagine in italiano, una volta per sessione) ── */
+.hint {
+    position: absolute;
+    top: calc(100% - 0.35rem);
+    right: calc(var(--gutter, 1.25rem) - 0.5rem);
+    width: min(19rem, calc(100vw - 2rem));
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.8rem 0.6rem 0.9rem 0.9rem;
+    background: var(--c-deep);
+    color: var(--c-white);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(16, 42, 58, 0.28);
+    animation: hintIn var(--dur-med) var(--ease-out) both;
+}
+
+/* Freccetta verso il globo (desktop) o il menu (mobile) */
+.hint::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 1rem;
+    width: 12px;
+    height: 12px;
+    background: var(--c-deep);
+    transform: rotate(45deg);
+}
+
+@keyframes hintIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: none; }
+}
+
+.hintIcon {
+    flex: none;
+    margin-top: 0.15rem;
+    color: var(--c-brass-soft);
+}
+
+.hintText {
+    margin: 0;
+    font-size: var(--fs-xs);
+    line-height: 1.5;
+}
+
+.hintText a {
+    color: var(--c-brass-soft);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.hintClose {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    margin: -0.3rem 0 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.75);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.hintClose:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--c-white);
+}
+
+/* Barra che si consuma nei 4 secondi prima della chiusura */
+.hintTimer {
+    position: absolute;
+    left: 0.9rem;
+    right: 0.9rem;
+    bottom: 0.4rem;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--c-brass);
+    transform-origin: left;
+    animation: hintTimer linear forwards;
+}
+
+@keyframes hintTimer {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hint, .hintTimer { animation: none; }
+}

@@ -86,6 +86,61 @@ const LanguageSwitcher: React.FC<{ onPick?: () => void; variant: 'desk' | 'mobil
     );
 };
 
+/* Avviso in inglese sotto il selettore lingua: compare una volta per sessione
+   sulle pagine in italiano, sparisce da solo dopo 4 secondi o con la X. */
+const HINT_DELAY_MS = 800;
+const HINT_VISIBLE_MS = 4000;
+const HINT_KEY = 'ht-lang-hint-seen';
+
+const LangHint: React.FC = () => {
+    const lang = useLang();
+    const { pathname } = useLocation();
+    const [visible, setVisible] = useState(false);
+    const page = pageFromPath(pathname) ?? 'home';
+
+    useEffect(() => {
+        if (lang !== 'it') return;
+        try {
+            if (sessionStorage.getItem(HINT_KEY)) return;
+            sessionStorage.setItem(HINT_KEY, '1');
+        } catch { /* storage bloccato: l'avviso compare comunque */ }
+        const show = window.setTimeout(() => setVisible(true), HINT_DELAY_MS);
+        return () => window.clearTimeout(show);
+        // Solo al primo caricamento: cambiare pagina non lo fa ricomparire
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        if (!visible) return;
+        const hide = window.setTimeout(() => setVisible(false), HINT_VISIBLE_MS);
+        return () => window.clearTimeout(hide);
+    }, [visible]);
+
+    // Se si passa a un'altra lingua l'avviso non serve piu'
+    if (!visible || lang !== 'it') return null;
+
+    return (
+        <div className={styles.hint} role="status" lang="en">
+            <svg className={styles.hintIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z" />
+            </svg>
+            <p className={styles.hintText}>
+                This site is also available in{' '}
+                <Link to={ROUTES.en[page]} hrefLang="en" onClick={() => setVisible(false)}>English</Link>,{' '}
+                <Link to={ROUTES.de[page]} hrefLang="de" lang="de" onClick={() => setVisible(false)}>Deutsch</Link> and{' '}
+                <Link to={ROUTES.fr[page]} hrefLang="fr" lang="fr" onClick={() => setVisible(false)}>Français</Link>.
+            </p>
+            <button type="button" className={styles.hintClose} onClick={() => setVisible(false)} aria-label="Close">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+            </button>
+            <span className={styles.hintTimer} style={{ animationDuration: `${HINT_VISIBLE_MS}ms` }} aria-hidden="true" />
+        </div>
+    );
+};
+
 const Header: React.FC = () => {
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
@@ -190,6 +245,8 @@ const Header: React.FC = () => {
                     <span aria-hidden="true" />
                     <span aria-hidden="true" />
                 </button>
+
+                <LangHint />
             </div>
 
             {/* Menu mobile a tutto schermo */}
