@@ -25,32 +25,21 @@
     background-size: cover;
     background-position: center;
     opacity: 0;
-    transform: scale(1.06);
     transition: opacity 2.2s var(--ease-in-out);
-    will-change: opacity, transform;
+    will-change: opacity;
 }
 
+/* Dissolvenza incrociata senza zoom: la foto nuova (.active) sfuma sopra quella
+   vecchia (.leaving), che resta piena sotto finche' la nuova non e' del tutto visibile.
+   Cosi' a meta' transizione non si vede il fondo scuro tra le due foto. */
 .slide.active {
     opacity: 1;
     z-index: 1;
 }
 
-/* Ken Burns lentissimo: il mare non sta mai fermo.
-   La stessa animazione resta applicata anche alla foto che esce (.leaving):
-   cosi' continua a zoomare mentre sfuma invece di tornare di colpo a scale(1.06). */
-.slide.active,
 .slide.leaving {
-    animation: drift 18s var(--ease-out) forwards;
-}
-
-@keyframes drift {
-    from {
-        transform: scale(1.06);
-    }
-
-    to {
-        transform: scale(1.14);
-    }
+    opacity: 1;
+    transition: none;
 }
 
 /* La velatura e' costruita come un orizzonte: scura in alto per l'header,
@@ -285,8 +274,6 @@
 
 @media (prefers-reduced-motion: reduce) {
 
-    .slide.active,
-    .slide.leaving,
     .indicatorActive .indicatorFill,
     .scrollLine {
         animation: none;
@@ -294,9 +281,5 @@
 
     .indicatorActive .indicatorFill {
         width: 100%;
-    }
-
-    .slide {
-        transform: none;
     }
 }

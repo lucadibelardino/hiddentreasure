@@ -18,9 +18,8 @@ const heroImages = [
 ].map((src, i) => ({ src, i }));
 
 const Hero: React.FC = () => {
-    // `leaving` e' la foto che sta sfumando via: deve conservare lo zoom raggiunto finche'
-    // non e' invisibile, altrimenti torna di colpo alla scala iniziale (lo "scatto" al cambio foto).
-    // Va aggiornata nello stesso render di `index`: anche un solo frame senza classe riavvia l'animazione.
+    // `leaving` e' la foto appena uscita: resta piena sotto la nuova finche' la dissolvenza
+    // non e' finita, poi torna trasparente (invisibile, perche' coperta dalla nuova).
     const [{ index, leaving }, setSlide] = useState<{ index: number; leaving: number | null }>({ index: 0, leaving: null });
     const [paused, setPaused] = useState(false);
     const navigate = useNavigate();
