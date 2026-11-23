@@ -27,7 +27,6 @@ const airbnb = sources.airbnb;
 
 const Item: React.FC<{ text: string; name: string }> = ({ text, name }) => (
     <li className={styles.item}>
-        <span className={styles.star} aria-hidden="true">★</span>
         <q className={styles.quote}>{text}</q>
         <span className={styles.name}>{name}</span>
     </li>
@@ -37,22 +36,31 @@ const ReviewsHighlight: React.FC = () => {
     if (items.length === 0) return null;
 
     return (
-        <section className={styles.band} aria-label="Recensioni degli ospiti">
-            <Link to="/recensioni" className={styles.badge}>
-                <span className={styles.badgeTitle}>{airbnb.badge ?? 'Recensioni'}</span>
-                <span className={styles.badgeMeta}>
-                    {fmt(airbnb.rating, 2)} su {airbnb.label} · Leggi tutte
-                </span>
-            </Link>
+        <section className={styles.band} aria-labelledby="ospiti-badge">
+            <header className={styles.head}>
+                <div className={styles.titleRow}>
+                    <span className={styles.rule} aria-hidden="true" />
+                    <h2 id="ospiti-badge" className={styles.badgeTitle}>{airbnb.badge ?? 'Dicono di noi'}</h2>
+                    <span className={styles.rule} aria-hidden="true" />
+                </div>
+                <p className={styles.badgeMeta}>
+                    <span className={styles.badgeStar} aria-hidden="true">★</span>
+                    {fmt(airbnb.rating, 2)} su {airbnb.label}
+                    <span aria-hidden="true"> · </span>
+                    <Link to="/recensioni" className={styles.badgeLink}>Leggi tutte</Link>
+                </p>
+            </header>
 
-            <div className={styles.track}>
-                {/* Due copie identiche in fila: quando la prima esce, la seconda e' al suo posto */}
-                <ul className={styles.row}>
-                    {items.map((it) => <Item key={it.key} text={it.text} name={it.name} />)}
-                </ul>
-                <ul className={styles.row} aria-hidden="true">
-                    {items.map((it) => <Item key={`b-${it.key}`} text={it.text} name={it.name} />)}
-                </ul>
+            <div className={styles.viewport}>
+                <div className={styles.track}>
+                    {/* Due copie identiche in fila: quando la prima esce, la seconda e' al suo posto */}
+                    <ul className={styles.row}>
+                        {items.map((it) => <Item key={it.key} text={it.text} name={it.name} />)}
+                    </ul>
+                    <ul className={styles.row} aria-hidden="true">
+                        {items.map((it) => <Item key={`b-${it.key}`} text={it.text} name={it.name} />)}
+                    </ul>
+                </div>
             </div>
         </section>
     );

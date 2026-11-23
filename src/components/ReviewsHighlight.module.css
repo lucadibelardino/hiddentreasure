@@ -1,73 +1,90 @@
-/* Fascia sottile: titolo fisso a sinistra, recensioni che scorrono a destra */
+/* Fascia recensioni: titolo al centro con filetti ottone,
+   sotto le frasi degli ospiti che scorrono da un lato all'altro. */
 .band {
-    display: flex;
-    align-items: stretch;
+    padding-block: clamp(2.5rem, 1.8rem + 2.5vw, 3.75rem);
     border-block: 1px solid var(--c-line);
     background: var(--c-white);
     overflow: hidden;
 }
 
-.badge {
-    position: relative;
-    z-index: 1;
-    flex: none;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.1rem;
-    padding: var(--space-sm) var(--space-md) var(--space-sm) var(--gutter);
-    background: var(--c-white);
-    border-right: 1px solid var(--c-line);
-    color: var(--c-deep);
-    transition: color var(--transition-fast);
+/* ── Intestazione ─────────────────────────────── */
+.head {
+    padding-inline: var(--gutter);
+    text-align: center;
 }
 
-/* Sfumatura che fa "entrare" le recensioni sotto il titolo */
-.badge::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 100%;
-    width: 2.5rem;
-    background: linear-gradient(to right, var(--c-white), transparent);
-    pointer-events: none;
+.titleRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1rem, 3vw, 2rem);
+}
+
+.rule {
+    flex: 0 1 120px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--c-brass));
+}
+
+.rule:last-child {
+    background: linear-gradient(to left, transparent, var(--c-brass));
 }
 
 .badgeTitle {
+    margin: 0;
     font-family: var(--font-display);
-    font-size: 1.2rem;
+    font-size: clamp(1.75rem, 1.4rem + 1.3vw, 2.4rem);
     font-style: italic;
-    line-height: 1.1;
+    font-weight: 500;
+    line-height: 1.05;
+    color: var(--c-deep);
     white-space: nowrap;
 }
 
 .badgeMeta {
-    font-size: var(--fs-xs);
+    margin-top: 0.45rem;
+    font-size: var(--fs-sm);
     color: var(--c-ink-soft);
-    white-space: nowrap;
 }
 
-.badge:hover .badgeMeta {
+.badgeStar {
+    margin-right: 0.3rem;
+    color: var(--c-brass);
+}
+
+.badgeLink {
     color: var(--c-sea);
+    text-decoration: underline;
+    text-decoration-color: rgba(46, 124, 138, 0.35);
+    text-underline-offset: 3px;
+    transition: text-decoration-color var(--transition-fast);
+}
+
+.badgeLink:hover {
+    text-decoration-color: currentColor;
 }
 
 /* ── Scorrimento continuo ─────────────────────── */
+.viewport {
+    margin-top: clamp(1.75rem, 1.3rem + 1.5vw, 2.5rem);
+    /* bordi sfumati: le frasi entrano ed escono morbide */
+    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
 .track {
     display: flex;
-    flex: 1;
-    min-width: 0;
     width: max-content;
 }
 
 .row {
     flex: none;
     display: flex;
-    align-items: center;
+    align-items: baseline;
     margin: 0;
     padding: 0;
     list-style: none;
-    animation: scroll 70s linear infinite;
+    animation: scroll 80s linear infinite;
 }
 
 .band:hover .row {
@@ -82,32 +99,37 @@
 .item {
     display: flex;
     align-items: baseline;
-    gap: 0.6rem;
-    padding: var(--space-sm) var(--space-lg);
+    gap: 0.75rem;
     white-space: nowrap;
-    border-right: 1px solid var(--c-line);
 }
 
-.star {
-    color: var(--c-brass);
-    font-size: 0.8rem;
+/* Separatore tra una frase e l'altra */
+.item::after {
+    content: '✦';
+    margin-inline: clamp(1.5rem, 1rem + 2vw, 2.75rem);
+    font-size: 0.7rem;
+    color: var(--c-brass-soft);
+    align-self: center;
 }
 
 .quote {
     font-family: var(--font-display);
-    font-size: 1.15rem;
+    font-size: clamp(1.3rem, 1.15rem + 0.6vw, 1.6rem);
     color: var(--c-deep);
     quotes: '“' '”';
 }
 
 .name {
-    font-size: var(--fs-xs);
-    color: var(--c-ink-soft);
+    font-size: var(--fs-eyebrow);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    color: var(--c-brass);
 }
 
 /* Chi preferisce meno movimento scorre a mano */
 @media (prefers-reduced-motion: reduce) {
-    .track {
+    .viewport {
         overflow-x: auto;
     }
 
@@ -121,13 +143,7 @@
 }
 
 @media (max-width: 600px) {
-    .badge {
-        padding-inline: var(--gutter) var(--space-sm);
-    }
+    .rule { flex-basis: 36px; }
 
-    .badgeTitle { font-size: 1.05rem; }
-
-    .item { padding-inline: var(--space-md); }
-
-    .quote { font-size: 1.05rem; }
+    .badgeMeta { font-size: var(--fs-xs); }
 }
