@@ -1,47 +1,16 @@
 .section {
-    padding-block: var(--section-y);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
     background: var(--c-shell);
-    border-top: 1px solid var(--c-line);
 }
 
-.head {
-    margin-bottom: var(--space-lg);
-}
-
-.head :global(.eyebrow) {
-    display: block;
-    margin-bottom: var(--space-sm);
-}
-
-.title {
-    font-size: var(--fs-h2);
-    font-weight: 400;
-    line-height: 1.08;
-    letter-spacing: -0.005em;
-    max-width: 20ch;
-}
-
-.title em {
-    font-style: italic;
-    font-weight: 600;
-    color: var(--c-sea);
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-    gap: clamp(2rem, 5vw, 5rem);
-    align-items: stretch;
-}
-
-/* ── Mappa ────────────────────────────────────── */
-.mapFrame {
+/* Un rettangolo largo e basso, solo la mappa */
+.frame {
     position: relative;
     /* Leaflet usa z-index fino a 1000: lo teniamo dentro la cornice,
        sotto l'header fisso. */
     isolation: isolate;
     z-index: 0;
-    min-height: 420px;
+    height: clamp(220px, 30vw, 400px);
     border-radius: var(--radius-md);
     overflow: hidden;
     background: var(--c-sand);
@@ -56,7 +25,7 @@
 }
 
 /* Tinte un po' più calde, vicine alla palette del sito */
-.mapReady :global(.leaflet-tile-pane) {
+.map :global(.leaflet-tile-pane) {
     filter: saturate(0.7) sepia(0.12) brightness(1.02);
 }
 
@@ -69,19 +38,11 @@
     color: var(--c-deep);
 }
 
-.placeholder {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    color: var(--c-ink-soft);
-    font-size: var(--fs-sm);
-}
-
 /* Segnaposto: punto ottone con alone che respira */
 .pin {
     background: none;
     border: 0;
+    cursor: pointer;
 }
 
 .pinDot {
@@ -115,132 +76,5 @@
 @media (prefers-reduced-motion: reduce) {
     .pinDot::after {
         animation: none;
-    }
-}
-
-.tooltip:global(.leaflet-tooltip) {
-    padding: 0.3rem 0.7rem;
-    border: 0;
-    border-radius: var(--radius-pill);
-    background: var(--c-deep);
-    color: var(--c-white);
-    font-family: var(--font-body);
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    box-shadow: var(--shadow-sm);
-}
-
-.tooltip:global(.leaflet-tooltip-top)::before {
-    border-top-color: var(--c-deep);
-}
-
-/* ── Informazioni ─────────────────────────────── */
-.info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.places {
-    margin: 0;
-    border-top: 1px solid var(--c-line);
-}
-
-.place {
-    display: grid;
-    grid-template-columns: 7.5rem 1fr;
-    gap: var(--space-md);
-    align-items: baseline;
-    padding-block: var(--space-md);
-    border-bottom: 1px solid var(--c-line);
-}
-
-.placeLabel {
-    font-size: var(--fs-eyebrow);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: var(--tracking-eyebrow);
-    color: var(--c-brass);
-}
-
-.placeBody {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-}
-
-.placeValue {
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
-    line-height: 1.1;
-    color: var(--c-deep);
-}
-
-.placeNote {
-    font-size: var(--fs-sm);
-    color: var(--c-ink-soft);
-}
-
-.actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-xs);
-    margin-top: var(--space-lg);
-}
-
-.primary,
-.secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 48px;
-    padding: 0.8rem 1.75rem;
-    border-radius: var(--radius-pill);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    text-decoration: none;
-    transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
-}
-
-.primary {
-    background: var(--c-deep);
-    color: var(--c-white);
-}
-
-.primary:hover {
-    background: var(--c-sea);
-}
-
-.secondary {
-    border: 1px solid var(--c-line-strong);
-    color: var(--c-deep);
-}
-
-.secondary:hover {
-    border-color: var(--c-deep);
-    background: var(--c-sand);
-}
-
-@media (max-width: 960px) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
-
-    .mapFrame {
-        min-height: 360px;
-    }
-}
-
-@media (max-width: 560px) {
-    .place {
-        grid-template-columns: 1fr;
-        gap: 0.35rem;
-    }
-
-    .actions .primary,
-    .actions .secondary {
-        flex: 1 1 100%;
     }
 }
