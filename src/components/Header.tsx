@@ -12,7 +12,7 @@ const Header: React.FC = () => {
 
     const isHome = location.pathname === '/';
     // Testo chiaro solo quando c'e' davvero la hero scura dietro.
-    // Su Galleria e Contatti il fondo e' chiaro: l'header e' sempre solido.
+    // Su Galleria, Recensioni e Contatti il fondo e' chiaro: l'header e' sempre solido.
     const transparent = isHome && !scrolled;
 
     useEffect(() => {
@@ -86,6 +86,7 @@ const Header: React.FC = () => {
                     <a href="#hero" className={styles.link} onClick={(e) => goToSection(e, 'hero')}>Home</a>
                     <a href="#villa" className={styles.link} onClick={(e) => goToSection(e, 'villa')}>La Villa</a>
                     <a href="/gallery" className={styles.link} onClick={(e) => goTo(e, '/gallery')}>Galleria</a>
+                    <a href="/recensioni" className={styles.link} onClick={(e) => goTo(e, '/recensioni')}>Recensioni</a>
                     <a href="/contatti" className={styles.cta} onClick={(e) => goTo(e, '/contatti')}>Prenota</a>
                 </nav>
 
@@ -118,6 +119,7 @@ const Header: React.FC = () => {
                     <a href="#hero" onClick={(e) => goToSection(e, 'hero')}>Home</a>
                     <a href="#villa" onClick={(e) => goToSection(e, 'villa')}>La Villa</a>
                     <a href="/gallery" onClick={(e) => goTo(e, '/gallery')}>Galleria</a>
+                    <a href="/recensioni" onClick={(e) => goTo(e, '/recensioni')}>Recensioni</a>
                     <a href="/contatti" onClick={(e) => goTo(e, '/contatti')}>Contatti</a>
                 </nav>
 
