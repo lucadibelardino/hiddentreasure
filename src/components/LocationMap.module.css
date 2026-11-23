@@ -1,6 +1,30 @@
 .section {
-    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    /* Più aria sopra: la mappa si stacca dalla fascia recensioni */
+    padding-top: clamp(4rem, 2.5rem + 5vw, 7rem);
+    padding-bottom: clamp(2.5rem, 1.5rem + 4vw, 5rem);
     background: var(--c-shell);
+}
+
+.head {
+    margin-bottom: var(--space-md);
+}
+
+.head :global(.eyebrow) {
+    display: block;
+    margin-bottom: var(--space-2xs);
+}
+
+.title {
+    font-size: var(--fs-h2);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.005em;
+}
+
+.title em {
+    font-style: italic;
+    font-weight: 600;
+    color: var(--c-sea);
 }
 
 /* Un rettangolo largo e basso, solo la mappa */
