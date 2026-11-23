@@ -150,12 +150,104 @@
 .airbnb { background: #FDE8EA; color: #B4233A; }
 .google { background: #E6F0FD; color: #1F5FBF; }
 
-/* ── Filtro ───────────────────────────────────── */
+/* ── Voti per categoria (Airbnb) ──────────────── */
+.categories {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--space-xs);
+    margin: 0;
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.category dt {
+    font-size: var(--fs-xs);
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.category dd {
+    margin: 0.1rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    line-height: 1.1;
+}
+
+/* ── Filtri ───────────────────────────────────── */
+.filters {
+    margin: var(--space-xl) 0 var(--space-md);
+}
+
 .tabs {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2xs);
-    margin: var(--space-xl) 0 var(--space-md);
+}
+
+.keywords {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin-top: var(--space-sm);
+}
+
+.keywordsLabel {
+    margin-right: var(--space-3xs);
+    font-size: var(--fs-eyebrow);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-eyebrow);
+    color: var(--c-brass);
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid transparent;
+    background: var(--c-sand);
+    color: var(--c-ink);
+    font: inherit;
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.chip:hover { border-color: var(--c-brass); }
+
+.chipActive,
+.chipActive:hover {
+    background: var(--c-brass-soft);
+    border-color: var(--c-brass);
+    color: var(--c-deep);
+    font-weight: 600;
+}
+
+.chipCount {
+    font-size: var(--fs-xs);
+    color: var(--c-ink-soft);
+}
+
+.resultLine {
+    margin-top: var(--space-md);
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+}
+
+.resultLine strong { color: var(--c-ink); }
+
+.clear {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--c-sea);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
 }
 
 .tab {
@@ -243,6 +335,55 @@
     color: var(--c-ink-soft);
 }
 
+/* Evidenziazione leggera della parola chiave */
+.mark {
+    background: linear-gradient(transparent 55%, rgba(217, 183, 132, 0.55) 55%);
+    color: inherit;
+    padding: 0 0.05em;
+}
+
+.clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 7;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.more {
+    align-self: flex-start;
+    margin-top: calc(var(--space-2xs) * -1);
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-sea);
+    cursor: pointer;
+}
+
+.note {
+    font-size: var(--fs-xs);
+    font-style: italic;
+    color: var(--c-ink-soft);
+}
+
+.reply {
+    padding: var(--space-xs) var(--space-sm);
+    border-left: 2px solid var(--c-brass-soft);
+    background: var(--c-shell);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+}
+
+.replyLabel {
+    margin-bottom: 0.15rem;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--c-ink);
+}
+
 /* ── Chiusura ─────────────────────────────────── */
 .cta {
     display: flex;
@@ -280,6 +421,8 @@
         grid-template-columns: 1fr;
         gap: var(--space-md);
     }
+
+    .categories { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 600px) {
@@ -294,4 +437,18 @@
     .sources { grid-template-columns: 1fr; }
 
     .quote { font-size: 1.2rem; }
+
+    /* Su telefono le parole chiave scorrono in orizzontale su una riga */
+    .keywords {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        margin-inline: calc(var(--gutter) * -1);
+        padding: 0 var(--gutter) var(--space-3xs);
+        scrollbar-width: none;
+    }
+
+    .keywords::-webkit-scrollbar { display: none; }
+
+    .chip,
+    .keywordsLabel { flex: none; }
 }
