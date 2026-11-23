@@ -124,7 +124,10 @@
     background: rgba(10, 20, 27, 0.96);
     display: grid;
     place-items: center;
-    padding: max(var(--space-lg), env(safe-area-inset-top)) var(--space-sm) calc(var(--space-xl) + env(safe-area-inset-bottom));
+    /* Spazio riservato sopra e sotto la foto per i controlli */
+    --lb-top: max(var(--space-lg), env(safe-area-inset-top));
+    --lb-bottom: calc(var(--space-xl) + env(safe-area-inset-bottom));
+    padding: var(--lb-top) var(--space-sm) var(--lb-bottom);
     animation: fadeIn var(--dur-med) var(--ease-out);
 }
 
@@ -139,8 +142,12 @@
 }
 
 .lightboxImage {
+    /* Il 100% di un elemento della griglia non limita l'altezza:
+       la foto va vincolata all'altezza dello schermo meno i margini */
     max-width: min(100%, 1400px);
-    max-height: 100%;
+    max-height: calc(100vh - var(--lb-top) - var(--lb-bottom));
+    max-height: calc(100dvh - var(--lb-top) - var(--lb-bottom));
+    min-height: 0;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -254,6 +261,12 @@
 
     .counter {
         bottom: calc(4.9rem + env(safe-area-inset-bottom));
+    }
+
+    /* Sotto la foto ci sono frecce e contatore, sopra il pulsante di chiusura */
+    .lightbox {
+        --lb-top: calc(4.5rem + env(safe-area-inset-top));
+        --lb-bottom: calc(6.75rem + env(safe-area-inset-bottom));
     }
 
     .cta {
