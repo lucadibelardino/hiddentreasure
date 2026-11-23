@@ -1,39 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useReveal from '../hooks/useReveal';
-import data from '../data/reviews.json';
+import Stars from './Stars';
+import { sources, sourceKeys, reviews, totalCount, overall, formatDate, fmt } from '../data/reviewsData';
+import type { Review, SourceKey } from '../data/reviewsData';
 import keywords from '../data/reviewKeywords';
 import styles from './ReviewsPage.module.css';
 
 /* Le recensioni vivono in src/data/reviews.json:
    si aggiornano a mano copiandole da Airbnb e Google.
    Le parole chiave del filtro sono in src/data/reviewKeywords.ts. */
-
-type SourceKey = 'airbnb' | 'google';
-
-interface Review {
-    name: string;
-    from?: string;
-    date: string; // AAAA-MM
-    rating: number;
-    source: SourceKey;
-    text: string;
-    translatedFrom?: string;
-    reply?: string;
-}
-
-interface Source {
-    label: string;
-    rating: number;
-    count: number;
-    url: string;
-    badge?: string;
-    categories?: { label: string; rating: number }[];
-}
-
-const sources = data.sources as Record<SourceKey, Source>;
-const reviews = [...(data.reviews as Review[])].sort((a, b) => b.date.localeCompare(a.date));
-const sourceKeys = Object.keys(sources) as SourceKey[];
 
 /* Una regex per parola chiave: la radice deve iniziare una parola */
 const keywordRegex = new Map(
@@ -61,47 +37,8 @@ const highlight = (text: string, re: RegExp | undefined): React.ReactNode => {
     return parts;
 };
 
-const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio',
-    'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
-
-const formatDate = (ym: string) => {
-    const [y, m] = ym.split('-').map(Number);
-    return m ? `${MONTHS[m - 1]} ${y}` : String(y);
-};
-
-const fmt = (n: number, digits: number) => n.toLocaleString('it-IT', { minimumFractionDigits: digits, maximumFractionDigits: digits });
-
-/* Media complessiva pesata sul numero di recensioni di ciascuna piattaforma */
-const totalCount = sourceKeys.reduce((s, k) => s + sources[k].count, 0);
-const overall = totalCount
-    ? sourceKeys.reduce((s, k) => s + sources[k].rating * sources[k].count, 0) / totalCount
-    : 0;
-
 /* Oltre questa lunghezza il testo si apre con "Continua a leggere" */
 const CLAMP_CHARS = 420;
-
-const Stars: React.FC<{ value: number; size?: number }> = ({ value, size = 16 }) => (
-    <span className={styles.stars} role="img" aria-label={`${fmt(value, 1)} stelle su 5`}>
-        {[0, 1, 2, 3, 4].map((i) => {
-            const fill = Math.max(0, Math.min(1, value - i));
-            const id = `st-${i}-${Math.round(fill * 100)}`;
-            return (
-                <svg key={i} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-                    <defs>
-                        <linearGradient id={id}>
-                            <stop offset={`${fill * 100}%`} stopColor="currentColor" />
-                            <stop offset={`${fill * 100}%`} stopColor="var(--c-sand)" />
-                        </linearGradient>
-                    </defs>
-                    <path
-                        fill={`url(#${id})`}
-                        d="M12 2.6l2.9 6 6.5.9-4.7 4.6 1.1 6.5L12 17.5l-5.8 3.1 1.1-6.5L2.6 9.5l6.5-.9z"
-                    />
-                </svg>
-            );
-        })}
-    </span>
-);
 
 const Arrow = () => (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -118,7 +55,7 @@ const ReviewCard: React.FC<{ review: Review; re?: RegExp }> = ({ review: r, re }
     return (
         <li className={styles.card}>
             <div className={styles.cardTop}>
-                <Stars value={r.rating} />
+                <Stars value={r.rating} className={styles.stars} />
                 <span className={`${styles.badge} ${styles[r.source]}`}>{sources[r.source].label}</span>
             </div>
             <blockquote className={`${styles.quote} ${clamped ? styles.clamped : ''}`}>
@@ -142,6 +79,14 @@ const ReviewCard: React.FC<{ review: Review; re?: RegExp }> = ({ review: r, re }
                     {r.from ? `${r.from} · ` : ''}{formatDate(r.date)}
                 </span>
             </p>
+            <a
+                href={r.url ?? sources[r.source].url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.verify}
+            >
+                {r.url ? `Vedi questa recensione su ${sources[r.source].label}` : `Verifica su ${sources[r.source].label}`}
+            </a>
         </li>
     );
 };
@@ -192,7 +137,7 @@ const ReviewsPage: React.FC = () => {
                     <div className={styles.overall}>
                         <span className={styles.overallValue}>{fmt(overall, 2)}</span>
                         <div>
-                            <Stars value={overall} size={20} />
+                            <Stars value={overall} size={20} className={styles.stars} />
                             <p className={styles.overallLabel}>
                                 Media su {totalCount} recensioni
                             </p>

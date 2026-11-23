@@ -1,5 +1,5 @@
 {
-  "_istruzioni": "Per aggiungere una recensione copia un blocco in 'reviews' e cambia i campi. source: 'airbnb' oppure 'google'. date: 'AAAA-MM'. rating: da 1 a 5. Campi facoltativi: from (provenienza), translatedFrom (lingua originale, se il testo è una traduzione), reply (risposta dell'host). In 'sources' aggiorna voto medio e numero totale come li mostra la piattaforma; 'categories' è facoltativo. Le parole chiave del filtro sono in src/data/reviewKeywords.ts.",
+  "_istruzioni": "Per aggiungere una recensione copia un blocco in 'reviews' e cambia i campi. source: 'airbnb' oppure 'google'. date: 'AAAA-MM'. rating: da 1 a 5. Campi facoltativi: from (provenienza), translatedFrom (lingua originale, se il testo è una traduzione), reply (risposta dell'host), url (link diretto alla recensione: su Google si copia da 'Condividi recensione'), featured (true = compare nello slider della home). In 'sources' aggiorna voto medio e numero totale come li mostra la piattaforma; 'categories' è facoltativo. Le parole chiave del filtro sono in src/data/reviewKeywords.ts.",
   "sources": {
     "airbnb": {
       "label": "Airbnb",
@@ -47,7 +47,8 @@
       "date": "2026-08",
       "rating": 5,
       "source": "airbnb",
-      "text": "Questo alloggio era semplicemente perfetto! Abbiamo cercato la tranquillità e l'abbiamo trovata, e questo a metà agosto! Tornerei in qualsiasi momento 🥰"
+      "text": "Questo alloggio era semplicemente perfetto! Abbiamo cercato la tranquillità e l'abbiamo trovata, e questo a metà agosto! Tornerei in qualsiasi momento 🥰",
+      "featured": true
     },
     {
       "name": "Hélène",
@@ -55,7 +56,8 @@
       "rating": 5,
       "source": "airbnb",
       "text": "Che posto meraviglioso! Spiaggia alla fine della terrazza. Non ci si stanca mai della terrazza sul tetto e dei suoi tramonti. Maria Lucia è reattiva e la comunicazione è stata fluida.",
-      "reply": "Per favore, torna di nuovo, sarò felice di ospitarti. Goditi il resto dell'estate!!!"
+      "reply": "Per favore, torna di nuovo, sarò felice di ospitarti. Goditi il resto dell'estate!!!",
+      "featured": true
     },
     {
       "name": "Guido",
@@ -69,7 +71,8 @@
       "date": "2025-08",
       "rating": 5,
       "source": "airbnb",
-      "text": "Posto incantevole, con vista mozzafiato sul mare, specialmente al tramonto e quando la luna si specchia sul mare proprio di fronte al giardino. La casa è piccola, ma con tutte le comodità, perfetta per la mia famiglia composta da me, mia moglie e i miei figli di 16 e 13 anni."
+      "text": "Posto incantevole, con vista mozzafiato sul mare, specialmente al tramonto e quando la luna si specchia sul mare proprio di fronte al giardino. La casa è piccola, ma con tutte le comodità, perfetta per la mia famiglia composta da me, mia moglie e i miei figli di 16 e 13 anni.",
+      "featured": true
     },
     {
       "name": "Ildikó",
@@ -121,7 +124,8 @@
       "date": "2022-06",
       "rating": 5,
       "source": "airbnb",
-      "text": "Questo appartamento è assolutamente al top, ha tutto il necessario, splendida posizione proprio sul mare. La spiaggia di sabbia era quasi privata, semplicemente fantastica. Ci torneremmo volentieri. Maria Lucia è stata molto disponibile e cordiale."
+      "text": "Questo appartamento è assolutamente al top, ha tutto il necessario, splendida posizione proprio sul mare. La spiaggia di sabbia era quasi privata, semplicemente fantastica. Ci torneremmo volentieri. Maria Lucia è stata molto disponibile e cordiale.",
+      "featured": true
     },
     {
       "name": "Tasja",
@@ -143,7 +147,8 @@
       "date": "2021-10",
       "rating": 5,
       "source": "airbnb",
-      "text": "La casa e soprattutto la cucina sono molto ben attrezzate e pratiche. La posizione è mozzafiato. La bellissima spiaggia direttamente davanti alla casa invita a fare il bagno, arrampicarsi e divertirsi. Ideale anche con bambini piccoli. Molte altre belle spiagge sono facilmente e rapidamente raggiungibili. Maria Lucia è molto cordiale e disponibile."
+      "text": "La casa e soprattutto la cucina sono molto ben attrezzate e pratiche. La posizione è mozzafiato. La bellissima spiaggia direttamente davanti alla casa invita a fare il bagno, arrampicarsi e divertirsi. Ideale anche con bambini piccoli. Molte altre belle spiagge sono facilmente e rapidamente raggiungibili. Maria Lucia è molto cordiale e disponibile.",
+      "featured": true
     },
     {
       "name": "Sophie",
@@ -151,7 +156,8 @@
       "date": "2021-10",
       "rating": 5,
       "source": "airbnb",
-      "text": "Abbiamo trascorso un meraviglioso soggiorno nella casa. Il mare è alla fine del giardino e la terrazza sul tetto è perfetta per gli aperitivi al tramonto di fronte al mare. La casa è ben attrezzata per cucinare. Si può fare la doccia all'esterno tornando dalla spiaggia. Un vero piacere."
+      "text": "Abbiamo trascorso un meraviglioso soggiorno nella casa. Il mare è alla fine del giardino e la terrazza sul tetto è perfetta per gli aperitivi al tramonto di fronte al mare. La casa è ben attrezzata per cucinare. Si può fare la doccia all'esterno tornando dalla spiaggia. Un vero piacere.",
+      "featured": true
     },
     {
       "name": "Regina",
@@ -195,7 +201,8 @@
       "date": "2019-10",
       "rating": 5,
       "source": "airbnb",
-      "text": "La posizione ha superato le aspettative! Essere a pochi passi dalla spiaggia privata è stato fantastico!! Torneremo sicuramente presto a visitare di nuovo la tua casa. Grazie per l'ottimo soggiorno 💖"
+      "text": "La posizione ha superato le aspettative! Essere a pochi passi dalla spiaggia privata è stato fantastico!! Torneremo sicuramente presto a visitare di nuovo la tua casa. Grazie per l'ottimo soggiorno 💖",
+      "featured": true
     },
     {
       "name": "Frederic",
