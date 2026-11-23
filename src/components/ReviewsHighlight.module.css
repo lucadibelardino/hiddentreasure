@@ -1,0 +1,208 @@
+.section {
+    padding-block: var(--section-y);
+    background-image: linear-gradient(160deg, var(--c-deep) 0%, var(--c-deep-2) 100%);
+    color: var(--c-white);
+}
+
+.inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* ── Intestazione ─────────────────────────────── */
+.head {
+    max-width: 640px;
+}
+
+.title {
+    margin: var(--space-2xs) 0 var(--space-sm);
+    font-size: var(--fs-h2);
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--c-white);
+}
+
+.title em {
+    font-style: italic;
+    font-weight: 600;
+    color: var(--c-brass-soft);
+}
+
+.score {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem 0.7rem;
+    font-size: var(--fs-sm);
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.scoreValue {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    line-height: 1;
+    color: var(--c-white);
+}
+
+.stars {
+    color: var(--c-brass-soft);
+}
+
+/* ── Slider ───────────────────────────────────── */
+.slider {
+    width: 100%;
+    max-width: 820px;
+    margin-top: var(--space-xl);
+}
+
+/* Tutte le slide occupano la stessa cella: l'altezza e' quella della piu' lunga,
+   cosi' la pagina non salta quando cambia recensione. */
+.viewport {
+    display: grid;
+}
+
+.slide {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition:
+        opacity var(--dur-slow) var(--ease-out),
+        transform var(--dur-slow) var(--ease-out),
+        visibility 0s linear var(--dur-slow);
+}
+
+.active {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+        opacity var(--dur-slow) var(--ease-out),
+        transform var(--dur-slow) var(--ease-out),
+        visibility 0s;
+}
+
+.quote {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 1.05rem + 1.3vw, 2.05rem);
+    font-weight: 400;
+    line-height: 1.35;
+    color: var(--c-white);
+}
+
+.author {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.authorName {
+    font-weight: 600;
+}
+
+.authorMeta {
+    font-size: var(--fs-sm);
+    color: rgba(255, 255, 255, 0.65);
+}
+
+/* ── Controlli ────────────────────────────────── */
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+}
+
+.arrow {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: transparent;
+    color: var(--c-white);
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.arrow:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.dots {
+    display: flex;
+    gap: 0.25rem;
+}
+
+/* Area cliccabile ampia, pallino piccolo */
+.dot {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.dot::after {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: background var(--transition-fast), width var(--transition-fast);
+}
+
+.dotActive::after {
+    width: 20px;
+    border-radius: var(--radius-pill);
+    background: var(--c-brass-soft);
+}
+
+/* ── Rimando ──────────────────────────────────── */
+.cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: var(--space-xl);
+    padding: 0.85rem 1.5rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--c-brass-soft);
+    color: var(--c-brass-soft);
+    font-weight: 600;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.cta:hover {
+    background: var(--c-brass-soft);
+    color: var(--c-deep);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .slide,
+    .active {
+        transition: none;
+        transform: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .controls { gap: var(--space-xs); }
+}

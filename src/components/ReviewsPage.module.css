@@ -384,6 +384,17 @@
     color: var(--c-ink);
 }
 
+.verify {
+    align-self: flex-start;
+    margin-top: calc(var(--space-2xs) * -1);
+    font-size: var(--fs-xs);
+    color: var(--c-ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.verify:hover { color: var(--c-sea); }
+
 /* ── Chiusura ─────────────────────────────────── */
 .cta {
     display: flex;
