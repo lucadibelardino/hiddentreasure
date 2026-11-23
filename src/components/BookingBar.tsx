@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DayPicker } from 'react-day-picker';
-import { it } from 'react-day-picker/locale';
+import { it, enGB, de, fr } from 'react-day-picker/locale';
+import { ROUTES, useLang, useT } from '../i18n';
 import 'react-day-picker/style.css';
 import styles from './BookingBar.module.css';
 
@@ -11,8 +12,13 @@ interface Availability {
     blocked: { from: string; to: string }[];
 }
 
+const DAY_PICKER_LOCALES = { it, en: enGB, de, fr };
+
 const BookingBar: React.FC = () => {
     const navigate = useNavigate();
+    const lang = useLang();
+    const t = useT().booking;
+    const contactPath = ROUTES[lang].contact;
     const [isOpen, setIsOpen] = useState(false);
     const [blockedDates, setBlockedDates] = useState<Date[]>([]);
     const [loading, setLoading] = useState(true);
@@ -104,15 +110,15 @@ const BookingBar: React.FC = () => {
                         <path d="M3 10h18M8 3v4M16 3v4" />
                     </svg>
                     <span className={styles.availabilityText}>
-                        <span className={styles.availabilityLabel}>Calendario</span>
-                        <span className={styles.availabilityValue}>Vedi le date libere</span>
+                        <span className={styles.availabilityLabel}>{t.calendar}</span>
+                        <span className={styles.availabilityValue}>{t.seeDates}</span>
                     </span>
                 </button>
 
                 <span className={styles.divider} aria-hidden="true" />
 
-                <button className={styles.cta} onClick={() => navigate('/contatti')}>
-                    Richiedi il preventivo
+                <button className={styles.cta} onClick={() => navigate(contactPath)}>
+                    {t.quote}
                 </button>
             </div>
 
@@ -123,16 +129,16 @@ const BookingBar: React.FC = () => {
                         className={styles.dialog}
                         role="dialog"
                         aria-modal="true"
-                        aria-label="Calendario delle disponibilita"
+                        aria-label={t.dialogAria}
                         tabIndex={-1}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <header className={styles.dialogHeader}>
                             <div>
-                                <p className={styles.dialogEyebrow}>Disponibilita</p>
-                                <h2 className={styles.dialogTitle}>Quando vuoi venire?</h2>
+                                <p className={styles.dialogEyebrow}>{t.dialogEyebrow}</p>
+                                <h2 className={styles.dialogTitle}>{t.dialogTitle}</h2>
                             </div>
-                            <button className={styles.iconClose} onClick={close} aria-label="Chiudi il calendario">
+                            <button className={styles.iconClose} onClick={close} aria-label={t.close}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
                                     <path d="M18 6 6 18M6 6l12 12" />
                                 </svg>
@@ -141,11 +147,11 @@ const BookingBar: React.FC = () => {
 
                         <div className={styles.calendarWrap}>
                             {loading ? (
-                                <p className={styles.loading}>Carico il calendario…</p>
+                                <p className={styles.loading}>{t.loading}</p>
                             ) : (
                                 <DayPicker
                                     mode="single"
-                                    locale={it}
+                                    locale={DAY_PICKER_LOCALES[lang]}
                                     numberOfMonths={twoMonths ? 2 : 1}
                                     showOutsideDays={false}
                                     disabled={[{ before: new Date() }, ...blockedDates]}
@@ -156,11 +162,11 @@ const BookingBar: React.FC = () => {
 
                         <footer className={styles.dialogFooter}>
                             <ul className={styles.legend}>
-                                <li><span className={`${styles.dot} ${styles.dotFree}`} />Libero</li>
-                                <li><span className={`${styles.dot} ${styles.dotBusy}`} />Occupato</li>
+                                <li><span className={`${styles.dot} ${styles.dotFree}`} />{t.free}</li>
+                                <li><span className={`${styles.dot} ${styles.dotBusy}`} />{t.busy}</li>
                             </ul>
-                            <button className={styles.footerCta} onClick={() => { setIsOpen(false); navigate('/contatti'); }}>
-                                Richiedi queste date
+                            <button className={styles.footerCta} onClick={() => { setIsOpen(false); navigate(contactPath); }}>
+                                {t.requestDates}
                             </button>
                         </footer>
                     </div>

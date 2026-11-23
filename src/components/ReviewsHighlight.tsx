@@ -1,7 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Stars from './Stars';
-import { reviews, sources, formatDate, fmt } from '../data/reviewsData';
+import { reviews, sources, formatDate, fmt, localize } from '../data/reviewsData';
+import { ROUTES, useLang, useT } from '../i18n';
 import type { Review } from '../data/reviewsData';
 import styles from './ReviewsHighlight.module.css';
 
@@ -53,21 +54,25 @@ const Laurel: React.FC<{ flip?: boolean }> = ({ flip }) => (
     </svg>
 );
 
-const Comment: React.FC<{ r: Review }> = ({ r }) => (
-    <article className={styles.card}>
-        <header className={styles.cardHead}>
-            <span className={styles.avatar} style={{ background: avatarColor(r.name) }} aria-hidden="true">
-                {r.name.charAt(0)}
-            </span>
-            <div className={styles.who}>
-                <span className={styles.name}>{r.name}</span>
-                <span className={styles.meta}>{formatDate(r.date)} · {sources[r.source].label}</span>
-            </div>
-            <Stars value={r.rating} size={13} className={styles.stars} />
-        </header>
-        <p className={styles.text}>{r.text}</p>
-    </article>
-);
+const Comment: React.FC<{ r: Review }> = ({ r }) => {
+    const lang = useLang();
+    const { text } = localize(r, lang);
+    return (
+        <article className={styles.card}>
+            <header className={styles.cardHead}>
+                <span className={styles.avatar} style={{ background: avatarColor(r.name) }} aria-hidden="true">
+                    {r.name.charAt(0)}
+                </span>
+                <div className={styles.who}>
+                    <span className={styles.name}>{r.name}</span>
+                    <span className={styles.meta}>{formatDate(r.date, lang)} · {sources[r.source].label}</span>
+                </div>
+                <Stars value={r.rating} size={13} className={styles.stars} />
+            </header>
+            <p className={styles.text}>{text}</p>
+        </article>
+    );
+};
 
 const ReviewsHighlight: React.FC = () => {
     const [index, setIndex] = useState(0);
@@ -76,6 +81,10 @@ const ReviewsHighlight: React.FC = () => {
     const [offset, setOffset] = useState(0);
     const trackRef = useRef<HTMLDivElement>(null);
     const n = slides.length;
+    const lang = useLang();
+    const dict = useT();
+    const t = dict.highlight;
+    const badge = airbnb.badge ? (dict.reviews.badge[airbnb.badge] ?? airbnb.badge) : t.fallbackTitle;
 
     // Posizione della card corrente (misurata, cosi' funziona a ogni larghezza)
     useLayoutEffect(() => {
@@ -115,15 +124,15 @@ const ReviewsHighlight: React.FC = () => {
                 <div className={styles.award}>
                     <Laurel />
                     <div className={styles.awardText}>
-                        <h2 id="ospiti-badge" className={styles.awardTitle}>{airbnb.badge ?? 'Dicono di noi'}</h2>
-                        <p className={styles.awardSource}>Riconoscimento Airbnb</p>
+                        <h2 id="ospiti-badge" className={styles.awardTitle}>{badge}</h2>
+                        <p className={styles.awardSource}>{t.awardSource}</p>
                     </div>
                     <Laurel flip />
                 </div>
                 <p className={styles.score}>
-                    <strong>{fmt(airbnb.rating, 2)}</strong> su {airbnb.count} recensioni Airbnb
+                    <strong>{fmt(airbnb.rating, 2, lang)}</strong> {t.scoreRest(airbnb.count)}
                     <span aria-hidden="true"> · </span>
-                    <Link to="/recensioni" className={styles.link}>Leggi tutte</Link>
+                    <Link to={ROUTES[lang].reviews} className={styles.link}>{t.readAll}</Link>
                 </p>
             </div>
 

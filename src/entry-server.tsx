@@ -15,4 +15,5 @@ export function render(url: string): string {
     );
 }
 
-export { PAGES, NOT_FOUND, canonicalUrl } from './seo/pages';
+export { PAGES, NOT_FOUND, canonicalUrl, alternates } from './seo/pages';
+export { OG_LOCALES, STRINGS, DEFAULT_LANG } from './i18n';

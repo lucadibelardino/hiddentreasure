@@ -1,52 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useReveal from '../hooks/useReveal';
+import { ROUTES, useLang, useT } from '../i18n';
 import styles from './Features.module.css';
 
 const delay = (ms: number) => ({ '--reveal-delay': `${ms}ms` } as React.CSSProperties);
 
-const features = [
-    {
-        label: 'Spiaggia',
-        title: 'Il mare in giardino',
-        description:
-            "Per arrivare al mare basta un passo: alla fine del prato inizia la sabbia, così vicina che si sentono le onde rompere."
-    },
-    {
-        label: 'Vista',
-        title: 'Terrazza panoramica',
-        description:
-            "Una vista di 270 gradi sul mare. Il belvedere privato dove finiscono tutte le giornate, con il sole che cala dietro la costa."
-    },
-    {
-        label: 'Accesso',
-        title: 'Spiaggia semiprivata',
-        description:
-            "La spiaggia a fine prato è semiprivata: niente file di ombrelloni, niente corsa per un posto la mattina presto."
-    },
-    {
-        label: 'Interni',
-        title: 'Da quattro a sei posti letto',
-        description:
-            "Una camera matrimoniale e una junior per quattro persone, più il divano letto in soggiorno per arrivare a sei. Due bagni completi e cucina attrezzata."
-    },
-    {
-        label: 'Esterni',
-        title: 'Giardino e due patii',
-        description:
-            "Un giardino curato e due patii luminosi: uno per la colazione al sole, l'altro all'ombra per il pomeriggio."
-    }
-];
-
-const stats = [
-    { value: '0', unit: 'passi', label: 'dal mare' },
-    { value: '270', unit: 'gradi', label: 'di vista dalla terrazza' },
-    { value: '4–6', unit: 'posti', label: 'letto' }
-];
+/* Testi in src/i18n/strings.ts, chiave "features" */
 
 const Features: React.FC = () => {
     const ref = useReveal<HTMLElement>();
     const navigate = useNavigate();
+    const lang = useLang();
+    const t = useT().features;
+    const { items: features, stats } = t;
 
     return (
         <section id="villa" ref={ref} className={styles.section} aria-labelledby="villa-title">
@@ -56,23 +23,23 @@ const Features: React.FC = () => {
                     <figure className={`${styles.media} reveal`}>
                         <img
                             src="/images/gallery/photo_2026-05-13_19-14-20.webp"
-                            alt="Il tramonto visto dalla terrazza panoramica della villa"
+                            alt={t.imageAlt}
                             loading="lazy"
                         />
-                        <figcaption className={styles.caption}>La terrazza, al tramonto</figcaption>
+                        <figcaption className={styles.caption}>{t.caption}</figcaption>
                     </figure>
                 </div>
 
                 <div className={styles.contentCol}>
-                    <p className={`eyebrow ${styles.eyebrow} reveal`}>La villa</p>
+                    <p className={`eyebrow ${styles.eyebrow} reveal`}>{t.eyebrow}</p>
 
                     <h2 id="villa-title" className={`${styles.title} reveal`} style={delay(60)}>
-                        Un posto che si spiega<em> in tre numeri</em>
+                        {t.title}<em>{t.titleAccent}</em>
                     </h2>
 
                     <dl className={`${styles.stats} reveal`} style={delay(120)}>
                         {stats.map((s) => (
-                            <div key={s.label} className={styles.stat}>
+                            <div key={s.unit} className={styles.stat}>
                                 <dt className={styles.statValue}>
                                     {s.value}<span className={styles.statUnit}>{s.unit}</span>
                                 </dt>
@@ -94,11 +61,11 @@ const Features: React.FC = () => {
                     </ul>
 
                     <div className={`${styles.actions} reveal`}>
-                        <button className={styles.primary} onClick={() => navigate('/contatti')}>
-                            Chiedi le date
+                        <button className={styles.primary} onClick={() => navigate(ROUTES[lang].contact)}>
+                            {t.askDates}
                         </button>
-                        <button className={styles.secondary} onClick={() => navigate('/gallery')}>
-                            Vedi tutte le foto
+                        <button className={styles.secondary} onClick={() => navigate(ROUTES[lang].gallery)}>
+                            {t.allPhotos}
                         </button>
                     </div>
                 </div>

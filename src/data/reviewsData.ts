@@ -1,4 +1,5 @@
 import data from './reviews.json';
+import { DEFAULT_LANG, type Lang } from '../i18n/langs';
 
 /* Dati e funzioni comuni alla pagina Recensioni e alla sezione in home. */
 
@@ -17,6 +18,20 @@ export interface Review {
     url?: string;
     /** true = compare nello slider della home */
     featured?: boolean;
+    /** Traduzioni per le versioni del sito in inglese, tedesco e francese */
+    i18n?: Partial<Record<Exclude<Lang, 'it'>, { text?: string; reply?: string; from?: string }>>;
+}
+
+/** Testo, risposta e provenienza nella lingua della pagina (se manca la traduzione resta l'italiano). */
+export function localize(r: Review, lang: Lang) {
+    const tr = lang === DEFAULT_LANG ? undefined : r.i18n?.[lang as Exclude<Lang, 'it'>];
+    return {
+        text: tr?.text ?? r.text,
+        reply: tr?.reply ?? r.reply,
+        from: tr?.from ?? r.from,
+        /** true = il testo mostrato e' una nostra traduzione */
+        translated: Boolean(tr?.text),
+    };
 }
 
 export interface Source {
@@ -38,13 +53,4 @@ export const overall = totalCount
     ? sourceKeys.reduce((s, k) => s + sources[k].rating * sources[k].count, 0) / totalCount
     : 0;
 
-const MONTHS = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio',
-    'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
-
-export const formatDate = (ym: string) => {
-    const [y, m] = ym.split('-').map(Number);
-    return m ? `${MONTHS[m - 1]} ${y}` : String(y);
-};
-
-export const fmt = (n: number, digits: number) =>
-    n.toLocaleString('it-IT', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+export { formatMonth as formatDate, formatNumber as fmt } from '../i18n';
