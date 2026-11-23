@@ -230,6 +230,7 @@ const Header: React.FC = () => {
                     <a href={`${routes.home}#villa`} className={styles.link} onClick={(e) => goToSection(e, 'villa')}>{t.villa}</a>
                     <a href={routes.gallery} className={styles.link} onClick={(e) => goTo(e, routes.gallery)}>{t.gallery}</a>
                     <a href={routes.reviews} className={styles.link} onClick={(e) => goTo(e, routes.reviews)}>{t.reviews}</a>
+                    <a href={routes.contact} className={styles.link} onClick={(e) => goTo(e, routes.contact)}>{t.contact}</a>
                     <a href={routes.contact} className={styles.cta} onClick={(e) => goTo(e, routes.contact)}>{t.book}</a>
                     <LanguageSwitcher variant="desk" />
                 </nav>
