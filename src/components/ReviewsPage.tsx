@@ -256,7 +256,7 @@ const ReviewsPage: React.FC = () => {
                                     aria-pressed={active}
                                     onClick={() => setKeyword(active ? null : k.id)}
                                 >
-                                    <span aria-hidden="true">{k.icon}</span> {k.label} <span className={styles.chipCount}>{n}</span>
+                                    {k.label} <span className={styles.chipCount}>{n}</span>
                                 </button>
                             );
                         })}
