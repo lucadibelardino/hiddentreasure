@@ -38,7 +38,7 @@ src/
   hooks/          useReveal — animazioni allo scroll con IntersectionObserver
   lib/            client Supabase
   styles/         variabili di design e stili globali
-public/images/    hero/ (slideshow) e gallery/ (galleria)
+public/images/    hero/ (slideshow, WebP 1920px), gallery/ (WebP 1600px) e gallery/thumb/ (miniature 800px)
 ```
 
 ## Design

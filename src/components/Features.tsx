@@ -55,7 +55,7 @@ const Features: React.FC = () => {
                 <div className={styles.mediaCol}>
                     <figure className={`${styles.media} reveal`}>
                         <img
-                            src="/images/gallery/photo_2026-05-13_19-14-20.jpg"
+                            src="/images/gallery/photo_2026-05-13_19-14-20.webp"
                             alt="Il tramonto visto dalla terrazza panoramica della villa"
                             loading="lazy"
                         />
