@@ -73,6 +73,17 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
+  <!-- Cloudflare Web Analytics: statistiche senza cookie (vedi privacy policy).
+       Parte solo sul sito vero, non in sviluppo su localhost. -->
+  <script>
+    if (location.hostname === 'hiddentreasurevillasimius.com') {
+      var cf = document.createElement('script');
+      cf.defer = true;
+      cf.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+      cf.setAttribute('data-cf-beacon', '{"token": "37d4db4f5c5b4445a42524647121ae34"}');
+      document.head.appendChild(cf);
+    }
+  </script>
 </body>
 
 </html>
