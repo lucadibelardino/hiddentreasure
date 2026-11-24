@@ -8,6 +8,7 @@ import LocationMap from './components/LocationMap';
 import GalleryPage from './components/GalleryPage';
 import ContactPage from './components/ContactPage';
 import ReviewsPage from './components/ReviewsPage';
+import RequestPage from './components/RequestPage';
 import Footer from './components/Footer';
 import PageHead from './seo/PageHead';
 import { LANGS, DEFAULT_LANG, ROUTES, useLang, useT, type PageKey } from './i18n';
@@ -77,6 +78,8 @@ const App: React.FC = () => {
             <div id="main" key={lang}>
                 <Routes>
                     {routes}
+                    {/* Pagina di prova del modulo di richiesta: fuori dal menu e dalla sitemap */}
+                    <Route path="/provabanner" element={<RequestPage />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>
