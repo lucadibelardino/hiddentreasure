@@ -36,7 +36,20 @@ export const notFoundMeta = (lang: Lang): PageMeta => ({
 
 export const NOT_FOUND = notFoundMeta(DEFAULT_LANG);
 
+/** Pagine di prova: raggiungibili, ma non indicizzate e fuori dalla sitemap. */
+export const HIDDEN_PAGES: PageMeta[] = [
+    {
+        lang: DEFAULT_LANG,
+        page: null,
+        path: '/provabanner',
+        title: 'Richiesta di disponibilità | Hidden Treasure Villasimius',
+        description: 'Scegli le date e chiedi la disponibilità della villa direttamente ai proprietari.',
+    },
+];
+
 export function metaFor(pathname: string): PageMeta {
+    const hidden = HIDDEN_PAGES.find((m) => m.path === pathname.replace(/\/+$/, ''));
+    if (hidden) return hidden;
     const lang = langFromPath(pathname);
     const page = pageFromPath(pathname);
     return page ? metaOf(lang, page) : notFoundMeta(lang);

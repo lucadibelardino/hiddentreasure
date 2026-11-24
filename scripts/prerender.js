@@ -13,7 +13,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dist = path.join(root, 'dist');
 const ssrEntry = path.join(root, 'dist-ssr', 'entry-server.js');
 
-const { render, PAGES, NOT_FOUND, canonicalUrl, alternates, OG_LOCALES, STRINGS, DEFAULT_LANG } = await import(pathToFileURL(ssrEntry).href);
+const { render, PAGES, HIDDEN_PAGES, NOT_FOUND, canonicalUrl, alternates, OG_LOCALES, STRINGS, DEFAULT_LANG } = await import(pathToFileURL(ssrEntry).href);
 const template = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
 
 const escapeHtml = (s) =>
@@ -60,6 +60,13 @@ for (const meta of PAGES) {
     fs.mkdirSync(path.dirname(path.join(dist, file)), { recursive: true });
     fs.writeFileSync(path.join(dist, file), buildPage(meta));
     console.log(`prerender: ${meta.path} -> dist/${file}`);
+}
+
+// Pagine di prova: stesso HTML pre-renderizzato, ma noindex e fuori dalla sitemap
+for (const meta of HIDDEN_PAGES) {
+    const file = `${meta.path.slice(1)}.html`;
+    fs.writeFileSync(path.join(dist, file), buildPage(meta, { noindex: true }));
+    console.log(`prerender: ${meta.path} -> dist/${file} (noindex)`);
 }
 
 // Un solo 404.html per tutto il sito (lo impone GitHub Pages), in italiano:
