@@ -5,6 +5,7 @@
  */
 import { LANGS, PAGE_KEYS, ROUTES, DEFAULT_LANG, langFromPath, pageFromPath, type Lang, type PageKey } from '../i18n/langs';
 import { STRINGS } from '../i18n/strings';
+import { WELCOME_ROUTES, WELCOME_TEXT } from '../i18n/welcome';
 
 export const SITE_URL = 'https://hiddentreasurevillasimius.com';
 
@@ -36,8 +37,11 @@ export const notFoundMeta = (lang: Lang): PageMeta => ({
 
 export const NOT_FOUND = notFoundMeta(DEFAULT_LANG);
 
-/** Pagine di prova: raggiungibili, ma non indicizzate e fuori dalla sitemap. */
-export const HIDDEN_PAGES: PageMeta[] = [];
+/** Pagine nascoste: raggiungibili, ma non indicizzate e fuori dalla sitemap. */
+export const HIDDEN_PAGES: PageMeta[] = [
+    // Guida per gli ospiti, in ogni lingua
+    ...LANGS.map((lang) => ({ lang, page: null, path: WELCOME_ROUTES[lang], ...WELCOME_TEXT[lang].meta })),
+];
 
 export function metaFor(pathname: string): PageMeta {
     const hidden = HIDDEN_PAGES.find((m) => m.path === pathname.replace(/\/+$/, ''));

@@ -9,6 +9,8 @@ import GalleryPage from './components/GalleryPage';
 import ContactPage from './components/ContactPage';
 import ReviewsPage from './components/ReviewsPage';
 import PrivacyPage from './components/PrivacyPage';
+import WelcomePage from './components/WelcomePage';
+import { WELCOME_ROUTES } from './i18n/welcome';
 import Footer from './components/Footer';
 import PageHead from './seo/PageHead';
 import { LANGS, DEFAULT_LANG, ROUTES, useLang, useT, type PageKey } from './i18n';
@@ -59,6 +61,8 @@ const PAGE_ELEMENTS: Record<PageKey, React.ReactElement> = {
 
 /* Ogni pagina esiste in ogni lingua: /gallery, /en/gallery, /de/galerie, /fr/galerie... */
 const routes = LANGS.flatMap((lang) => [
+    // Guida per gli ospiti: fuori dal menu e dalla sitemap, noindex (src/i18n/welcome.ts)
+    <Route key={`${lang}-welcome`} path={WELCOME_ROUTES[lang]} element={<WelcomePage />} />,
     ...(Object.keys(PAGE_ELEMENTS) as PageKey[]).map((page) => (
         <Route key={`${lang}-${page}`} path={ROUTES[lang][page]} element={PAGE_ELEMENTS[page]} />
     )),
