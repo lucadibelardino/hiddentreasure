@@ -9,6 +9,8 @@ export const PRIVACY = {
     email: 'gestionehtv@gmail.com',
     /** Richieste dal modulo: cancellate in automatico N mesi dopo la data di partenza. */
     requestMonths: 3,
+    /** Email di notifica e corrispondenza con gli ospiti (Gmail): da cancellare a mano entro N mesi. */
+    emailMonths: 12,
     /** Ultimo aggiornamento della policy (AAAA-MM-GG). */
     updated: '2026-11-25',
 };

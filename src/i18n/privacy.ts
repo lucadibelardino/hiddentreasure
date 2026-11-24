@@ -46,7 +46,7 @@ const it: PrivacyText = {
                     ],
                 },
                 'Li usiamo solo per risponderti e prepararti un preventivo. La base giuridica è la richiesta che ci fai prima di un eventuale contratto di locazione (art. 6.1.b GDPR). Nome ed email servono per poterti rispondere: senza, la richiesta non può partire.',
-                `Le richieste vengono cancellate in automatico ${P.requestMonths} mesi dopo la data di partenza indicata. Entro lo stesso periodo cancelliamo anche l'email di notifica che riceviamo. Se il soggiorno si conclude, i dati necessari al contratto e agli obblighi di legge (fiscali e di pubblica sicurezza) sono conservati per il tempo previsto dalla legge.`,
+                `Le richieste vengono cancellate in automatico ${P.requestMonths} mesi dopo la data di partenza indicata. L'email di notifica che riceviamo e la corrispondenza con te le conserviamo al massimo ${P.emailMonths} mesi. Se il soggiorno si conclude, i dati necessari al contratto e agli obblighi di legge (fiscali e di pubblica sicurezza) sono conservati per il tempo previsto dalla legge.`,
             ],
         },
         {
@@ -125,7 +125,7 @@ const en: PrivacyText = {
                     ],
                 },
                 'We use them only to reply to you and prepare a quote. The legal basis is the request you make before a possible rental contract (Art. 6(1)(b) GDPR). We need your name and email to be able to reply: without them the request cannot be sent.',
-                `Requests are deleted automatically ${P.requestMonths} months after the requested departure date. Within the same period we also delete the notification email we receive. If you go on to stay with us, the data needed for the contract and for legal obligations (tax and police registration) is kept for as long as the law requires.`,
+                `Requests are deleted automatically ${P.requestMonths} months after the requested departure date. We keep the notification email we receive and our correspondence with you for no more than ${P.emailMonths} months. If you go on to stay with us, the data needed for the contract and for legal obligations (tax and police registration) is kept for as long as the law requires.`,
             ],
         },
         {
@@ -204,7 +204,7 @@ const de: PrivacyText = {
                     ],
                 },
                 'Wir verwenden diese Daten ausschließlich, um Ihnen zu antworten und ein Angebot zu erstellen. Rechtsgrundlage ist Ihre Anfrage vor einem möglichen Mietvertrag (Art. 6 Abs. 1 lit. b DSGVO). Name und E-Mail-Adresse brauchen wir, um antworten zu können: ohne sie kann die Anfrage nicht gesendet werden.',
-                `Anfragen werden ${P.requestMonths} Monate nach dem angefragten Abreisedatum automatisch gelöscht. Innerhalb desselben Zeitraums löschen wir auch die Benachrichtigungs-E-Mail, die wir erhalten. Kommt ein Aufenthalt zustande, bewahren wir die für den Vertrag und die gesetzlichen Pflichten (Steuern und polizeiliche Gästemeldung) nötigen Daten so lange auf, wie das Gesetz es vorschreibt.`,
+                `Anfragen werden ${P.requestMonths} Monate nach dem angefragten Abreisedatum automatisch gelöscht. Die Benachrichtigungs-E-Mail, die wir erhalten, und unsere Korrespondenz mit Ihnen bewahren wir höchstens ${P.emailMonths} Monate auf. Kommt ein Aufenthalt zustande, bewahren wir die für den Vertrag und die gesetzlichen Pflichten (Steuern und polizeiliche Gästemeldung) nötigen Daten so lange auf, wie das Gesetz es vorschreibt.`,
             ],
         },
         {
@@ -283,7 +283,7 @@ const fr: PrivacyText = {
                     ],
                 },
                 'Nous les utilisons uniquement pour vous répondre et vous préparer un devis. La base juridique est la demande que vous faites avant un éventuel contrat de location (art. 6.1.b RGPD). Le nom et l’e-mail sont nécessaires pour vous répondre : sans eux, la demande ne peut pas être envoyée.',
-                `Les demandes sont supprimées automatiquement ${P.requestMonths} mois après la date de départ demandée. Dans le même délai, nous supprimons aussi l’e-mail de notification que nous recevons. Si le séjour a lieu, les données nécessaires au contrat et aux obligations légales (fiscales et déclaration des voyageurs à la police) sont conservées pendant la durée prévue par la loi.`,
+                `Les demandes sont supprimées automatiquement ${P.requestMonths} mois après la date de départ demandée. Nous conservons l’e-mail de notification que nous recevons et nos échanges avec vous pendant ${P.emailMonths} mois au maximum. Si le séjour a lieu, les données nécessaires au contrat et aux obligations légales (fiscales et déclaration des voyageurs à la police) sont conservées pendant la durée prévue par la loi.`,
             ],
         },
         {
