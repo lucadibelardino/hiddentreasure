@@ -37,15 +37,8 @@ export const notFoundMeta = (lang: Lang): PageMeta => ({
 
 export const NOT_FOUND = notFoundMeta(DEFAULT_LANG);
 
-/** Pagine di prova: raggiungibili, ma non indicizzate e fuori dalla sitemap. */
+/** Pagine nascoste: raggiungibili, ma non indicizzate e fuori dalla sitemap. */
 export const HIDDEN_PAGES: PageMeta[] = [
-    {
-        lang: DEFAULT_LANG,
-        page: null,
-        path: '/provabanner',
-        title: 'Prova barra di prenotazione | Hidden Treasure Villasimius',
-        description: 'Pagina di prova: la home con la nuova barra di prenotazione.',
-    },
     // Guida per gli ospiti, in ogni lingua
     ...LANGS.map((lang) => ({ lang, page: null, path: WELCOME_ROUTES[lang], ...WELCOME_TEXT[lang].meta })),
 ];
