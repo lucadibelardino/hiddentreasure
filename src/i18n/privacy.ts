@@ -58,8 +58,9 @@ const it: PrivacyText = {
         {
             h: 'Navigazione sul sito',
             body: [
-                "Come ogni sito, per mostrarti le pagine i server ricevono il tuo indirizzo IP e i dati tecnici del browser. Li trattiamo per legittimo interesse (art. 6.1.f GDPR), cioè per far funzionare il sito e proteggerlo da abusi. Non facciamo statistiche sulle visite e non ti profiliamo.",
+                "Come ogni sito, per mostrarti le pagine i server ricevono il tuo indirizzo IP e i dati tecnici del browser. Li trattiamo per legittimo interesse (art. 6.1.f GDPR), cioè per far funzionare il sito e proteggerlo da abusi. Non ti profiliamo.",
                 'I caratteri tipografici sono serviti dal nostro sito, non da servizi esterni.',
+                'Per sapere quante persone visitano il sito e da dove arrivano usiamo Cloudflare Web Analytics. Non usa cookie, non salva nulla sul tuo dispositivo e non ti segue su altri siti: ci mostra solo numeri complessivi (visite, pagine, Paese, sito di provenienza). Lo facciamo per legittimo interesse, per migliorare il sito.',
                 "La mappa in fondo alla home carica le immagini satellitari dai server di Esri quando la mappa diventa visibile. Esri riceve così il tuo indirizzo IP, ma non salva cookie. Lo facciamo per legittimo interesse, per mostrarti dove si trova la villa.",
             ],
         },
@@ -70,7 +71,7 @@ const it: PrivacyText = {
                 {
                     list: [
                         'GitHub (GitHub Inc.): ospita il sito;',
-                        'Cloudflare (Cloudflare Inc.): riceve e conserva le richieste del modulo, invia le email di notifica e gestisce il dominio;',
+                        'Cloudflare (Cloudflare Inc.): riceve e conserva le richieste del modulo, invia le email di notifica, gestisce il dominio e le statistiche anonime delle visite;',
                         'Google (Gmail): la casella dove riceviamo le notifiche e le tue email;',
                         'Esri: immagini satellitari della mappa.',
                     ],
@@ -81,7 +82,7 @@ const it: PrivacyText = {
         {
             h: 'Cookie',
             body: [
-                'Il sito non usa cookie di profilazione, di statistica o di terze parti, per questo non vedi nessun banner.',
+                'Il sito non usa cookie: né di profilazione, né di statistica, né di terze parti. Per questo non vedi nessun banner.',
                 "Usiamo solo una memoria tecnica del browser (sessionStorage) per ricordare che hai già visto l'avviso sulle altre lingue, così non te lo mostriamo a ogni pagina. Si cancella da sola quando chiudi la scheda.",
             ],
         },
@@ -137,8 +138,9 @@ const en: PrivacyText = {
         {
             h: 'Browsing the website',
             body: [
-                'Like any website, to show you the pages the servers receive your IP address and technical data about your browser. We process them on the basis of legitimate interest (Art. 6(1)(f) GDPR), that is to run the website and protect it from abuse. We do not collect visitor statistics and we do not profile you.',
+                'Like any website, to show you the pages the servers receive your IP address and technical data about your browser. We process them on the basis of legitimate interest (Art. 6(1)(f) GDPR), that is to run the website and protect it from abuse. We do not profile you.',
                 'The fonts are served from our own website, not from external services.',
+                'To know how many people visit the website and where they come from we use Cloudflare Web Analytics. It uses no cookies, stores nothing on your device and does not track you across other websites: it only shows us aggregate figures (visits, pages, country, referring website). We do this on the basis of legitimate interest, to improve the website.',
                 'The map at the bottom of the home page loads satellite images from Esri servers when it comes into view. Esri therefore receives your IP address, but sets no cookies. We do this on the basis of legitimate interest, to show you where the villa is.',
             ],
         },
@@ -149,7 +151,7 @@ const en: PrivacyText = {
                 {
                     list: [
                         'GitHub (GitHub Inc.): hosts the website;',
-                        'Cloudflare (Cloudflare Inc.): receives and stores form requests, sends notification emails and manages the domain;',
+                        'Cloudflare (Cloudflare Inc.): receives and stores form requests, sends notification emails, manages the domain and the anonymous visit statistics;',
                         'Google (Gmail): the mailbox where we receive notifications and your emails;',
                         'Esri: satellite images for the map.',
                     ],
@@ -216,8 +218,9 @@ const de: PrivacyText = {
         {
             h: 'Besuch der Website',
             body: [
-                'Wie bei jeder Website erhalten die Server Ihre IP-Adresse und technische Angaben zu Ihrem Browser, um Ihnen die Seiten anzuzeigen. Wir verarbeiten sie auf Grundlage unseres berechtigten Interesses (Art. 6 Abs. 1 lit. f DSGVO), um die Website zu betreiben und vor Missbrauch zu schützen. Wir erstellen keine Besucherstatistiken und keine Profile.',
+                'Wie bei jeder Website erhalten die Server Ihre IP-Adresse und technische Angaben zu Ihrem Browser, um Ihnen die Seiten anzuzeigen. Wir verarbeiten sie auf Grundlage unseres berechtigten Interesses (Art. 6 Abs. 1 lit. f DSGVO), um die Website zu betreiben und vor Missbrauch zu schützen. Wir erstellen keine Profile.',
                 'Die Schriftarten werden von unserer eigenen Website geladen, nicht von externen Diensten.',
+                'Um zu wissen, wie viele Menschen die Website besuchen und woher sie kommen, nutzen wir Cloudflare Web Analytics. Der Dienst verwendet keine Cookies, speichert nichts auf Ihrem Gerät und verfolgt Sie nicht über andere Websites: Er zeigt uns nur Gesamtzahlen (Besuche, Seiten, Land, verweisende Website). Das geschieht auf Grundlage unseres berechtigten Interesses, die Website zu verbessern.',
                 'Die Karte unten auf der Startseite lädt Satellitenbilder von Servern der Firma Esri, sobald sie sichtbar wird. Esri erhält dabei Ihre IP-Adresse, setzt aber keine Cookies. Das geschieht auf Grundlage unseres berechtigten Interesses, Ihnen die Lage der Villa zu zeigen.',
             ],
         },
@@ -228,7 +231,7 @@ const de: PrivacyText = {
                 {
                     list: [
                         'GitHub (GitHub Inc.): Hosting der Website;',
-                        'Cloudflare (Cloudflare Inc.): Empfang und Speicherung der Formularanfragen, Versand der Benachrichtigungs-E-Mails, Verwaltung der Domain;',
+                        'Cloudflare (Cloudflare Inc.): Empfang und Speicherung der Formularanfragen, Versand der Benachrichtigungs-E-Mails, Verwaltung der Domain und anonyme Besucherstatistik;',
                         'Google (Gmail): das Postfach, in dem wir Benachrichtigungen und Ihre E-Mails erhalten;',
                         'Esri: Satellitenbilder der Karte.',
                     ],
@@ -295,8 +298,9 @@ const fr: PrivacyText = {
         {
             h: 'Navigation sur le site',
             body: [
-                'Comme pour tout site, pour vous afficher les pages les serveurs reçoivent votre adresse IP et des données techniques sur votre navigateur. Nous les traitons sur la base de notre intérêt légitime (art. 6.1.f RGPD), pour faire fonctionner le site et le protéger des abus. Nous ne faisons pas de statistiques de visite et ne vous profilons pas.',
+                'Comme pour tout site, pour vous afficher les pages les serveurs reçoivent votre adresse IP et des données techniques sur votre navigateur. Nous les traitons sur la base de notre intérêt légitime (art. 6.1.f RGPD), pour faire fonctionner le site et le protéger des abus. Nous ne vous profilons pas.',
                 'Les polices de caractères sont servies par notre propre site, pas par des services externes.',
+                'Pour savoir combien de personnes visitent le site et d’où elles viennent, nous utilisons Cloudflare Web Analytics. Il n’utilise aucun cookie, n’enregistre rien sur votre appareil et ne vous suit pas sur d’autres sites : il nous montre seulement des chiffres globaux (visites, pages, pays, site d’origine). Nous le faisons sur la base de notre intérêt légitime, pour améliorer le site.',
                 'La carte en bas de la page d’accueil charge des images satellite depuis les serveurs d’Esri lorsqu’elle devient visible. Esri reçoit ainsi votre adresse IP, mais ne dépose aucun cookie. Nous le faisons sur la base de notre intérêt légitime, pour vous montrer où se trouve la villa.',
             ],
         },
@@ -307,7 +311,7 @@ const fr: PrivacyText = {
                 {
                     list: [
                         'GitHub (GitHub Inc.) : héberge le site ;',
-                        'Cloudflare (Cloudflare Inc.) : reçoit et conserve les demandes du formulaire, envoie les e-mails de notification et gère le domaine ;',
+                        'Cloudflare (Cloudflare Inc.) : reçoit et conserve les demandes du formulaire, envoie les e-mails de notification, gère le domaine et les statistiques anonymes de visite ;',
                         'Google (Gmail) : la boîte où nous recevons les notifications et vos e-mails ;',
                         'Esri : images satellite de la carte.',
                     ],
