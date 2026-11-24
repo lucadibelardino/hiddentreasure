@@ -79,19 +79,6 @@ const it = {
         scrollAria: 'Scorri alla presentazione della villa',
     },
 
-    booking: {
-        calendar: 'Calendario',
-        seeDates: 'Vedi le date libere',
-        quote: 'Richiedi il preventivo',
-        dialogAria: 'Calendario delle disponibilità',
-        dialogEyebrow: 'Disponibilità',
-        dialogTitle: 'Quando vuoi venire?',
-        close: 'Chiudi il calendario',
-        loading: 'Carico il calendario…',
-        free: 'Libero',
-        busy: 'Occupato',
-        requestDates: 'Richiedi queste date',
-    },
 
     features: {
         items: [
@@ -395,19 +382,6 @@ const en: Dict = {
         scrollAria: 'Scroll to the villa',
     },
 
-    booking: {
-        calendar: 'Calendar',
-        seeDates: 'See available dates',
-        quote: 'Request a quote',
-        dialogAria: 'Availability calendar',
-        dialogEyebrow: 'Availability',
-        dialogTitle: 'When would you like to come?',
-        close: 'Close the calendar',
-        loading: 'Loading the calendar…',
-        free: 'Available',
-        busy: 'Booked',
-        requestDates: 'Ask about these dates',
-    },
 
     features: {
         items: [
@@ -716,19 +690,6 @@ const de: Dict = {
         scrollAria: 'Weiter zur Vorstellung der Villa',
     },
 
-    booking: {
-        calendar: 'Kalender',
-        seeDates: 'Freie Termine ansehen',
-        quote: 'Angebot anfragen',
-        dialogAria: 'Belegungskalender',
-        dialogEyebrow: 'Verfügbarkeit',
-        dialogTitle: 'Wann möchten Sie kommen?',
-        close: 'Kalender schließen',
-        loading: 'Kalender wird geladen…',
-        free: 'Frei',
-        busy: 'Belegt',
-        requestDates: 'Diese Termine anfragen',
-    },
 
     features: {
         items: [
@@ -1037,19 +998,6 @@ const fr: Dict = {
         scrollAria: 'Défiler jusqu’à la présentation de la villa',
     },
 
-    booking: {
-        calendar: 'Calendrier',
-        seeDates: 'Voir les dates libres',
-        quote: 'Demander un devis',
-        dialogAria: 'Calendrier des disponibilités',
-        dialogEyebrow: 'Disponibilités',
-        dialogTitle: 'Quand souhaitez-vous venir ?',
-        close: 'Fermer le calendrier',
-        loading: 'Chargement du calendrier…',
-        free: 'Libre',
-        busy: 'Réservé',
-        requestDates: 'Demander ces dates',
-    },
 
     features: {
         items: [
