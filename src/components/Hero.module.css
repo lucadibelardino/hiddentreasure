@@ -12,6 +12,17 @@
     padding: calc(var(--header-h) + var(--space-xl)) 0 calc(var(--space-2xl) + env(safe-area-inset-bottom));
 }
 
+/* Con la barra nuova i pannelli del calendario possono uscire dalla hero:
+   si ritaglia solo lo sfondo, e la hero resta sopra le sezioni successive */
+.heroOpen {
+    overflow: visible;
+    z-index: 5;
+}
+
+.heroOpen .stage {
+    overflow: clip;
+}
+
 /* ── Sfondo ───────────────────────────────────── */
 .stage {
     position: absolute;

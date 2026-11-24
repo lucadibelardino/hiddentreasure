@@ -1,4 +1,5 @@
 import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { DayPicker, type DateRange } from 'react-day-picker';
 import { it, enGB, de, fr } from 'react-day-picker/locale';
 import { useLang, useT } from '../i18n';
@@ -223,6 +224,17 @@ const BookingSearch: React.FC<Props> = ({
         };
     }, [sheetOpen]);
 
+    // Spazio in fondo alla pagina, cosi' la barra fissa non copre il footer
+    const barVisible = phone && !hideMobileBar;
+    useEffect(() => {
+        if (!barVisible) return;
+        const previous = document.body.style.paddingBottom;
+        document.body.style.paddingBottom = 'calc(80px + env(safe-area-inset-bottom))';
+        return () => {
+            document.body.style.paddingBottom = previous;
+        };
+    }, [barVisible]);
+
     // Passando da computer a telefono (o viceversa) si chiude tutto
     useEffect(() => {
         setActive(null);
@@ -322,8 +334,8 @@ const BookingSearch: React.FC<Props> = ({
                     </span>
                 </button>
 
-                {!hideMobileBar && <div className={styles.barSpacer} aria-hidden="true" />}
-                {!hideMobileBar && !sheetOpen && (
+                {/* Barra e pannello vanno nel body: dentro la hero (animata) "fixed" non si ancorerebbe allo schermo */}
+                {!hideMobileBar && !sheetOpen && createPortal(
                     <div className={styles.bottomBar}>
                         <button type="button" className={styles.bottomInfo} onClick={() => setSheetOpen(true)}>
                             {complete ? (
@@ -341,10 +353,11 @@ const BookingSearch: React.FC<Props> = ({
                         <button type="button" className={styles.bottomCta} onClick={search}>
                             {complete ? t.search : t.datesNeeded}
                         </button>
-                    </div>
+                    </div>,
+                    document.body,
                 )}
 
-                {sheetOpen && (
+                {sheetOpen && createPortal(
                     <div className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby="bs-sheet-title" ref={sheetRef} tabIndex={-1}>
                         <div className={styles.sheetHead}>
                             <button type="button" className={styles.iconBtn} onClick={closeSheet} aria-label={t.close}>
@@ -386,7 +399,8 @@ const BookingSearch: React.FC<Props> = ({
                                 <span>{complete ? t.search : t.datesNeeded}</span>
                             </button>
                         </div>
-                    </div>
+                    </div>,
+                    document.body,
                 )}
             </>
         );
