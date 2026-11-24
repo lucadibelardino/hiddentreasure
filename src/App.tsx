@@ -8,6 +8,7 @@ import LocationMap from './components/LocationMap';
 import GalleryPage from './components/GalleryPage';
 import ContactPage from './components/ContactPage';
 import ReviewsPage from './components/ReviewsPage';
+import PrivacyPage from './components/PrivacyPage';
 import HomeBooking from './components/HomeBooking';
 import Footer from './components/Footer';
 import PageHead from './seo/PageHead';
@@ -64,6 +65,7 @@ const PAGE_ELEMENTS: Record<PageKey, React.ReactElement> = {
     gallery: <GalleryPage />,
     reviews: <ReviewsPage />,
     contact: <ContactPage />,
+    privacy: <PrivacyPage />,
 };
 
 /* Ogni pagina esiste in ogni lingua: /gallery, /en/gallery, /de/galerie, /fr/galerie... */

@@ -7,14 +7,14 @@ export const LANGS = ['it', 'en', 'de', 'fr'] as const;
 export type Lang = (typeof LANGS)[number];
 export const DEFAULT_LANG: Lang = 'it';
 
-export type PageKey = 'home' | 'gallery' | 'reviews' | 'contact';
-export const PAGE_KEYS: PageKey[] = ['home', 'gallery', 'reviews', 'contact'];
+export type PageKey = 'home' | 'gallery' | 'reviews' | 'contact' | 'privacy';
+export const PAGE_KEYS: PageKey[] = ['home', 'gallery', 'reviews', 'contact', 'privacy'];
 
 export const ROUTES: Record<Lang, Record<PageKey, string>> = {
-    it: { home: '/', gallery: '/gallery', reviews: '/recensioni', contact: '/contatti' },
-    en: { home: '/en/', gallery: '/en/gallery', reviews: '/en/reviews', contact: '/en/contact' },
-    de: { home: '/de/', gallery: '/de/galerie', reviews: '/de/bewertungen', contact: '/de/kontakt' },
-    fr: { home: '/fr/', gallery: '/fr/galerie', reviews: '/fr/avis', contact: '/fr/contact' },
+    it: { home: '/', gallery: '/gallery', reviews: '/recensioni', contact: '/contatti', privacy: '/privacy' },
+    en: { home: '/en/', gallery: '/en/gallery', reviews: '/en/reviews', contact: '/en/contact', privacy: '/en/privacy' },
+    de: { home: '/de/', gallery: '/de/galerie', reviews: '/de/bewertungen', contact: '/de/kontakt', privacy: '/de/datenschutz' },
+    fr: { home: '/fr/', gallery: '/fr/galerie', reviews: '/fr/avis', contact: '/fr/contact', privacy: '/fr/confidentialite' },
 };
 
 /** Nome della lingua scritto nella lingua stessa (per il selettore). */

@@ -45,7 +45,10 @@ const Footer: React.FC = () => {
 
             <div className={`container ${styles.bottom}`}>
                 <p>© {new Date().getFullYear()} Hidden Treasure Villasimius</p>
-                <p className={styles.iun}>I.U.N. S0174</p>
+                <p className={styles.legal}>
+                    <Link to={r.privacy}>{t.privacy}</Link>
+                    <span className={styles.iun}>I.U.N. S0174</span>
+                </p>
             </div>
         </footer>
     );

@@ -65,6 +65,7 @@ export default {
   // Parte da solo grazie al Cron Trigger
   async scheduled(event, env, ctx) {
     ctx.waitUntil(sincronizzaAirbnb(env));
+    ctx.waitUntil(pulizia(env));
   },
 };
 
@@ -1331,4 +1332,18 @@ function scriptGestione() {
   $("esci").onclick = async () => { await chiama("POST", "/logout"); location.reload(); };
 
   carica();
+}
+
+/* ════════════════════════ Pulizia automatica (GDPR) ════════════════════════ */
+
+// Per quanti mesi teniamo le richieste dopo la data di partenza richiesta.
+// Lo stesso numero è scritto nella privacy policy del sito (src/data/privacy.ts):
+// se lo cambi qui, cambialo anche lì.
+const MESI_RICHIESTE = 3;
+
+// Parte a ogni Cron Trigger (ogni ora): cancella le richieste che hanno finito il loro scopo
+async function pulizia(env) {
+  const { meta } = await env.DB.prepare("DELETE FROM richieste WHERE check_out < date('now', ?)")
+    .bind(`-${MESI_RICHIESTE} months`).run();
+  if (meta.changes) console.log(`Pulizia: ${meta.changes} richieste cancellate`);
 }
