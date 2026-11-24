@@ -46,6 +46,10 @@ interface Period {
 /** Risposta di GET /calendario (tabelle D1 stagioni, prezzi_giorno, blocchi, impostazioni). */
 interface CalendarApi {
     max_ospiti?: number;
+    /** Ospiti compresi nel prezzo a notte (di solito 2). */
+    ospiti_inclusi?: number;
+    /** Euro a notte per ogni ospite oltre quelli compresi. */
+    supplemento_ospite_eur?: number;
     blocchi?: { dal: string; al: string }[];
     stagioni?: { nome: string; dal: string; al: string; prezzo_notte_eur: number; min_notti: number }[];
     prezzi_giorno?: { data: string; prezzo_notte_eur: number | null; min_notti: number | null }[];
@@ -54,6 +58,10 @@ interface CalendarApi {
 export interface Pricing {
     stagioni: NonNullable<CalendarApi['stagioni']>;
     giorni: Map<string, NonNullable<CalendarApi['prezzi_giorno']>[number]>;
+    /** Ospiti compresi nel prezzo a notte. */
+    includedGuests: number;
+    /** Euro a notte per ogni ospite in piu' (adulti + bambini, i neonati non contano). */
+    extraGuestFee: number;
 }
 
 const getJSON = <T,>(url: string, signal: AbortSignal): Promise<T> =>
@@ -105,6 +113,8 @@ export function useCalendar() {
                 setPricing({
                     stagioni: data.stagioni ?? [],
                     giorni: new Map((data.prezzi_giorno ?? []).map((g) => [g.data, g])),
+                    includedGuests: data.ospiti_inclusi ?? 2,
+                    extraGuestFee: data.supplemento_ospite_eur ?? 0,
                 });
                 if (data.max_ospiti && data.max_ospiti > 0) setMaxGuests(data.max_ospiti);
             } else {
@@ -129,21 +139,51 @@ function nightRule(iso: string, pricing: Pricing) {
     };
 }
 
-/** Notti minime per un arrivo in quel giorno (decide la notte di arrivo). */
-export const minNightsFrom = (from: Date, pricing: Pricing | null) =>
-    pricing ? Math.max(1, nightRule(toISO(from), pricing).minNights) : 1;
+/**
+ * Notti minime di un soggiorno: vale il minimo piu' alto tra le notti che comprende
+ * (scelta di Luca: se Ferragosto vuole 7 notti, ogni soggiorno che lo include dura almeno 7 notti).
+ */
+function stayMinNights(from: Date, to: Date, pricing: Pricing) {
+    let min = 1;
+    for (const d = new Date(from); d < to; d.setDate(d.getDate() + 1)) {
+        min = Math.max(min, nightRule(toISO(d), pricing).minNights);
+    }
+    return min;
+}
+
+/** Il soggiorno rispetta le notti minime di tutte le sue notti? */
+export const isLongEnough = (from: Date, to: Date, pricing: Pricing | null) =>
+    !pricing || nightsBetween(from, to) >= stayMinNights(from, to, pricing);
 
 /**
- * Totale delle notti. null se anche una sola notte non ha un prezzo:
- * meglio nessuna cifra che una cifra sbagliata.
+ * Il soggiorno valido piu' corto con questo arrivo, per il suggerimento "Minimo N notti".
+ * Allungandolo si possono incontrare notti con un minimo piu' alto:
+ * quelle partenze le disattiva il calendario.
  */
-export function quote(from: Date, to: Date, pricing: Pricing | null): number | null {
+export function shortestStay(from: Date, pricing: Pricing | null): number {
+    if (!pricing) return 1;
+    let min = 1;
+    for (let k = 1; k <= 90; k++) {
+        const night = new Date(from);
+        night.setDate(night.getDate() + k - 1);
+        min = Math.max(min, nightRule(toISO(night), pricing).minNights);
+        if (k >= min) return k;
+    }
+    return min;
+}
+
+/**
+ * Totale delle notti, con il supplemento per gli ospiti oltre quelli compresi.
+ * null se anche una sola notte non ha un prezzo: meglio nessuna cifra che una cifra sbagliata.
+ */
+export function quote(from: Date, to: Date, pricing: Pricing | null, guests = 0): number | null {
     if (!pricing) return null;
+    const extra = Math.max(0, guests - pricing.includedGuests) * pricing.extraGuestFee;
     let total = 0;
     for (const d = new Date(from); d < to; d.setDate(d.getDate() + 1)) {
         const { price } = nightRule(toISO(d), pricing);
         if (price == null) return null;
-        total += price;
+        total += price + extra;
     }
     return total;
 }
@@ -164,21 +204,19 @@ export function useDisabledDays(
     from: Date | undefined,
     pickingCheckOut: boolean,
     blocked: Date[],
-    minNights = 1,
+    longEnough: (from: Date, to: Date) => boolean = () => true,
 ): Matcher[] {
     return useMemo<Matcher[]>(() => {
         const past = { before: startOfToday() };
         if (pickingCheckOut && from) {
             const nextBusy = blocked.find((d) => d > from);
-            // Notti minime: le partenze troppo vicine all'arrivo non si possono scegliere
-            const earliest = new Date(from);
-            earliest.setDate(earliest.getDate() + minNights);
-            const tooShort: Matcher[] = minNights > 1 ? [{ after: from, before: earliest }] : [];
+            // Notti minime: le partenze che danno un soggiorno troppo corto non si possono scegliere
+            const tooShort: Matcher[] = [(d: Date) => d > from && !longEnough(from, d)];
             if (!nextBusy) return [past, ...blocked, ...tooShort];
             return [past, ...blocked.filter((d) => d !== nextBusy), { after: nextBusy }, ...tooShort];
         }
         return [past, ...blocked];
-    }, [blocked, from, pickingCheckOut, minNights]);
+    }, [blocked, from, pickingCheckOut, longEnough]);
 }
 
 /** C'e' almeno una notte occupata tra arrivo (compreso) e partenza (esclusa)? */
@@ -193,7 +231,7 @@ export function pickDay(
     range: DateRange | undefined,
     active: Field | null,
     blocked: Date[],
-    minNightsFor: (arrival: Date) => number = () => 1,
+    longEnough: (from: Date, to: Date) => boolean = () => true,
 ): { range: DateRange; next: Field } {
     const from = range?.from;
     const to = range?.to;
@@ -204,7 +242,7 @@ export function pickDay(
     }
     // Cambio solo l'arrivo e la partenza scelta resta valida
     if (active === 'checkIn' && to && day < to && !hasBlockedBetween(day, to, blocked)
-        && nightsBetween(day, to) >= minNightsFor(day)) {
+        && longEnough(day, to)) {
         return { range: { from: day, to }, next: 'checkOut' };
     }
     // Altrimenti si riparte: nuovo arrivo, poi la partenza
