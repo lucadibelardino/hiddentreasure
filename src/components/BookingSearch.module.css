@@ -1,0 +1,689 @@
+/* ── Pillola (computer) ───────────────────────── */
+.wrap {
+    position: relative;
+    max-width: 880px;
+    margin: 0 auto;
+}
+
+.pill {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1.3fr);
+    align-items: center;
+    min-height: 68px;
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-pill);
+    background: var(--c-white);
+    box-shadow: var(--shadow-md);
+    transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/* Con un pannello aperto la pillola si "abbassa" e il campo attivo resta in rilievo */
+.pillOpen {
+    background: #ECE8E1;
+    box-shadow: var(--shadow-sm);
+}
+
+.field {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+    height: 100%;
+    min-height: 66px;
+    padding: 0.7rem 1.6rem;
+    border-radius: var(--radius-pill);
+    text-align: left;
+    transition: background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.field:hover {
+    background: rgba(16, 42, 58, 0.05);
+}
+
+.pillOpen .field:hover {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.field.fieldActive,
+.pillOpen .field.fieldActive:hover {
+    background: var(--c-white);
+    box-shadow: var(--shadow-md);
+}
+
+.field:focus-visible,
+.fieldInner:focus-visible {
+    outline: 2px solid var(--c-sea);
+    outline-offset: -2px;
+}
+
+/* Ultimo campo: testo + pulsante rotondo nella stessa capsula */
+.fieldLast {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 0.5rem 0.5rem 0.5rem 0;
+}
+
+.fieldInner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+    align-self: stretch;
+    padding-left: 1.6rem;
+    text-align: left;
+    border-radius: var(--radius-pill);
+}
+
+.sep {
+    width: 1px;
+    height: 32px;
+    background: var(--c-line-strong);
+    transition: opacity var(--transition-fast);
+}
+
+.pillOpen .sep {
+    opacity: 0;
+}
+
+.fieldLabel {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--c-deep);
+}
+
+.fieldValue,
+.fieldPlaceholder {
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fieldValue {
+    color: var(--c-ink);
+    font-weight: 500;
+}
+
+.fieldPlaceholder {
+    color: var(--c-ink-soft);
+}
+
+/* ── Pulsante Verifica ─────────────────────────── */
+.cta {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    min-width: 52px;
+    height: 52px;
+    padding: 0 1rem;
+    border-radius: var(--radius-pill);
+    background: var(--c-deep);
+    color: var(--c-white);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    transition: background-color var(--transition-fast), gap var(--transition-base, 0.25s ease);
+}
+
+.cta:hover:not(:disabled) {
+    background: var(--c-sea);
+}
+
+.cta:focus-visible {
+    outline: 2px solid var(--c-sea);
+    outline-offset: 3px;
+}
+
+.cta:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* La scritta compare quando la barra e' aperta, come su Airbnb */
+.ctaText {
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width var(--transition-base, 0.25s ease);
+}
+
+.ctaWide {
+    gap: 0.5rem;
+    padding: 0 1.3rem;
+}
+
+.ctaWide .ctaText {
+    max-width: 8em;
+}
+
+/* ── Popover ───────────────────────────────────── */
+.popover {
+    position: absolute;
+    top: calc(100% + 12px);
+    z-index: 20;
+    padding: var(--space-md) clamp(1.25rem, 1rem + 1.5vw, 2.25rem);
+    border-radius: 28px;
+    background: var(--c-white);
+    box-shadow: var(--shadow-lg);
+    animation: pop 0.18s ease-out;
+}
+
+@keyframes pop {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+}
+
+.popoverCalendar {
+    left: 0;
+    right: 0;
+}
+
+.popoverGuests {
+    right: 0;
+    width: min(400px, 100%);
+}
+
+.popHead {
+    text-align: center;
+    min-height: 3.2rem;
+}
+
+.popTitle {
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    font-weight: 500;
+    color: var(--c-deep);
+    line-height: 1.2;
+}
+
+.popSub {
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+}
+
+.popFoot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-sm);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--c-line);
+}
+
+.popActions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.closeBtn {
+    padding: 0.55rem 1.2rem;
+    border-radius: var(--radius-pill);
+    background: var(--c-deep);
+    color: var(--c-white);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    transition: background-color var(--transition-fast);
+}
+
+.closeBtn:hover {
+    background: var(--c-sea);
+}
+
+.legend {
+    font-size: var(--fs-xs);
+    color: var(--c-ink-soft);
+}
+
+.linkBtn {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-deep);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 0.4rem 0.2rem;
+}
+
+.linkBtn:hover:not(:disabled) {
+    color: var(--c-sea);
+}
+
+.linkBtn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+/* ── Calendario (react-day-picker v9) ─────────── */
+.calendarWrap {
+    display: flex;
+    justify-content: center;
+    min-height: 330px;
+    padding: var(--space-2xs) 0 var(--space-sm);
+}
+
+.loading {
+    align-self: center;
+    color: var(--c-ink-soft);
+    font-size: var(--fs-sm);
+}
+
+.calendar {
+    --rdp-accent-color: var(--c-deep);
+    --rdp-accent-background-color: rgba(46, 124, 138, 0.12);
+    --rdp-range_middle-background-color: #EEF3F3;
+    --rdp-range_start-date-background-color: var(--c-deep);
+    --rdp-range_end-date-background-color: var(--c-deep);
+    --rdp-range_start-background: linear-gradient(var(--rdp-gradient-direction), transparent 50%, #EEF3F3 50%);
+    --rdp-range_end-background: linear-gradient(var(--rdp-gradient-direction), #EEF3F3 50%, transparent 50%);
+    --rdp-day-width: 46px;
+    --rdp-day-height: 44px;
+    --rdp-day_button-width: 44px;
+    --rdp-day_button-height: 44px;
+    --rdp-day_button-border-radius: 50%;
+    --rdp-today-color: var(--c-brass);
+    --rdp-nav-height: 2.5rem;
+    font-family: var(--font-body);
+    margin: 0;
+}
+
+.calendar :global(.rdp-months) {
+    justify-content: center;
+    gap: clamp(1.5rem, 1rem + 2vw, 3rem);
+}
+
+.calendar :global(.rdp-month_caption) {
+    justify-content: center;
+    padding-bottom: 0.4rem;
+}
+
+.calendar :global(.rdp-caption_label) {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    color: var(--c-deep);
+}
+
+.calendar :global(.rdp-nav) {
+    position: absolute;
+    inset: 0 0 auto 0;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.calendar :global(.rdp-nav) button {
+    pointer-events: auto;
+    border-radius: 50%;
+}
+
+.calendar :global(.rdp-nav) button:hover:not(:disabled) {
+    background: var(--c-shell);
+}
+
+.calendar :global(.rdp-chevron) {
+    fill: var(--c-deep);
+}
+
+.calendar :global(.rdp-weekday) {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--c-ink-soft);
+}
+
+.calendar :global(.rdp-day_button) {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-ink);
+    border: 1.5px solid transparent;
+    transition: border-color var(--transition-fast);
+}
+
+.calendar :global(.rdp-day:not(.rdp-disabled):not(.rdp-range_start):not(.rdp-range_end)) :global(.rdp-day_button:hover) {
+    border-color: var(--c-deep);
+}
+
+.calendar :global(.rdp-range_start) :global(.rdp-day_button),
+.calendar :global(.rdp-range_end) :global(.rdp-day_button) {
+    color: var(--c-white);
+}
+
+.calendar :global(.rdp-range_middle) :global(.rdp-day_button) {
+    color: var(--c-deep);
+}
+
+.calendar :global(.rdp-disabled) {
+    opacity: 1;
+}
+
+.calendar :global(.rdp-disabled) :global(.rdp-day_button) {
+    color: var(--c-ink-soft);
+    font-weight: 400;
+    opacity: 0.38;
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+    cursor: default;
+}
+
+.calendar :global(.rdp-today:not(.rdp-selected)) :global(.rdp-day_button) {
+    color: var(--c-brass);
+    font-weight: 700;
+}
+
+/* Anteprima del periodo mentre si passa sopra la partenza */
+.calendar .preview:not(:global(.rdp-range_start)) {
+    background: #F3F6F6;
+}
+
+/* ── Ospiti ────────────────────────────────────── */
+.guestPicker {
+    display: flex;
+    flex-direction: column;
+}
+
+.stepRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--c-line);
+}
+
+.stepLabel {
+    display: block;
+    font-weight: 600;
+    color: var(--c-ink);
+}
+
+.stepHint {
+    display: block;
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+}
+
+.stepper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.stepBtn {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--c-line-strong);
+    color: var(--c-ink);
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.stepBtn:hover:not(:disabled) {
+    border-color: var(--c-deep);
+    color: var(--c-deep);
+}
+
+.stepBtn:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.stepValue {
+    min-width: 2ch;
+    text-align: center;
+    font-size: var(--fs-body);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--c-ink);
+}
+
+.maxNote {
+    padding-top: var(--space-sm);
+    font-size: var(--fs-xs);
+    color: var(--c-ink-soft);
+}
+
+/* ── Telefono ──────────────────────────────────── */
+.mobileTrigger {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: 0.75rem 1.1rem;
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-pill);
+    background: var(--c-white);
+    box-shadow: var(--shadow-md);
+    text-align: left;
+}
+
+.mobileIcon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--c-deep);
+    color: var(--c-white);
+}
+
+.mobileText {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.mobileTitle {
+    font-weight: 700;
+    color: var(--c-deep);
+}
+
+.mobileSub {
+    font-size: var(--fs-sm);
+    color: var(--c-ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bottomBar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-header);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+    background: var(--c-white);
+    border-top: 1px solid var(--c-line);
+    box-shadow: 0 -6px 20px rgba(16, 42, 58, 0.06);
+}
+
+/* Spazio in fondo alla pagina, cosi' la barra fissa non copre il contenuto */
+.barSpacer {
+    height: calc(80px + env(safe-area-inset-bottom));
+}
+
+.bottomInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    text-align: left;
+}
+
+.bottomMain {
+    font-weight: 700;
+    color: var(--c-deep);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.bottomSub {
+    font-size: var(--fs-xs);
+    color: var(--c-ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bottomCta {
+    flex: none;
+    padding: 0.85rem 1.4rem;
+    border-radius: var(--radius-pill);
+    background: var(--c-deep);
+    color: var(--c-white);
+    font-weight: 700;
+    font-size: var(--fs-sm);
+}
+
+.sheet {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    flex-direction: column;
+    background: var(--c-shell);
+    animation: rise 0.22s ease-out;
+    outline: none;
+}
+
+@keyframes rise {
+    from {
+        transform: translateY(24px);
+        opacity: 0;
+    }
+}
+
+.sheetHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.75rem;
+}
+
+.sheetTitle {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--c-deep);
+}
+
+.iconBtn,
+.iconBtnSpacer {
+    width: 40px;
+    height: 40px;
+}
+
+.iconBtn {
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--c-line-strong);
+    background: var(--c-white);
+    color: var(--c-deep);
+}
+
+.sheetBody {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: 0 0.75rem var(--space-sm);
+}
+
+.sheetCard {
+    padding: var(--space-sm) var(--space-sm) var(--space-xs);
+    border-radius: var(--radius-lg);
+    background: var(--c-white);
+    box-shadow: var(--shadow-sm);
+}
+
+.sheetSection {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--c-deep);
+}
+
+.sheetDates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--c-line-strong);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.sheetDate {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0.6rem 0.85rem;
+}
+
+.sheetDate + .sheetDate {
+    border-left: 1px solid var(--c-line-strong);
+}
+
+.sheetDateActive {
+    box-shadow: inset 0 0 0 2px var(--c-deep);
+    border-radius: var(--radius-md);
+}
+
+.calendarHint {
+    min-height: 1.5em;
+    margin-top: var(--space-xs);
+    text-align: center;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-sea);
+}
+
+.sheet .calendarWrap {
+    min-height: 320px;
+    padding-bottom: 0;
+}
+
+.sheet .calendar {
+    --rdp-day-width: min(13.4vw, 48px);
+    --rdp-day-height: min(12.5vw, 46px);
+    --rdp-day_button-width: min(12.5vw, 44px);
+    --rdp-day_button-height: min(12.5vw, 44px);
+}
+
+.sheet .legend {
+    display: block;
+    text-align: center;
+    padding-bottom: var(--space-2xs);
+}
+
+.sheetFoot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+    background: var(--c-white);
+    border-top: 1px solid var(--c-line);
+}
+
+.sheetFoot .cta {
+    gap: 0.5rem;
+    padding: 0 1.4rem;
+}
