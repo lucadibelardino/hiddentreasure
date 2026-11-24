@@ -4,7 +4,7 @@ import type { DateRange } from 'react-day-picker';
 import BookingSearch, { type BookingSearchHandle } from './BookingSearch';
 import RequestForm from './RequestForm';
 import { useT } from '../i18n';
-import { DEFAULT_GUESTS, useBlockedNights, type Guests } from '../booking/availability';
+import { DEFAULT_GUESTS, useCalendar, type Guests } from '../booking/availability';
 import styles from './HomeBooking.module.css';
 
 /**
@@ -14,7 +14,7 @@ import styles from './HomeBooking.module.css';
 const HomeBooking: React.FC = () => {
     const t = useT().request;
     const ts = useT().search;
-    const { blocked, loading } = useBlockedNights();
+    const { blocked, pricing, maxGuests, loading } = useCalendar();
     const [range, setRange] = useState<DateRange | undefined>();
     const [guests, setGuests] = useState<Guests>(DEFAULT_GUESTS);
     const [open, setOpen] = useState(false);
@@ -63,6 +63,8 @@ const HomeBooking: React.FC = () => {
                 onGuestsChange={setGuests}
                 blocked={blocked}
                 loading={loading}
+                pricing={pricing}
+                maxGuests={maxGuests}
                 onSearch={() => setOpen(true)}
                 hideMobileBar={dialogOpen}
             />
@@ -93,7 +95,7 @@ const HomeBooking: React.FC = () => {
                                 </svg>
                             </button>
                         </header>
-                        <RequestForm from={range!.from!} to={range!.to!} guests={guests} onEdit={edit} onReset={reset} />
+                        <RequestForm from={range!.from!} to={range!.to!} guests={guests} pricing={pricing} onEdit={edit} onReset={reset} />
                     </div>
                 </div>,
                 document.body,

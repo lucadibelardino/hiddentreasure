@@ -4,7 +4,10 @@ import { DayPicker, type DateRange } from 'react-day-picker';
 import { it, enGB, de, fr } from 'react-day-picker/locale';
 import { useLang, useT } from '../i18n';
 import {
-    MAX_GUESTS,
+    formatEuro,
+    minNightsFrom,
+    quote,
+    type Pricing,
     formatDay,
     formatDayShort,
     guestsLabel,
@@ -34,6 +37,9 @@ interface Props {
     onGuestsChange: (g: Guests) => void;
     blocked: Date[];
     loading: boolean;
+    /** Prezzi e notti minime dal Worker (null se non disponibili). */
+    pricing: Pricing | null;
+    maxGuests: number;
     /** Date complete e pulsante "Verifica" premuto. */
     onSearch: () => void;
     /** Nasconde la barra fissa in basso sul telefono (quando il modulo e' gia' aperto). */
@@ -97,9 +103,9 @@ const Stepper: React.FC<{
     );
 };
 
-const GuestPicker: React.FC<{ guests: Guests; onChange: (g: Guests) => void }> = ({ guests, onChange }) => {
+const GuestPicker: React.FC<{ guests: Guests; max: number; onChange: (g: Guests) => void }> = ({ guests, max, onChange }) => {
     const t = useT().search;
-    const room = totalGuests(guests) < MAX_GUESTS;
+    const room = totalGuests(guests) < max;
     return (
         <div className={styles.guestPicker}>
             <Stepper id="bs-adults" label={t.adults} hint={t.adultsHint} value={guests.adults} min={1} canAdd={room}
@@ -108,7 +114,7 @@ const GuestPicker: React.FC<{ guests: Guests; onChange: (g: Guests) => void }> =
                 onChange={(children) => onChange({ ...guests, children })} />
             <Stepper id="bs-infants" label={t.infants} hint={t.infantsHint} value={guests.infants} min={0} canAdd={guests.infants < MAX_INFANTS}
                 onChange={(infants) => onChange({ ...guests, infants })} />
-            <p className={styles.maxNote}>{t.maxNote(MAX_GUESTS)}</p>
+            <p className={styles.maxNote}>{t.maxNote(max)}</p>
         </div>
     );
 };
@@ -124,6 +130,8 @@ const BookingSearch: React.FC<Props> = ({
     onGuestsChange,
     blocked,
     loading,
+    pricing,
+    maxGuests,
     onSearch,
     hideMobileBar,
     ref,
@@ -152,7 +160,11 @@ const BookingSearch: React.FC<Props> = ({
     const nights = from && to ? nightsBetween(from, to) : 0;
 
     const pickingCheckOut = (phone ? !!from && !to : active === 'checkOut') && !!from;
-    const disabled = useDisabledDays(from, pickingCheckOut, blocked);
+    const minNights = from ? minNightsFrom(from, pricing) : 1;
+    const disabled = useDisabledDays(from, pickingCheckOut, blocked, minNights);
+    const total = from && to ? quote(from, to, pricing) : null;
+    /** "6 notti · 1.080 €" (senza prezzo se manca anche una sola notte) */
+    const stayText = nights > 0 ? [nightsText(nights), total != null ? formatEuro(total, lang) : ''].filter(Boolean).join(' · ') : '';
 
     useImperativeHandle(ref, () => ({
         open: () => {
@@ -243,7 +255,7 @@ const BookingSearch: React.FC<Props> = ({
 
     /* ── Calendario ── */
     const onDayClick = (day: Date) => {
-        const result = pickDay(day, range, phone ? (from && !to ? 'checkOut' : null) : active, blocked);
+        const result = pickDay(day, range, phone ? (from && !to ? 'checkOut' : null) : active, blocked, (d) => minNightsFrom(d, pricing));
         onRangeChange(result.range);
         setHover(undefined);
         if (!phone) {
@@ -286,7 +298,8 @@ const BookingSearch: React.FC<Props> = ({
             />
         );
 
-    const calendarHint = !from ? t.pickCheckIn : !to ? t.pickCheckOut : nights > 0 ? nightsText(nights) : '';
+    const checkOutHint = minNights > 1 ? `${t.pickCheckOut} · ${t.minNights(minNights)}` : t.pickCheckOut;
+    const calendarHint = !from ? t.pickCheckIn : !to ? checkOutHint : stayText;
 
     const search = () => {
         if (!complete) {
@@ -340,7 +353,7 @@ const BookingSearch: React.FC<Props> = ({
                         <button type="button" className={styles.bottomInfo} onClick={() => setSheetOpen(true)}>
                             {complete ? (
                                 <>
-                                    <span className={styles.bottomMain}>{nightsText(nights)}</span>
+                                    <span className={styles.bottomMain}>{stayText}</span>
                                     <span className={styles.bottomSub}>{formatDayShort(from!, lang)} – {formatDayShort(to!, lang)}</span>
                                 </>
                             ) : (
@@ -386,7 +399,7 @@ const BookingSearch: React.FC<Props> = ({
 
                             <section className={styles.sheetCard}>
                                 <h3 className={styles.sheetSection}>{t.guests}</h3>
-                                <GuestPicker guests={guests} onChange={onGuestsChange} />
+                                <GuestPicker guests={guests} max={maxGuests} onChange={onGuestsChange} />
                             </section>
                         </div>
 
@@ -460,7 +473,7 @@ const BookingSearch: React.FC<Props> = ({
                 <div className={`${styles.popover} ${styles.popoverCalendar}`} role="dialog" aria-label={active === 'checkIn' ? t.pickCheckIn : t.pickCheckOut}>
                     <div className={styles.popHead}>
                         <p className={styles.popTitle} aria-live="polite">
-                            {nights > 0 ? nightsText(nights) : active === 'checkIn' ? t.pickCheckIn : t.pickCheckOut}
+                            {nights > 0 ? stayText : active === 'checkIn' ? t.pickCheckIn : from ? checkOutHint : t.pickCheckIn}
                         </p>
                         {from && to && (
                             <p className={styles.popSub}>{formatDay(from, lang)} – {formatDay(to, lang)}</p>
@@ -481,7 +494,7 @@ const BookingSearch: React.FC<Props> = ({
 
             {active === 'guests' && (
                 <div className={`${styles.popover} ${styles.popoverGuests}`} role="dialog" aria-label={t.guests}>
-                    <GuestPicker guests={guests} onChange={onGuestsChange} />
+                    <GuestPicker guests={guests} max={maxGuests} onChange={onGuestsChange} />
                 </div>
             )}
         </div>

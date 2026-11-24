@@ -298,6 +298,9 @@ const it = {
         edit: 'Modifica',
         datesNeeded: 'Scegli le date',
         details: 'I tuoi dati',
+        minNights: (n: number) => `Minimo ${n} notti`,
+        estimate: 'Totale indicativo',
+        priceNote: 'Prezzo delle sole notti, indicativo: te lo confermiamo nella risposta.',
     },
 
     notFound: {
@@ -611,6 +614,9 @@ const en: Dict = {
         edit: 'Edit',
         datesNeeded: 'Choose dates',
         details: 'Your details',
+        minNights: (n: number) => `Minimum ${n} nights`,
+        estimate: 'Estimated total',
+        priceNote: 'Price for the nights only, as an estimate: we confirm it in our reply.',
     },
 
     notFound: {
@@ -922,6 +928,9 @@ const de: Dict = {
         edit: 'Ändern',
         datesNeeded: 'Daten wählen',
         details: 'Ihre Angaben',
+        minNights: (n: number) => `Mindestens ${n} Nächte`,
+        estimate: 'Voraussichtlicher Preis',
+        priceNote: 'Preis nur für die Nächte, unverbindlich: Wir bestätigen ihn in unserer Antwort.',
     },
 
     notFound: {
@@ -1233,6 +1242,9 @@ const fr: Dict = {
         edit: 'Modifier',
         datesNeeded: 'Choisir les dates',
         details: 'Vos coordonnées',
+        minNights: (n: number) => `Minimum ${n} nuits`,
+        estimate: 'Total indicatif',
+        priceNote: 'Prix des nuits seules, à titre indicatif : nous le confirmons dans notre réponse.',
     },
 
     notFound: {
