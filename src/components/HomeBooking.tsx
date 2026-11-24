@@ -8,7 +8,7 @@ import { DEFAULT_GUESTS, useCalendar, type Guests } from '../booking/availabilit
 import styles from './HomeBooking.module.css';
 
 /**
- * Barra di prenotazione nella hero della home di prova (/provabanner).
+ * Barra di prenotazione nella hero della home, in tutte le lingue.
  * "Verifica" apre il modulo con i recapiti in una finestra sopra la pagina.
  */
 const HomeBooking: React.FC = () => {

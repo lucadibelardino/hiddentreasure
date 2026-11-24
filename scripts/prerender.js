@@ -69,6 +69,15 @@ for (const meta of HIDDEN_PAGES) {
     console.log(`prerender: ${meta.path} -> dist/${file} (noindex)`);
 }
 
+// Vecchie pagine di prova: un HTML minimo che rimanda subito alla home
+for (const from of ['/provabanner']) {
+    fs.writeFileSync(
+        path.join(dist, `${from.slice(1)}.html`),
+        `<!doctype html>\n<html lang="it"><head><meta charset="utf-8"><meta name="robots" content="noindex"><link rel="canonical" href="${canonicalUrl('/')}"><meta http-equiv="refresh" content="0; url=/"><title>Hidden Treasure Villasimius</title></head><body><a href="/">Hidden Treasure Villasimius</a></body></html>\n`
+    );
+    console.log(`prerender: ${from} -> / (redirect)`);
+}
+
 // Un solo 404.html per tutto il sito (lo impone GitHub Pages), in italiano:
 // sotto /en/, /de/ e /fr/ il browser lo ridisegna nella lingua giusta (src/main.tsx).
 fs.writeFileSync(path.join(dist, '404.html'), buildPage(NOT_FOUND, { noindex: true }));
