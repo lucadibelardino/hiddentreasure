@@ -40,7 +40,12 @@ function predecode(src: string): Promise<void> {
 
 type SlideState = { index: number; leaving: number | null };
 
-const Hero: React.FC = () => {
+interface HeroProps {
+    /** Al posto della barra attuale (pagina di prova /provabanner). */
+    booking?: React.ReactNode;
+}
+
+const Hero: React.FC<HeroProps> = ({ booking }) => {
     // `leaving` e' la foto che sta uscendo: resta montata (e animata, a seconda del tipo
     // di passaggio) finche' il passaggio non e' finito.
     const [{ index, leaving }, setSlide] = useState<SlideState>({ index: 0, leaving: null });
@@ -99,7 +104,7 @@ const Hero: React.FC = () => {
     }, []);
 
     return (
-        <section id="hero" className={styles.hero} aria-label={t.sectionAria}>
+        <section id="hero" className={`${styles.hero} ${booking ? styles.heroOpen : ''}`} aria-label={t.sectionAria}>
             <div
                 className={styles.stage}
                 style={{ '--hero-dur': `${TRANSITION_MS}ms` } as React.CSSProperties}
@@ -136,7 +141,7 @@ const Hero: React.FC = () => {
 
                 <p className={styles.lead}>{t.lead}</p>
 
-                <BookingBar />
+                {booking ?? <BookingBar />}
 
                 <button className={styles.galleryBtn} onClick={() => navigate(ROUTES[lang].gallery)}>
                     <span>{t.seeVilla}</span>

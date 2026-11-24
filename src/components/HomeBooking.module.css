@@ -1,0 +1,112 @@
+.slot {
+    position: relative;
+    z-index: 3; /* il calendario resta sopra "Guarda la villa" */
+    width: 100%;
+    margin-top: var(--space-lg);
+    animation: slotIn 1s var(--ease-out) 0.24s both;
+}
+
+@keyframes slotIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+}
+
+/* ── Finestra con il modulo ───────────────────── */
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: grid;
+    place-items: center;
+    padding: var(--space-sm);
+    background: rgba(16, 42, 58, 0.55);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    animation: fade 0.2s ease-out;
+    color: var(--c-ink);
+    text-align: left;
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+    }
+}
+
+.dialog {
+    width: min(1040px, 100%);
+    max-height: calc(100svh - 2 * var(--space-sm));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: clamp(1.25rem, 0.8rem + 2vw, 2.5rem);
+    border-radius: var(--radius-lg);
+    background: var(--c-shell);
+    box-shadow: var(--shadow-lg);
+    outline: none;
+    animation: rise 0.25s ease-out;
+}
+
+@keyframes rise {
+    from {
+        transform: translateY(16px);
+    }
+}
+
+.head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+}
+
+.title {
+    font-size: var(--fs-h2);
+    font-weight: 400;
+    line-height: 1.05;
+    margin: var(--space-2xs) 0 var(--space-xs);
+    color: var(--c-deep);
+}
+
+.title em {
+    font-style: italic;
+    font-weight: 600;
+    color: var(--c-sea);
+}
+
+.subtitle {
+    max-width: 52ch;
+    color: var(--c-ink-soft);
+}
+
+.close {
+    flex: none;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--c-line-strong);
+    background: var(--c-white);
+    color: var(--c-deep);
+}
+
+.close:hover {
+    border-color: var(--c-deep);
+}
+
+/* Telefono: a tutto schermo */
+@media (max-width: 743px) {
+    .backdrop {
+        padding: 0;
+        place-items: stretch;
+    }
+
+    .dialog {
+        max-height: none;
+        height: 100%;
+        border-radius: 0;
+    }
+}

@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import type { DateRange, Matcher } from 'react-day-picker';
 import { LOCALES, type Dict, type Lang } from '../i18n';
 
-/** Massimo di ospiti (adulti + bambini). I neonati non contano. Da confermare con Luca. */
-export const MAX_GUESTS = 10;
+/** Massimo di ospiti (adulti + bambini), confermato da Luca. I neonati non contano. */
+export const MAX_GUESTS = 6;
 
 export interface Guests {
     adults: number;

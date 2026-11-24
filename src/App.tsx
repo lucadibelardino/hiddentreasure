@@ -8,7 +8,7 @@ import LocationMap from './components/LocationMap';
 import GalleryPage from './components/GalleryPage';
 import ContactPage from './components/ContactPage';
 import ReviewsPage from './components/ReviewsPage';
-import RequestPage from './components/RequestPage';
+import HomeBooking from './components/HomeBooking';
 import Footer from './components/Footer';
 import PageHead from './seo/PageHead';
 import { LANGS, DEFAULT_LANG, ROUTES, useLang, useT, type PageKey } from './i18n';
@@ -25,6 +25,16 @@ const ScrollToTop: React.FC = () => {
 const HomePage: React.FC = () => (
     <>
         <Hero />
+        <Features />
+        <ReviewsHighlight />
+        <LocationMap />
+    </>
+);
+
+/** Copia della home con la nuova barra di prenotazione (/provabanner, fuori da menu e sitemap). */
+const ProvaHomePage: React.FC = () => (
+    <>
+        <Hero booking={<HomeBooking />} />
         <Features />
         <ReviewsHighlight />
         <LocationMap />
@@ -79,7 +89,7 @@ const App: React.FC = () => {
                 <Routes>
                     {routes}
                     {/* Pagina di prova del modulo di richiesta: fuori dal menu e dalla sitemap */}
-                    <Route path="/provabanner" element={<RequestPage />} />
+                    <Route path="/provabanner" element={<ProvaHomePage />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>

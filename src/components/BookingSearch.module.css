@@ -1,8 +1,19 @@
 /* ── Pillola (computer) ───────────────────────── */
 .wrap {
     position: relative;
+    width: 100%;
     max-width: 880px;
     margin: 0 auto;
+    color: var(--c-ink);
+    text-align: left;
+}
+
+/* Dentro la hero (testo bianco e centrato) */
+.mobileTrigger,
+.sheet,
+.bottomBar {
+    color: var(--c-ink);
+    text-align: left;
 }
 
 .pill {
@@ -512,11 +523,6 @@
     background: var(--c-white);
     border-top: 1px solid var(--c-line);
     box-shadow: 0 -6px 20px rgba(16, 42, 58, 0.06);
-}
-
-/* Spazio in fondo alla pagina, cosi' la barra fissa non copre il contenuto */
-.barSpacer {
-    height: calc(80px + env(safe-area-inset-bottom));
 }
 
 .bottomInfo {
