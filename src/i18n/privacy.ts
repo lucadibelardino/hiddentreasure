@@ -31,7 +31,7 @@ const it: PrivacyText = {
         {
             h: 'Chi è il titolare',
             body: [
-                `Il titolare del trattamento è ${P.controller}, ${P.address}. Per qualsiasi domanda sui tuoi dati scrivi a ${mail}.`,
+                `Il titolare del trattamento è ${P.controller}. Per qualsiasi domanda sui tuoi dati scrivi a ${mail}.`,
             ],
         },
         {
@@ -110,7 +110,7 @@ const en: PrivacyText = {
         {
             h: 'Who is responsible',
             body: [
-                `The data controller is ${P.controller}, ${P.address}. For any question about your data, write to ${mail}.`,
+                `The data controller is ${P.controller}. For any question about your data, write to ${mail}.`,
             ],
         },
         {
@@ -189,7 +189,7 @@ const de: PrivacyText = {
         {
             h: 'Verantwortlicher',
             body: [
-                `Verantwortlich für die Datenverarbeitung ist ${P.controller}, ${P.address}. Bei Fragen zu Ihren Daten schreiben Sie an ${mail}.`,
+                `Verantwortlich für die Datenverarbeitung ist ${P.controller}. Bei Fragen zu Ihren Daten schreiben Sie an ${mail}.`,
             ],
         },
         {
@@ -268,7 +268,7 @@ const fr: PrivacyText = {
         {
             h: 'Responsable du traitement',
             body: [
-                `Le responsable du traitement est ${P.controller}, ${P.address}. Pour toute question sur vos données, écrivez à ${mail}.`,
+                `Le responsable du traitement est ${P.controller}. Pour toute question sur vos données, écrivez à ${mail}.`,
             ],
         },
         {

@@ -5,8 +5,7 @@
  */
 export const PRIVACY = {
     /** Chi decide come e perché si usano i dati (il "titolare del trattamento"). */
-    controller: 'DA_COMPLETARE nome e cognome',
-    address: 'DA_COMPLETARE indirizzo',
+    controller: 'Luca Di Belardino',
     email: 'gestionehtv@gmail.com',
     /** Richieste dal modulo: cancellate in automatico N mesi dopo la data di partenza. */
     requestMonths: 3,
