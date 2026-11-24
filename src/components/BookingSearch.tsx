@@ -247,6 +247,28 @@ const BookingSearch: React.FC<Props> = ({
         };
     }, [barVisible]);
 
+    // Aprendo un pannello che esce dallo schermo, la pagina scende quanto basta per vederlo tutto
+    // (senza mai far finire la barra sotto l'intestazione del sito)
+    const panel = phone ? null : active === 'guests' ? 'guests' : active ? 'calendar' : null;
+    useEffect(() => {
+        if (!panel) return;
+        const frame = requestAnimationFrame(() => {
+            const wrap = wrapRef.current;
+            const pop = wrap?.querySelector<HTMLElement>('[role="dialog"]');
+            if (!wrap || !pop) return;
+            const margin = 16;
+            const header = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 76;
+            const overflow = pop.getBoundingClientRect().bottom - window.innerHeight + margin;
+            const room = wrap.getBoundingClientRect().top - header - margin;
+            const delta = Math.min(overflow, room);
+            if (delta > 0) {
+                const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                window.scrollBy({ top: delta, behavior: reduce ? 'auto' : 'smooth' });
+            }
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [panel]);
+
     // Passando da computer a telefono (o viceversa) si chiude tutto
     useEffect(() => {
         setActive(null);
