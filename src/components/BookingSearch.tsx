@@ -1,11 +1,12 @@
-import React, { useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { DayPicker, type DateRange } from 'react-day-picker';
 import { it, enGB, de, fr } from 'react-day-picker/locale';
 import { useLang, useT } from '../i18n';
 import {
     formatEuro,
-    minNightsFrom,
+    isLongEnough,
+    shortestStay,
     quote,
     type Pricing,
     formatDay,
@@ -160,9 +161,10 @@ const BookingSearch: React.FC<Props> = ({
     const nights = from && to ? nightsBetween(from, to) : 0;
 
     const pickingCheckOut = (phone ? !!from && !to : active === 'checkOut') && !!from;
-    const minNights = from ? minNightsFrom(from, pricing) : 1;
-    const disabled = useDisabledDays(from, pickingCheckOut, blocked, minNights);
-    const total = from && to ? quote(from, to, pricing) : null;
+    const minNights = from ? shortestStay(from, pricing) : 1;
+    const longEnough = useCallback((a: Date, b: Date) => isLongEnough(a, b, pricing), [pricing]);
+    const disabled = useDisabledDays(from, pickingCheckOut, blocked, longEnough);
+    const total = from && to ? quote(from, to, pricing, totalGuests(guests)) : null;
     /** "6 notti · 1.080 €" (senza prezzo se manca anche una sola notte) */
     const stayText = nights > 0 ? [nightsText(nights), total != null ? formatEuro(total, lang) : ''].filter(Boolean).join(' · ') : '';
 
@@ -277,7 +279,7 @@ const BookingSearch: React.FC<Props> = ({
 
     /* ── Calendario ── */
     const onDayClick = (day: Date) => {
-        const result = pickDay(day, range, phone ? (from && !to ? 'checkOut' : null) : active, blocked, (d) => minNightsFrom(d, pricing));
+        const result = pickDay(day, range, phone ? (from && !to ? 'checkOut' : null) : active, blocked, longEnough);
         onRangeChange(result.range);
         setHover(undefined);
         if (!phone) {

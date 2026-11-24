@@ -45,7 +45,7 @@ const RequestForm: React.FC<Props> = ({ from, to, guests, pricing, onEdit, onRes
 
     const fmt = (d: Date) => formatDay(d, lang);
     const nights = nightsBetween(from, to);
-    const total = quote(from, to, pricing);
+    const total = quote(from, to, pricing, totalGuests(guests));
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

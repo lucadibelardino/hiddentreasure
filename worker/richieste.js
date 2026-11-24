@@ -79,14 +79,18 @@ async function impostazione(env, chiave, predefinito) {
 async function calendario(env) {
   const oggi = new Date().toISOString().slice(0, 10);
   // batch: tre query in un solo viaggio verso il database
-  const [blocchi, stagioni, giorni] = await env.DB.batch([
+  const [blocchi, stagioni, giorni, impostazioni] = await env.DB.batch([
     env.DB.prepare("SELECT dal, al FROM blocchi WHERE al > ? ORDER BY dal").bind(oggi),
     env.DB.prepare("SELECT nome, dal, al, prezzo_notte_eur, min_notti FROM stagioni WHERE al >= ? ORDER BY dal").bind(oggi),
     env.DB.prepare("SELECT data, prezzo_notte_eur, min_notti FROM prezzi_giorno WHERE data >= ? ORDER BY data").bind(oggi),
+    env.DB.prepare("SELECT chiave, valore FROM impostazioni"),
   ]);
+  const imp = Object.fromEntries(impostazioni.results.map((r) => [r.chiave, Number(r.valore)]));
   return {
     aggiornato: new Date().toISOString(),
-    max_ospiti: Number(await impostazione(env, "max_ospiti", "6")),
+    max_ospiti: imp.max_ospiti ?? 6,
+    ospiti_inclusi: imp.ospiti_inclusi ?? 2,
+    supplemento_ospite_eur: imp.supplemento_ospite_eur ?? 0,
     blocchi: blocchi.results,
     stagioni: stagioni.results,
     prezzi_giorno: giorni.results,
@@ -334,6 +338,22 @@ function uguali(a, b) {
 /* ── API della gestione (solo con sessione valida) ── */
 
 const STATI = ["nuova", "confermata", "rifiutata"];
+const IMPOSTAZIONI = {
+  max_ospiti: { min: 1, max: 30, nome: "Massimo ospiti" },
+  ospiti_inclusi: { min: 1, max: 30, nome: "Ospiti compresi nel prezzo" },
+  supplemento_ospite_eur: { min: 0, max: 1000, nome: "Supplemento per ospite" },
+};
+
+// Tutti i giorni da dal ad al compresi, come "AAAA-MM-GG" (null se le date non vanno bene o superano un anno)
+function giorniTra(dal, al) {
+  if (!DATA.test(dal || "") || !DATA.test(al || "") || al < dal) return null;
+  const giorni = [];
+  for (let d = new Date(dal + "T00:00:00Z"); d.toISOString().slice(0, 10) <= al; d.setUTCDate(d.getUTCDate() + 1)) {
+    giorni.push(d.toISOString().slice(0, 10));
+    if (giorni.length > 366) return null;
+  }
+  return giorni;
+}
 const numero = (v, min = 0) => {
   if (v === "" || v === null || v === undefined) return null;
   const n = Number(v);
@@ -387,15 +407,23 @@ async function api(request, env, metodo, pathname) {
     return json({ ok: true });
   }
 
-  // Prezzi per un singolo giorno (se il giorno c'è già, viene sostituito)
-  if (risorsa === "prezzi_giorno" && metodo === "POST") {
+  // Giorni speciali: uno o più giorni di fila, dal/al compresi (se un giorno c'è già, viene sostituito)
+  if (risorsa === "prezzi_giorno" && metodo === "POST" && !id) {
     const prezzo = numero(corpo.prezzo_notte_eur, 0);
     const minNotti = numero(corpo.min_notti, 1);
-    if (!DATA.test(corpo.data) || Number.isNaN(prezzo) || Number.isNaN(minNotti) || (prezzo === null && minNotti === null)) {
-      return errore("Serve una data e almeno un prezzo o un minimo di notti.");
+    const giorni = giorniTra(corpo.dal || corpo.data, corpo.al || corpo.data);
+    if (!giorni || Number.isNaN(prezzo) || Number.isNaN(minNotti) || (prezzo === null && minNotti === null)) {
+      return errore("Servono le date (al massimo un anno) e almeno un prezzo o un minimo di notti.");
     }
-    await env.DB.prepare("INSERT OR REPLACE INTO prezzi_giorno (data, prezzo_notte_eur, min_notti, nota) VALUES (?, ?, ?, ?)")
-      .bind(corpo.data, prezzo, minNotti === null ? null : Math.round(minNotti), String(corpo.nota || "").trim() || null).run();
+    const nota = String(corpo.nota || "").trim() || null;
+    const ins = env.DB.prepare("INSERT OR REPLACE INTO prezzi_giorno (data, prezzo_notte_eur, min_notti, nota) VALUES (?, ?, ?, ?)");
+    await env.DB.batch(giorni.map((g) => ins.bind(g, prezzo, minNotti === null ? null : Math.round(minNotti), nota)));
+    return json({ ok: true, giorni: giorni.length });
+  }
+  // Toglie i giorni speciali in un intervallo (dal/al compresi)
+  if (risorsa === "prezzi_giorno" && metodo === "POST" && id === "elimina") {
+    if (!DATA.test(corpo.dal) || !DATA.test(corpo.al) || corpo.al < corpo.dal) return errore("Date non valide.");
+    await env.DB.prepare("DELETE FROM prezzi_giorno WHERE data BETWEEN ? AND ?").bind(corpo.dal, corpo.al).run();
     return json({ ok: true });
   }
   if (risorsa === "prezzi_giorno" && metodo === "DELETE" && DATA.test(id || "")) {
@@ -424,12 +452,17 @@ async function api(request, env, metodo, pathname) {
     return json({ ok: true });
   }
 
-  // Impostazioni (per ora solo il massimo ospiti)
+  // Impostazioni: si salvano solo le chiavi conosciute, ognuna con i suoi limiti
   if (risorsa === "impostazioni" && metodo === "POST") {
-    const max = numero(corpo.max_ospiti, 1);
-    if (!max || Number.isNaN(max) || max > 30) return errore("Massimo ospiti tra 1 e 30.");
-    await env.DB.prepare("INSERT OR REPLACE INTO impostazioni (chiave, valore) VALUES ('max_ospiti', ?)")
-      .bind(String(Math.round(max))).run();
+    const salva = [];
+    for (const [chiave, { min, max, nome }] of Object.entries(IMPOSTAZIONI)) {
+      if (corpo[chiave] === undefined) continue;
+      const v = numero(corpo[chiave], min);
+      if (v === null || Number.isNaN(v) || v > max) return errore(nome + ": valore tra " + min + " e " + max + ".");
+      salva.push(env.DB.prepare("INSERT OR REPLACE INTO impostazioni (chiave, valore) VALUES (?, ?)").bind(chiave, String(Math.round(v))));
+    }
+    if (!salva.length) return errore("Niente da salvare.");
+    await env.DB.batch(salva);
     return json({ ok: true });
   }
 
@@ -503,19 +536,19 @@ document.getElementById("form").onsubmit = async (e) => {
 };
 </script></body></html>`;
 
-const PAGINA_GESTIONE = `<!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex"><title>Gestione · Hidden Treasure</title>
-<style>${STILE}
+const STILE_GESTIONE = `
 header{position:sticky;top:0;z-index:5;background:var(--shell);border-bottom:1px solid var(--line)}
 .top{max-width:1100px;margin:0 auto;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
 nav{max-width:1100px;margin:0 auto;padding:0 1rem;display:flex;gap:.25rem;overflow-x:auto}
 nav button{border:0;background:none;padding:.65rem .9rem;border-bottom:2px solid transparent;color:var(--soft);font-weight:600;white-space:nowrap}
 nav button[aria-selected=true]{color:var(--deep);border-color:var(--deep)}
 main{max-width:1100px;margin:0 auto;padding:1.25rem 1rem 4rem;display:flex;flex-direction:column;gap:1rem}
-section[hidden]{display:none}
+body.con-barra main{padding-bottom:12rem}
+section[hidden],form[hidden],.azioni[hidden],.azioni [hidden]{display:none}
 section{display:flex;flex-direction:column;gap:1rem}
-.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem;align-items:end}
+h3{margin:0 0 .5rem;font-size:1rem;color:var(--deep);text-transform:capitalize}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;align-items:end}
+.form .largo{grid-column:span 2}
 .table{width:100%;border-collapse:collapse;font-size:.95rem}
 .table th{text-align:left;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--soft);padding:.5rem;border-bottom:1px solid var(--line)}
 .table td{padding:.6rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
@@ -527,8 +560,66 @@ section{display:flex;flex-direction:column;gap:1rem}
 .vuoto{color:var(--soft);text-align:center;padding:1rem}
 .richiesta{display:grid;gap:.25rem}
 .richiesta strong{color:var(--deep)}
-.azioni{display:flex;gap:.25rem;flex-wrap:wrap}
-/* Telefono: ogni riga diventa una scheda */
+.azioni{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.btn.chiaro{background:#fff;color:var(--deep);border:1px solid var(--deep)}
+.btn.chiaro:hover{background:var(--deep);color:#fff}
+
+/* Campo date: un pulsante che apre il calendario */
+.scegli{display:flex;align-items:center;gap:.5rem;width:100%;padding:.6rem .75rem;border:1px solid rgba(26,34,39,.22);border-radius:8px;background:#fff;color:var(--ink);text-align:left;font-weight:400}
+.scegli::before{content:"";width:16px;height:16px;flex:none;border:2px solid var(--sea);border-radius:3px;border-top-width:5px}
+.scegli.vuoto-campo{color:var(--soft)}
+
+/* Calendario: mesi e giorni */
+.mesi{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem 2rem}
+.griglia{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.gs{font-size:.7rem;font-weight:700;color:var(--soft);text-align:center;padding:.2rem 0}
+.g{position:relative;border:0;border-radius:6px;background:#fff;min-height:3.2rem;padding:.2rem .1rem;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:1px;color:var(--ink);font-size:.9rem;line-height:1.15}
+.g:hover:not(:disabled){outline:2px solid var(--sea);outline-offset:-2px}
+.g .p{font-size:.7rem;color:var(--soft)}
+.g .m{font-size:.65rem;font-weight:700;color:var(--brass)}
+.g:disabled{color:#B9C0C5;background:transparent;cursor:default}
+.g:disabled .p,.g:disabled .m{display:none}
+.g.airbnb{background:#FBEFEA}
+.g.airbnb .n{text-decoration:line-through;color:#B4533C}
+.g.manuale{background:#F3EEE4}
+.g.manuale .n{text-decoration:line-through;color:var(--brass)}
+.g.speciale::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--brass)}
+.g.sel{background:var(--sea);color:#fff}
+.g.sel .p,.g.sel .m,.g.sel .n{color:#fff}
+.g.estremo{background:var(--deep)}
+.g.anteprima{background:#DCEBEC}
+.legenda{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font-size:.8rem;color:var(--soft)}
+.legenda span{display:inline-flex;align-items:center;gap:.35rem}
+.legenda i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.riga-titolo{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
+
+/* Barra della selezione nel calendario */
+#barra{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#fff;border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(16,42,58,.12)}
+#barra[hidden]{display:none}
+.barra-in{max-width:1100px;margin:0 auto;padding:1rem;display:flex;flex-direction:column;gap:.75rem}
+.barra-in .form{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+body.con-barra #toast{bottom:9rem}
+
+/* Finestra del calendario a comparsa */
+dialog{border:0;border-radius:18px;padding:0;width:min(720px,calc(100% - 2rem));max-height:calc(100vh - 2rem);box-shadow:0 20px 60px rgba(16,42,58,.3)}
+dialog::backdrop{background:rgba(16,42,58,.45)}
+.pk{display:flex;flex-direction:column;gap:1rem;padding:1.25rem}
+.pk-testa{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.x{border:0;background:#EEF0F1;border-radius:50%;width:2.2rem;height:2.2rem;font-size:1.3rem;line-height:1;color:var(--ink)}
+.pk-corpo{position:relative}
+.pk-nav{position:absolute;top:-.3rem;left:0;right:0;display:flex;justify-content:space-between;pointer-events:none}
+.pk-nav button{pointer-events:auto;border:1px solid var(--line);background:#fff;border-radius:50%;width:2rem;height:2rem;font-size:1.1rem;line-height:1;color:var(--deep)}
+.pk-nav button:disabled{opacity:.3}
+.pk .mesi{grid-template-columns:1fr 1fr}
+.pk h3{text-align:center}
+.pk .g{min-height:2.6rem}
+.pk-piede{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:1rem}
+
+#toast{position:fixed;left:50%;bottom:1rem;z-index:20;transform:translateX(-50%);background:var(--deep);color:#fff;padding:.6rem 1rem;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.on{opacity:1}
+#toast.err{background:var(--red)}
+
+/* Telefono */
 @media (max-width:700px){
   .table thead{display:none}
   .table,.table tbody,.table tr,.table td{display:block;width:100%}
@@ -536,18 +627,31 @@ section{display:flex;flex-direction:column;gap:1rem}
   .table tr:last-child{border-bottom:0}
   .table td{border:0;padding:.2rem 0}
   .card.scroll{padding:.25rem 1rem}
+  .form .largo{grid-column:auto}
+  .mesi{grid-template-columns:1fr}
+  .card{padding:1rem}
+  .g{min-height:3rem}
+  dialog{width:100%;max-width:100%;max-height:92vh;margin:auto 0 0;border-radius:18px 18px 0 0}
+  .pk .mesi{grid-template-columns:1fr}
+  .barra-in{padding:.75rem 1rem;max-height:60vh;overflow-y:auto}
+  .barra-in{gap:.5rem}
+  .barra-in .riga-titolo{flex-wrap:nowrap;align-items:flex-start}
+  #sel-testo{font-size:.9rem}
+  .barra-in .azioni .btn{padding:.5rem .9rem;font-size:.9rem}
 }
-#toast{position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);background:var(--deep);color:#fff;padding:.6rem 1rem;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none}
-#toast.on{opacity:1}
-#toast.err{background:var(--red)}
-</style></head>
+`;
+
+const PAGINA_GESTIONE = `<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Gestione · Hidden Treasure</title>
+<style>${STILE}${STILE_GESTIONE}</style></head>
 <body>
 <header>
   <div class="top"><h1>Gestione</h1><button class="link" id="esci">Esci</button></div>
   <nav role="tablist">
     <button role="tab" data-tab="richieste" aria-selected="true">Richieste</button>
+    <button role="tab" data-tab="calendario">Calendario</button>
     <button role="tab" data-tab="prezzi">Prezzi</button>
-    <button role="tab" data-tab="blocchi">Date bloccate</button>
     <button role="tab" data-tab="impostazioni">Impostazioni</button>
   </nav>
 </header>
@@ -556,14 +660,32 @@ section{display:flex;flex-direction:column;gap:1rem}
     <div class="card scroll"><table class="table"><thead><tr><th>Ricevuta</th><th>Ospite</th><th>Soggiorno</th><th>Messaggio</th><th>Stato</th></tr></thead><tbody id="richieste"></tbody></table></div>
   </section>
 
+  <section id="tab-calendario" hidden>
+    <div class="card">
+      <div class="riga-titolo">
+        <h2>Calendario</h2>
+        <div class="legenda">
+          <span><i style="background:#FBEFEA"></i>Airbnb</span>
+          <span><i style="background:#F3EEE4"></i>Bloccato da te</span>
+          <span><i style="background:var(--brass);width:8px;height:8px;border-radius:50%"></i>Giorno speciale</span>
+        </div>
+      </div>
+      <p class="muted">Tocca il primo e l'ultimo giorno di un periodo, poi scegli cosa farne: cambiare prezzo o notti minime, bloccarlo, crearci una stagione. In ogni casella: prezzo a notte e, sotto, il minimo di notti se è più di 1.</p>
+      <div class="mesi" id="panoramica"></div>
+    </div>
+    <div class="card scroll">
+      <h2>Date bloccate</h2>
+      <table class="table"><thead><tr><th>Dal</th><th>Al (partenza)</th><th>Origine</th><th>Nota</th><th></th></tr></thead><tbody id="blocchi"></tbody></table>
+    </div>
+  </section>
+
   <section id="tab-prezzi" hidden>
     <div class="card">
       <h2 id="titolo-stagione">Nuova stagione</h2>
-      <p class="muted">Prezzo a notte per un periodo. Inizio e fine sono compresi. Le notti minime valgono per chi arriva in quel periodo.</p>
+      <p class="muted">Prezzo a notte per un periodo, primo e ultimo giorno compresi.</p>
       <form class="form" id="form-stagione">
         <label>Nome<input name="nome" required placeholder="Agosto"></label>
-        <label>Dal<input name="dal" type="date" required></label>
-        <label>Al (compreso)<input name="al" type="date" required></label>
+        <label class="largo">Periodo<span class="campo-date" data-titolo="Periodo della stagione"><input type="hidden" name="dal"><input type="hidden" name="al"><button type="button" class="scegli"></button></span></label>
         <label>€ a notte<input name="prezzo_notte_eur" type="number" min="0" step="1" required></label>
         <label>Notti minime<input name="min_notti" type="number" min="1" step="1" value="1"></label>
         <div class="azioni"><button class="btn">Salva</button><button type="button" class="link" id="annulla-stagione" hidden>Annulla</button></div>
@@ -573,163 +695,415 @@ section{display:flex;flex-direction:column;gap:1rem}
 
     <div class="card">
       <h2>Giorni speciali</h2>
-      <p class="muted">Un singolo giorno con prezzo o minimo diverso (es. Ferragosto). Vince sulla stagione. Lascia vuoto ciò che non cambia.</p>
+      <p class="muted">Uno o più giorni con prezzo o minimo diverso (es. Ferragosto): vincono sulla stagione. Lascia vuoto ciò che non cambia.</p>
       <form class="form" id="form-giorno">
-        <label>Giorno<input name="data" type="date" required></label>
+        <label class="largo">Giorni<span class="campo-date" data-titolo="Giorni speciali"><input type="hidden" name="dal"><input type="hidden" name="al"><button type="button" class="scegli"></button></span></label>
         <label>€ a notte<input name="prezzo_notte_eur" type="number" min="0" step="1"></label>
         <label>Notti minime<input name="min_notti" type="number" min="1" step="1"></label>
         <label>Nota<input name="nota" placeholder="Ferragosto"></label>
         <div><button class="btn">Salva</button></div>
       </form>
     </div>
-    <div class="card scroll"><table class="table"><thead><tr><th>Giorno</th><th>€/notte</th><th>Min. notti</th><th>Nota</th><th></th></tr></thead><tbody id="giorni"></tbody></table></div>
-  </section>
-
-  <section id="tab-blocchi" hidden>
-    <div class="card">
-      <h2>Blocca delle date</h2>
-      <p class="muted">Per amici, lavori o soggiorni tuoi. Le date di Airbnb arrivano da sole ogni ora.</p>
-      <form class="form" id="form-blocco">
-        <label>Prima notte occupata<input name="dal" type="date" required></label>
-        <label>Giorno di partenza<input name="al" type="date" required></label>
-        <label>Nota<input name="nota" placeholder="Lavori in giardino"></label>
-        <div><button class="btn">Blocca</button></div>
-      </form>
-    </div>
-    <div class="card scroll"><table class="table"><thead><tr><th>Dal</th><th>Al (partenza)</th><th>Origine</th><th>Nota</th><th></th></tr></thead><tbody id="blocchi"></tbody></table></div>
+    <div class="card scroll"><table class="table"><thead><tr><th>Giorni</th><th>€/notte</th><th>Min. notti</th><th>Nota</th><th></th></tr></thead><tbody id="giorni"></tbody></table></div>
+    <p class="muted">Notti minime: ogni soggiorno deve durare almeno quanto il minimo più alto tra le notti che comprende.</p>
   </section>
 
   <section id="tab-impostazioni" hidden>
     <div class="card">
-      <h2>Impostazioni</h2>
+      <h2>Ospiti e supplemento</h2>
       <form class="form" id="form-impostazioni">
         <label>Massimo ospiti (adulti + bambini)<input name="max_ospiti" type="number" min="1" max="30" required></label>
+        <label>Ospiti compresi nel prezzo<input name="ospiti_inclusi" type="number" min="1" max="30" required></label>
+        <label>Supplemento a notte per ogni ospite in più (€)<input name="supplemento_ospite_eur" type="number" min="0" step="1" required></label>
         <div><button class="btn">Salva</button></div>
       </form>
+      <p class="muted" id="esempio"></p>
+      <p class="muted">I neonati non contano né per il massimo né per il supplemento.</p>
     </div>
   </section>
 </main>
+
+<div id="barra" hidden><div class="barra-in">
+  <div class="riga-titolo"><strong id="sel-testo"></strong><button class="link" id="sel-annulla">Annulla</button></div>
+  <div class="azioni" id="sel-azioni">
+    <button class="btn" id="sel-prezzo">Prezzo e notti minime</button>
+    <button class="btn chiaro" id="sel-blocca">Blocca queste notti</button>
+    <button class="link" id="sel-stagione">Crea una stagione</button>
+    <button class="link danger" id="sel-togli">Togli i giorni speciali</button>
+  </div>
+  <form class="form" id="form-sel" hidden>
+    <label>€ a notte<input name="prezzo_notte_eur" type="number" min="0" step="1"></label>
+    <label>Notti minime<input name="min_notti" type="number" min="1" step="1"></label>
+    <label>Nota<input name="nota" placeholder="Ferragosto"></label>
+    <div class="azioni"><button class="btn">Applica ai giorni</button><button type="button" class="link" id="sel-indietro">Indietro</button></div>
+  </form>
+</div></div>
+
+<dialog id="picker"><div class="pk">
+  <div class="pk-testa"><div><strong id="pk-titolo"></strong><div class="muted" id="pk-hint"></div></div><button class="x" id="pk-chiudi" aria-label="Chiudi">×</button></div>
+  <div class="pk-corpo">
+    <div class="pk-nav"><button id="pk-prec" aria-label="Mese precedente">‹</button><button id="pk-succ" aria-label="Mese successivo">›</button></div>
+    <div class="mesi" id="pk-mesi"></div>
+  </div>
+  <div class="pk-piede"><span id="pk-sel" class="muted"></span><div class="azioni"><button class="link" id="pk-pulisci">Cancella</button><button class="btn" id="pk-ok">Conferma</button></div></div>
+</div></dialog>
+
 <div id="toast" role="status"></div>
-<script>
-let dati = null;
-let stagioneInModifica = null;
+<script>(${scriptGestione.toString()})();</script>
+</body></html>`;
 
-/* Crea un elemento: i testi passano sempre da textContent, mai da innerHTML */
-function el(tag, props, ...figli) {
-  const e = document.createElement(tag);
-  Object.assign(e, props || {});
-  figli.flat().forEach((f) => e.append(f instanceof Node ? f : document.createTextNode(f == null ? "" : String(f))));
-  return e;
-}
-const fmt = (iso) => iso ? new Date(iso + "T00:00:00").toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "";
-const euro = (n) => n == null ? "—" : n.toLocaleString("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
-function toast(testo, errore) {
-  const t = document.getElementById("toast");
-  t.textContent = testo; t.className = errore ? "on err" : "on";
-  clearTimeout(t._t); t._t = setTimeout(() => (t.className = ""), 2500);
-}
-async function chiama(metodo, url, body) {
-  const r = await fetch(url, { method: metodo, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
-  if (r.status === 401) { location.reload(); return null; }
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok) { toast(j.errore || "Errore", true); return null; }
-  return j;
-}
-const datiForm = (f) => Object.fromEntries(new FormData(f).entries());
-const riga = (...celle) => el("tr", null, celle.map((c) => el("td", null, c)));
-const vuoto = (n, testo) => el("tr", null, el("td", { colSpan: n, className: "vuoto" }, testo));
-const elimina = (testo, fn) => el("button", { className: "link danger", onclick: () => confirm(testo) && fn() }, "Elimina");
+/*
+ * Il codice della pagina di gestione. Gira nel browser, non nel Worker:
+ * viene copiato nella pagina come testo (scriptGestione.toString()).
+ * I testi passano sempre da textContent, mai da innerHTML.
+ */
+function scriptGestione() {
+  let dati = null;
+  let stagioneInModifica = null;
 
-async function carica() {
-  dati = await chiama("GET", "/api/dati");
-  if (!dati) return;
-  disegnaRichieste(); disegnaStagioni(); disegnaGiorni(); disegnaBlocchi();
-  document.querySelector("#form-impostazioni [name=max_ospiti]").value = dati.impostazioni.max_ospiti || 6;
-}
+  /* ── Strumenti ── */
+  const $ = (id) => document.getElementById(id);
+  function el(tag, props, ...figli) {
+    const e = document.createElement(tag);
+    Object.assign(e, props || {});
+    figli.flat().forEach((f) => e.append(f instanceof Node ? f : document.createTextNode(f == null ? "" : String(f))));
+    return e;
+  }
+  // Date come testo "AAAA-MM-GG", calcolate in UTC così il giorno non slitta mai
+  const iso = (d) => d.toISOString().slice(0, 10);
+  const piu = (s, n) => { const d = new Date(s + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return iso(d); };
+  const giorniFra = (a, b) => Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 864e5);
+  const oggi = (() => { const d = new Date(); return iso(new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))); })();
+  const fmt = (s, anno = true) => s ? new Date(s + "T00:00:00Z").toLocaleDateString("it-IT",
+    { weekday: "short", day: "numeric", month: "short", year: anno ? "numeric" : undefined, timeZone: "UTC" }) : "";
+  const periodo = (a, b) => a === b ? fmt(a) : fmt(a, a.slice(0, 4) !== b.slice(0, 4)) + " → " + fmt(b);
+  const euro = (n) => n == null ? "—" : Number(n).toLocaleString("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const giorniTesto = (n) => n === 1 ? "1 giorno" : n + " giorni";
+  const telefono = () => matchMedia("(max-width:700px)").matches;
 
-function disegnaRichieste() {
-  const tb = document.getElementById("richieste");
-  tb.replaceChildren(...(dati.richieste.length ? dati.richieste.map((r) => {
-    const stato = el("select", { onchange: async (e) => { if (await chiama("POST", "/api/richieste/" + r.id + "/stato", { stato: e.target.value })) toast("Stato aggiornato"); } },
-      ["nuova", "confermata", "rifiutata"].map((s) => el("option", { value: s, selected: s === (r.stato || "nuova") }, s)));
-    const ospite = el("div", { className: "richiesta" },
-      el("strong", null, r.nome),
-      el("a", { href: "mailto:" + r.email }, r.email),
-      r.telefono ? el("a", { href: "tel:" + r.telefono }, r.telefono) : "");
-    const notti = Math.round((new Date(r.check_out) - new Date(r.check_in)) / 864e5);
-    return riga((r.creato_il || "").slice(0, 16), ospite,
-      el("div", { className: "richiesta" }, fmt(r.check_in) + " → " + fmt(r.check_out), el("span", { className: "muted" }, notti + " notti · " + r.ospiti + " ospiti · " + (r.lingua || "").toUpperCase())),
-      el("span", { className: "muted", style: "white-space:pre-line" }, r.messaggio || ""), stato);
-  }) : [vuoto(5, "Nessuna richiesta per ora.")]));
-}
+  function toast(testo, errore) {
+    const t = $("toast");
+    t.textContent = testo; t.className = errore ? "on err" : "on";
+    clearTimeout(t._t); t._t = setTimeout(() => (t.className = ""), 2500);
+  }
+  async function chiama(metodo, url, body) {
+    const r = await fetch(url, { method: metodo, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+    if (r.status === 401) { location.reload(); return null; }
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { toast(j.errore || "Errore", true); return null; }
+    return j;
+  }
+  const datiForm = (f) => Object.fromEntries(new FormData(f).entries());
+  const riga = (...celle) => el("tr", null, celle.map((c) => el("td", null, c)));
+  const vuoto = (n, testo) => el("tr", null, el("td", { colSpan: n, className: "vuoto" }, testo));
+  const elimina = (testo, fn, etichetta = "Elimina") => el("button", { className: "link danger", onclick: () => confirm(testo) && fn() }, etichetta);
 
-function disegnaStagioni() {
-  const tb = document.getElementById("stagioni");
-  tb.replaceChildren(...(dati.stagioni.length ? dati.stagioni.map((s) => riga(
-    s.nome, fmt(s.dal) + " → " + fmt(s.al), euro(s.prezzo_notte_eur), s.min_notti,
-    el("div", { className: "azioni" },
-      el("button", { className: "link", onclick: () => modificaStagione(s) }, "Modifica"),
-      elimina("Eliminare la stagione " + s.nome + "?", async () => { if (await chiama("DELETE", "/api/stagioni/" + s.id)) { toast("Stagione eliminata"); carica(); } }))
-  )) : [vuoto(5, "Nessuna stagione: senza prezzo il sito non mostra il totale.")]));
-}
+  /* ── Cosa succede in un giorno: prezzo, minimo, blocco ── */
+  function info(s) {
+    const g = dati.giorni.get(s);
+    const st = dati.stagioni.find((x) => x.dal <= s && s <= x.al);
+    const b = dati.blocchi.find((x) => x.dal <= s && s < x.al);
+    return {
+      prezzo: g && g.prezzo_notte_eur != null ? g.prezzo_notte_eur : st ? st.prezzo_notte_eur : null,
+      min: g && g.min_notti != null ? g.min_notti : st ? st.min_notti : 1,
+      speciale: !!g,
+      blocco: b ? b.origine : null,
+    };
+  }
 
-function modificaStagione(s) {
-  stagioneInModifica = s.id;
-  const f = document.getElementById("form-stagione");
-  ["nome", "dal", "al", "prezzo_notte_eur", "min_notti"].forEach((k) => (f.elements[k].value = s[k]));
-  document.getElementById("titolo-stagione").textContent = "Modifica: " + s.nome;
-  document.getElementById("annulla-stagione").hidden = false;
-  f.scrollIntoView({ behavior: "smooth", block: "center" });
-}
-function fineModifica() {
-  stagioneInModifica = null;
-  document.getElementById("form-stagione").reset();
-  document.getElementById("titolo-stagione").textContent = "Nuova stagione";
-  document.getElementById("annulla-stagione").hidden = true;
-}
-document.getElementById("annulla-stagione").onclick = fineModifica;
+  /* ── Un mese: griglia da lunedì a domenica ── */
+  function mese(anno, m, decora) {
+    const primo = new Date(Date.UTC(anno, m, 1));
+    const quanti = new Date(Date.UTC(anno, m + 1, 0)).getUTCDate();
+    const griglia = el("div", { className: "griglia" }, ["L", "M", "M", "G", "V", "S", "D"].map((g) => el("span", { className: "gs" }, g)));
+    for (let i = 0; i < (primo.getUTCDay() + 6) % 7; i++) griglia.append(el("span"));
+    for (let g = 1; g <= quanti; g++) {
+      const s = iso(new Date(Date.UTC(anno, m, g)));
+      const b = el("button", { type: "button", className: "g", disabled: s < oggi }, el("span", { className: "n" }, g));
+      b.dataset.iso = s;
+      decora(s, b);
+      griglia.append(b);
+    }
+    const nome = primo.toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" });
+    return el("div", { className: "mese" }, el("h3", null, nome), griglia);
+  }
+  function decoraGiorno(s, b, conMinimo) {
+    const i = info(s);
+    if (i.blocco) b.classList.add(i.blocco);
+    if (i.speciale) b.classList.add("speciale");
+    b.append(el("span", { className: "p" }, i.prezzo == null ? "–" : "€" + i.prezzo));
+    if (conMinimo && i.min > 1) b.append(el("span", { className: "m" }, "min " + i.min));
+    b.title = [fmt(s), i.prezzo == null ? "senza prezzo" : euro(i.prezzo) + " a notte", i.min > 1 ? "minimo " + i.min + " notti" : "",
+      i.blocco === "airbnb" ? "occupato su Airbnb" : i.blocco === "manuale" ? "bloccato da te" : ""].filter(Boolean).join(" · ");
+  }
+  // Colora la selezione da a a b compresi (b può mancare)
+  function evidenzia(contenitore, a, b, classe = "sel") {
+    contenitore.querySelectorAll(".g").forEach((x) => {
+      const s = x.dataset.iso;
+      const dentro = a && s >= a && s <= (b || a);
+      x.classList.toggle(classe, !!dentro);
+      x.classList.toggle("estremo", !!dentro && classe === "sel" && (s === a || s === (b || a)));
+    });
+  }
 
-function disegnaGiorni() {
-  const tb = document.getElementById("giorni");
-  tb.replaceChildren(...(dati.prezzi_giorno.length ? dati.prezzi_giorno.map((g) => riga(
-    fmt(g.data), euro(g.prezzo_notte_eur), g.min_notti ?? "—", g.nota || "",
-    elimina("Eliminare il prezzo del " + fmt(g.data) + "?", async () => { if (await chiama("DELETE", "/api/prezzi_giorno/" + g.data)) { toast("Giorno eliminato"); carica(); } })
-  )) : [vuoto(5, "Nessun giorno speciale.")]));
-}
+  /* ── Calendario a comparsa per scegliere le date ── */
+  const pk = { campo: null, a: null, b: null, mese: null };
+  function meseDi(s) { const [y, m] = s.split("-").map(Number); return { y, m: m - 1 }; }
+  function apriPicker(campo) {
+    pk.campo = campo;
+    pk.a = campo.querySelector("[name=dal]").value || null;
+    pk.b = campo.querySelector("[name=al]").value || null;
+    pk.mese = meseDi(pk.a && pk.a > oggi ? pk.a : oggi);
+    $("pk-titolo").textContent = campo.dataset.titolo || "Scegli le date";
+    disegnaPicker();
+    $("picker").showModal();
+  }
+  function disegnaPicker() {
+    const n = telefono() ? 1 : 2;
+    const mesi = [];
+    for (let i = 0; i < n; i++) {
+      const d = new Date(Date.UTC(pk.mese.y, pk.mese.m + i, 1));
+      mesi.push(mese(d.getUTCFullYear(), d.getUTCMonth(), (s, b) => {
+        decoraGiorno(s, b, false);
+        b.onclick = () => sceltaPicker(s);
+        b.onmouseenter = () => { if (pk.a && !pk.b && s > pk.a) evidenzia($("pk-mesi"), pk.a, s); };
+      }));
+    }
+    $("pk-mesi").replaceChildren(...mesi);
+    const ora = meseDi(oggi);
+    $("pk-prec").disabled = pk.mese.y === ora.y && pk.mese.m === ora.m;
+    aggiornaPicker();
+  }
+  function aggiornaPicker() {
+    evidenzia($("pk-mesi"), pk.a, pk.b);
+    $("pk-hint").textContent = !pk.a ? "Tocca il primo giorno." : !pk.b ? "Ora l'ultimo giorno (per un giorno solo, conferma)." : "Fatto: conferma o tocca un altro giorno per ricominciare.";
+    const fine = pk.b || pk.a;
+    $("pk-sel").textContent = pk.a ? periodo(pk.a, fine) + " · " + giorniTesto(giorniFra(pk.a, fine) + 1) : "";
+    $("pk-ok").disabled = !pk.a;
+  }
+  function sceltaPicker(s) {
+    if (!pk.a || pk.b || s < pk.a) { pk.a = s; pk.b = null; } else pk.b = s;
+    aggiornaPicker();
+  }
+  function spostaMese(n) {
+    const d = new Date(Date.UTC(pk.mese.y, pk.mese.m + n, 1));
+    pk.mese = { y: d.getUTCFullYear(), m: d.getUTCMonth() };
+    disegnaPicker();
+  }
+  $("pk-prec").onclick = () => spostaMese(telefono() ? -1 : -2);
+  $("pk-succ").onclick = () => spostaMese(telefono() ? 1 : 2);
+  $("pk-chiudi").onclick = () => $("picker").close();
+  $("pk-pulisci").onclick = () => { pk.a = pk.b = null; aggiornaPicker(); };
+  $("pk-ok").onclick = () => { impostaCampo(pk.campo, pk.a, pk.b || pk.a); $("picker").close(); };
+  $("picker").addEventListener("click", (e) => { if (e.target === $("picker")) $("picker").close(); });
 
-function disegnaBlocchi() {
-  const tb = document.getElementById("blocchi");
-  tb.replaceChildren(...(dati.blocchi.length ? dati.blocchi.map((b) => riga(
-    fmt(b.dal), fmt(b.al), el("span", { className: "tag " + b.origine }, b.origine), b.nota || "",
-    b.origine === "manuale"
-      ? elimina("Sbloccare queste date?", async () => { if (await chiama("DELETE", "/api/blocchi/" + b.id)) { toast("Date sbloccate"); carica(); } })
-      : el("span", { className: "muted" }, "da Airbnb")
-  )) : [vuoto(5, "Nessuna data bloccata.")]));
-}
+  function impostaCampo(campo, dal, al) {
+    campo.querySelector("[name=dal]").value = dal || "";
+    campo.querySelector("[name=al]").value = al || "";
+    const b = campo.querySelector(".scegli");
+    b.textContent = dal ? periodo(dal, al) : "Scegli le date";
+    b.classList.toggle("vuoto-campo", !dal);
+  }
+  document.querySelectorAll(".campo-date").forEach((c) => {
+    impostaCampo(c, null, null);
+    c.querySelector(".scegli").onclick = () => apriPicker(c);
+  });
 
-/* Moduli */
-function invio(id, fn) {
-  const f = document.getElementById(id);
-  f.onsubmit = async (e) => {
+  /* ── Vista calendario con selezione ── */
+  const sel = { a: null, b: null };
+  function disegnaPanoramica() {
+    const ora = meseDi(oggi);
+    const mesi = [];
+    for (let i = 0; i < 13; i++) {
+      const d = new Date(Date.UTC(ora.y, ora.m + i, 1));
+      mesi.push(mese(d.getUTCFullYear(), d.getUTCMonth(), (s, b) => {
+        decoraGiorno(s, b, true);
+        b.onclick = () => sceltaPanoramica(s);
+      }));
+    }
+    $("panoramica").replaceChildren(...mesi);
+    aggiornaSelezione();
+  }
+  function sceltaPanoramica(s) {
+    if (!sel.a || sel.b) { sel.a = s; sel.b = null; }
+    else if (s < sel.a) { sel.b = sel.a; sel.a = s; }
+    else sel.b = s;
+    aggiornaSelezione();
+  }
+  function aggiornaSelezione() {
+    evidenzia($("panoramica"), sel.a, sel.b);
+    $("barra").hidden = !sel.a;
+    document.body.classList.toggle("con-barra", !!sel.a);
+    if (!sel.a) return;
+    const a = sel.a, b = sel.b || sel.a;
+    const n = giorniFra(a, b) + 1;
+    $("sel-testo").textContent = periodo(a, b) + " · " + giorniTesto(n) + (sel.b ? "" : " (tocca l'ultimo giorno per allungare)");
+    const primo = info(a);
+    const f = $("form-sel");
+    f.elements.prezzo_notte_eur.placeholder = primo.prezzo == null ? "" : "ora " + primo.prezzo;
+    f.elements.min_notti.placeholder = "ora " + primo.min;
+    $("sel-blocca").textContent = n === 1 ? "Blocca questa notte" : "Blocca queste " + n + " notti";
+    let speciali = false;
+    for (let s = a; s <= b; s = piu(s, 1)) if (dati.giorni.has(s)) { speciali = true; break; }
+    $("sel-togli").hidden = !speciali;
+  }
+  // La barra mostra le azioni; il modulo del prezzo si apre solo quando serve
+  function mostraModulo(si) {
+    $("form-sel").hidden = !si;
+    $("sel-azioni").hidden = si;
+    if (si) $("form-sel").elements.prezzo_notte_eur.focus();
+  }
+  $("sel-prezzo").onclick = () => mostraModulo(true);
+  $("sel-indietro").onclick = () => mostraModulo(false);
+  const chiudiSelezione = () => { sel.a = sel.b = null; $("form-sel").reset(); mostraModulo(false); aggiornaSelezione(); };
+  $("sel-annulla").onclick = chiudiSelezione;
+  $("form-sel").onsubmit = async (e) => {
     e.preventDefault();
-    const b = f.querySelector("button.btn"); b.disabled = true;
-    try { await fn(datiForm(f), f); } finally { b.disabled = false; }
+    const d = datiForm(e.target);
+    const r = await chiama("POST", "/api/prezzi_giorno", { ...d, dal: sel.a, al: sel.b || sel.a });
+    if (r) { toast("Salvato per " + giorniTesto(r.giorni)); chiudiSelezione(); carica(); }
   };
+  $("sel-blocca").onclick = async () => {
+    const fine = piu(sel.b || sel.a, 1);
+    const nota = prompt("Nota per queste date (facoltativa), ad esempio Lavori o Amici:", "");
+    if (nota === null) return;
+    if (await chiama("POST", "/api/blocchi", { dal: sel.a, al: fine, nota })) { toast("Bloccato: partenza possibile dal " + fmt(fine, false)); chiudiSelezione(); carica(); }
+  };
+  $("sel-togli").onclick = async () => {
+    if (!confirm("Togliere i prezzi speciali in questi giorni? Tornano a valere le stagioni.")) return;
+    if (await chiama("POST", "/api/prezzi_giorno/elimina", { dal: sel.a, al: sel.b || sel.a })) { toast("Giorni speciali tolti"); chiudiSelezione(); carica(); }
+  };
+  $("sel-stagione").onclick = () => {
+    const a = sel.a, b = sel.b || sel.a;
+    chiudiSelezione();
+    fineModifica();
+    impostaCampo(document.querySelector("#form-stagione .campo-date"), a, b);
+    apriScheda("prezzi");
+    $("form-stagione").elements.nome.focus();
+  };
+
+  /* ── Caricamento e tabelle ── */
+  async function carica() {
+    const r = await chiama("GET", "/api/dati");
+    if (!r) return;
+    dati = { ...r, giorni: new Map(r.prezzi_giorno.map((g) => [g.data, g])) };
+    disegnaRichieste(); disegnaStagioni(); disegnaGiorni(); disegnaBlocchi(); disegnaPanoramica();
+    const f = $("form-impostazioni");
+    f.elements.max_ospiti.value = dati.impostazioni.max_ospiti || 6;
+    f.elements.ospiti_inclusi.value = dati.impostazioni.ospiti_inclusi || 2;
+    f.elements.supplemento_ospite_eur.value = dati.impostazioni.supplemento_ospite_eur || 0;
+    esempio();
+  }
+
+  function disegnaRichieste() {
+    $("richieste").replaceChildren(...(dati.richieste.length ? dati.richieste.map((r) => {
+      const stato = el("select", { onchange: async (e) => { if (await chiama("POST", "/api/richieste/" + r.id + "/stato", { stato: e.target.value })) toast("Stato aggiornato"); } },
+        ["nuova", "confermata", "rifiutata"].map((s) => el("option", { value: s, selected: s === (r.stato || "nuova") }, s)));
+      const ospite = el("div", { className: "richiesta" },
+        el("strong", null, r.nome),
+        el("a", { href: "mailto:" + r.email }, r.email),
+        r.telefono ? el("a", { href: "tel:" + r.telefono }, r.telefono) : "");
+      const notti = giorniFra(r.check_in, r.check_out);
+      return riga((r.creato_il || "").slice(0, 16), ospite,
+        el("div", { className: "richiesta" }, fmt(r.check_in) + " → " + fmt(r.check_out), el("span", { className: "muted" }, notti + " notti · " + r.ospiti + " ospiti · " + (r.lingua || "").toUpperCase())),
+        el("span", { className: "muted", style: "white-space:pre-line" }, r.messaggio || ""), stato);
+    }) : [vuoto(5, "Nessuna richiesta per ora.")]));
+  }
+
+  function disegnaStagioni() {
+    $("stagioni").replaceChildren(...(dati.stagioni.length ? dati.stagioni.map((s) => riga(
+      s.nome, periodo(s.dal, s.al), euro(s.prezzo_notte_eur), s.min_notti,
+      el("div", { className: "azioni" },
+        el("button", { className: "link", onclick: () => modificaStagione(s) }, "Modifica"),
+        elimina("Eliminare la stagione " + s.nome + "?", async () => { if (await chiama("DELETE", "/api/stagioni/" + s.id)) { toast("Stagione eliminata"); carica(); } }))
+    )) : [vuoto(5, "Nessuna stagione: senza prezzo il sito non mostra il totale.")]));
+  }
+  function modificaStagione(s) {
+    stagioneInModifica = s.id;
+    const f = $("form-stagione");
+    ["nome", "prezzo_notte_eur", "min_notti"].forEach((k) => (f.elements[k].value = s[k]));
+    impostaCampo(f.querySelector(".campo-date"), s.dal, s.al);
+    $("titolo-stagione").textContent = "Modifica: " + s.nome;
+    $("annulla-stagione").hidden = false;
+    f.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  function fineModifica() {
+    stagioneInModifica = null;
+    $("form-stagione").reset();
+    impostaCampo(document.querySelector("#form-stagione .campo-date"), null, null);
+    $("titolo-stagione").textContent = "Nuova stagione";
+    $("annulla-stagione").hidden = true;
+  }
+  $("annulla-stagione").onclick = fineModifica;
+
+  // I giorni speciali di fila con gli stessi valori diventano una riga sola
+  function disegnaGiorni() {
+    const gruppi = [];
+    for (const g of dati.prezzi_giorno) {
+      const u = gruppi[gruppi.length - 1];
+      if (u && piu(u.al, 1) === g.data && u.prezzo_notte_eur === g.prezzo_notte_eur && u.min_notti === g.min_notti && u.nota === g.nota) u.al = g.data;
+      else gruppi.push({ ...g, dal: g.data, al: g.data });
+    }
+    $("giorni").replaceChildren(...(gruppi.length ? gruppi.map((g) => riga(
+      periodo(g.dal, g.al), euro(g.prezzo_notte_eur), g.min_notti == null ? "—" : g.min_notti, g.nota || "",
+      elimina("Togliere i giorni speciali " + periodo(g.dal, g.al) + "?", async () => {
+        if (await chiama("POST", "/api/prezzi_giorno/elimina", { dal: g.dal, al: g.al })) { toast("Giorni speciali tolti"); carica(); }
+      })
+    )) : [vuoto(5, "Nessun giorno speciale.")]));
+  }
+
+  function disegnaBlocchi() {
+    $("blocchi").replaceChildren(...(dati.blocchi.length ? dati.blocchi.map((b) => riga(
+      fmt(b.dal), fmt(b.al), el("span", { className: "tag " + b.origine }, b.origine), b.nota || "",
+      b.origine === "manuale"
+        ? elimina("Sbloccare queste date?", async () => { if (await chiama("DELETE", "/api/blocchi/" + b.id)) { toast("Date sbloccate"); carica(); } }, "Sblocca")
+        : el("span", { className: "muted" }, "da Airbnb")
+    )) : [vuoto(5, "Nessuna data bloccata.")]));
+  }
+
+  // Esempio del supplemento con i valori del modulo
+  function esempio() {
+    const f = $("form-impostazioni");
+    const inclusi = Number(f.elements.ospiti_inclusi.value) || 0;
+    const supp = Number(f.elements.supplemento_ospite_eur.value) || 0;
+    const max = Number(f.elements.max_ospiti.value) || 0;
+    const ospiti = Math.min(max, inclusi + 2);
+    const extra = Math.max(0, ospiti - inclusi);
+    $("esempio").textContent = !supp || !extra
+      ? "Senza supplemento il prezzo a notte è lo stesso per qualsiasi numero di ospiti."
+      : "Esempio: con " + ospiti + " ospiti e una notte da 150 €, il sito calcola 150 + " + extra + " × " + supp + " = " + (150 + extra * supp) + " € a notte.";
+  }
+  $("form-impostazioni").oninput = esempio;
+
+  /* ── Moduli ── */
+  function invio(id, fn) {
+    const f = $(id);
+    f.onsubmit = async (e) => {
+      e.preventDefault();
+      const d = datiForm(f);
+      if ("dal" in d && !d.dal) { toast("Scegli le date", true); f.querySelector(".scegli").click(); return; }
+      const b = f.querySelector("button.btn"); b.disabled = true;
+      try { await fn(d, f); } finally { b.disabled = false; }
+    };
+  }
+  invio("form-stagione", async (d) => {
+    const url = "/api/stagioni" + (stagioneInModifica ? "/" + stagioneInModifica : "");
+    if (await chiama("POST", url, d)) { toast("Stagione salvata"); fineModifica(); carica(); }
+  });
+  invio("form-giorno", async (d, f) => {
+    const r = await chiama("POST", "/api/prezzi_giorno", d);
+    if (r) { toast("Salvato per " + giorniTesto(r.giorni)); f.reset(); impostaCampo(f.querySelector(".campo-date"), null, null); carica(); }
+  });
+  invio("form-impostazioni", async (d) => { if (await chiama("POST", "/api/impostazioni", d)) { toast("Impostazioni salvate"); carica(); } });
+
+  /* ── Schede ── */
+  function apriScheda(nome) {
+    document.querySelectorAll("nav button").forEach((x) => x.setAttribute("aria-selected", x.dataset.tab === nome));
+    document.querySelectorAll("main section").forEach((s) => (s.hidden = s.id !== "tab-" + nome));
+    if (nome !== "calendario" && sel.a) chiudiSelezione();
+  }
+  document.querySelectorAll("nav button").forEach((b) => (b.onclick = () => apriScheda(b.dataset.tab)));
+  $("esci").onclick = async () => { await chiama("POST", "/logout"); location.reload(); };
+
+  carica();
 }
-invio("form-stagione", async (d) => {
-  const url = "/api/stagioni" + (stagioneInModifica ? "/" + stagioneInModifica : "");
-  if (await chiama("POST", url, d)) { toast("Stagione salvata"); fineModifica(); carica(); }
-});
-invio("form-giorno", async (d, f) => { if (await chiama("POST", "/api/prezzi_giorno", d)) { toast("Giorno salvato"); f.reset(); carica(); } });
-invio("form-blocco", async (d, f) => { if (await chiama("POST", "/api/blocchi", d)) { toast("Date bloccate"); f.reset(); carica(); } });
-invio("form-impostazioni", async (d) => { if (await chiama("POST", "/api/impostazioni", d)) { toast("Impostazioni salvate"); carica(); } });
-
-/* Schede */
-document.querySelectorAll("nav button").forEach((b) => (b.onclick = () => {
-  document.querySelectorAll("nav button").forEach((x) => x.setAttribute("aria-selected", x === b));
-  document.querySelectorAll("main section").forEach((s) => (s.hidden = s.id !== "tab-" + b.dataset.tab));
-}));
-document.getElementById("esci").onclick = async () => { await chiama("POST", "/logout"); location.reload(); };
-
-carica();
-</script></body></html>`;
