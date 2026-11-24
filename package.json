@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/karla": "^5.3.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "leaflet": "^1.9.4",

@@ -27,6 +27,11 @@ const it = {
             description:
                 'Prenota direttamente la villa Hidden Treasure a Villasimius: scrivici su WhatsApp, chiamaci o mandaci una email. Ti rispondiamo noi, senza intermediari.',
         },
+        privacy: {
+            title: 'Privacy e cookie | Hidden Treasure Villasimius',
+            description:
+                'Come il sito della villa Hidden Treasure a Villasimius tratta i dati personali: richieste di disponibilità, conservazione, fornitori, cookie e i tuoi diritti.',
+        },
         notFound: {
             title: 'Pagina non trovata | Hidden Treasure Villasimius',
             description: 'Questa pagina non esiste. Torna alla home della villa Hidden Treasure a Villasimius.',
@@ -231,6 +236,7 @@ const it = {
         whereWeAre: 'Dove siamo',
         freeDates: 'Date libere?',
         askAvailability: 'Chiedi disponibilità',
+        privacy: 'Privacy e cookie',
     },
 
     request: {
@@ -260,6 +266,7 @@ const it = {
         submit: 'Invia la richiesta',
         sending: 'Invio in corso…',
         note: 'Usiamo i tuoi dati solo per risponderti.',
+        privacyLink: 'Informativa privacy',
         missingDates: 'Scegli arrivo e partenza dal calendario.',
         okTitle: 'Richiesta inviata',
         okText: (name: string) => `Grazie ${name}, abbiamo ricevuto la tua richiesta. Ti rispondiamo presto all'indirizzo che ci hai lasciato.`,
@@ -335,6 +342,11 @@ const en: Dict = {
             title: 'Contact and booking | Hidden Treasure Villasimius',
             description:
                 'Book Hidden Treasure villa in Villasimius directly: message us on WhatsApp, call or send an email. You talk to us, with no middleman.',
+        },
+        privacy: {
+            title: 'Privacy and cookies | Hidden Treasure Villasimius',
+            description:
+                'How the Hidden Treasure villa website in Villasimius handles personal data: availability requests, retention, providers, cookies and your rights.',
         },
         notFound: {
             title: 'Page not found | Hidden Treasure Villasimius',
@@ -547,6 +559,7 @@ const en: Dict = {
         whereWeAre: 'Find us',
         freeDates: 'Free dates?',
         askAvailability: 'Ask about availability',
+        privacy: 'Privacy and cookies',
     },
 
     request: {
@@ -576,6 +589,7 @@ const en: Dict = {
         submit: 'Send request',
         sending: 'Sending…',
         note: 'We only use your details to reply to you.',
+        privacyLink: 'Privacy policy',
         missingDates: 'Choose check-in and check-out on the calendar.',
         okTitle: 'Request sent',
         okText: (name: string) => `Thank you ${name}, we have received your request. We will reply soon to the address you gave us.`,
@@ -649,6 +663,11 @@ const de: Dict = {
             title: 'Kontakt und Buchung | Hidden Treasure Villasimius',
             description:
                 'Buchen Sie die Villa Hidden Treasure in Villasimius direkt bei uns: per WhatsApp, Telefon oder E-Mail. Sie sprechen mit uns, ohne Vermittler.',
+        },
+        privacy: {
+            title: 'Datenschutz und Cookies | Hidden Treasure Villasimius',
+            description:
+                'Wie die Website der Villa Hidden Treasure in Villasimius personenbezogene Daten verarbeitet: Anfragen, Speicherdauer, Dienstleister, Cookies und Ihre Rechte.',
         },
         notFound: {
             title: 'Seite nicht gefunden | Hidden Treasure Villasimius',
@@ -861,6 +880,7 @@ const de: Dict = {
         whereWeAre: 'So finden Sie uns',
         freeDates: 'Noch frei?',
         askAvailability: 'Verfügbarkeit anfragen',
+        privacy: 'Datenschutz',
     },
 
     request: {
@@ -890,6 +910,7 @@ const de: Dict = {
         submit: 'Anfrage senden',
         sending: 'Wird gesendet…',
         note: 'Wir verwenden Ihre Daten nur, um Ihnen zu antworten.',
+        privacyLink: 'Datenschutzerklärung',
         missingDates: 'Bitte wählen Sie An- und Abreise im Kalender.',
         okTitle: 'Anfrage gesendet',
         okText: (name: string) => `Danke, ${name}! Wir haben Ihre Anfrage erhalten und antworten Ihnen bald an die angegebene Adresse.`,
@@ -963,6 +984,11 @@ const fr: Dict = {
             title: 'Contact et réservation | Hidden Treasure Villasimius',
             description:
                 'Réservez la villa Hidden Treasure à Villasimius en direct : écrivez-nous sur WhatsApp, appelez-nous ou envoyez un e-mail. C’est nous qui vous répondons, sans intermédiaire.',
+        },
+        privacy: {
+            title: 'Confidentialité et cookies | Hidden Treasure Villasimius',
+            description:
+                'Comment le site de la villa Hidden Treasure à Villasimius traite les données personnelles : demandes, conservation, prestataires, cookies et vos droits.',
         },
         notFound: {
             title: 'Page introuvable | Hidden Treasure Villasimius',
@@ -1175,6 +1201,7 @@ const fr: Dict = {
         whereWeAre: 'Nous trouver',
         freeDates: 'Des dates libres ?',
         askAvailability: 'Demander les disponibilités',
+        privacy: 'Confidentialité',
     },
 
     request: {
@@ -1204,6 +1231,7 @@ const fr: Dict = {
         submit: 'Envoyer la demande',
         sending: 'Envoi en cours…',
         note: 'Vos données servent uniquement à vous répondre.',
+        privacyLink: 'Politique de confidentialité',
         missingDates: "Choisissez l'arrivée et le départ dans le calendrier.",
         okTitle: 'Demande envoyée',
         okText: (name: string) => `Merci ${name}, nous avons bien reçu votre demande. Nous vous répondrons bientôt à l'adresse indiquée.`,

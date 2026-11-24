@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useLang, useT } from '../i18n';
+import { Link } from 'react-router-dom';
+import { ROUTES, useLang, useT } from '../i18n';
 import {
     WORKER_URL,
     formatDay,
@@ -222,7 +223,9 @@ const RequestForm: React.FC<Props> = ({ from, to, guests, pricing, onEdit, onRes
                 <button type="submit" className={styles.submit} disabled={sending}>
                     {sending ? t.sending : t.submit}
                 </button>
-                <p className={styles.note}>{t.note}</p>
+                <p className={styles.note}>
+                    {t.note} <Link to={ROUTES[lang].privacy}>{t.privacyLink}</Link>
+                </p>
             </div>
         </form>
     );
