@@ -344,6 +344,22 @@ const IMPOSTAZIONI = {
   supplemento_ospite_eur: { min: 0, max: 1000, nome: "Supplemento per ospite" },
 };
 
+// Toglie le notti da dal ad al (escluso) dai blocchi manuali: un blocco che le
+// comprende tutte sparisce, uno che le tocca in parte viene accorciato o diviso in due
+async function ritagliaBlocchi(env, dal, al) {
+  const { results } = await env.DB.prepare(
+    "SELECT id, dal, al, nota FROM blocchi WHERE origine = 'manuale' AND dal < ? AND al > ?"
+  ).bind(al, dal).all();
+  const ins = env.DB.prepare("INSERT INTO blocchi (dal, al, origine, nota) VALUES (?, ?, 'manuale', ?)");
+  const istruzioni = [];
+  for (const b of results) {
+    istruzioni.push(env.DB.prepare("DELETE FROM blocchi WHERE id = ?").bind(b.id));
+    if (b.dal < dal) istruzioni.push(ins.bind(b.dal, dal, b.nota));
+    if (b.al > al) istruzioni.push(ins.bind(al, b.al, b.nota));
+  }
+  return istruzioni;
+}
+
 // Tutti i giorni da dal ad al compresi, come "AAAA-MM-GG" (null se le date non vanno bene o superano un anno)
 function giorniTra(dal, al) {
   if (!DATA.test(dal || "") || !DATA.test(al || "") || al < dal) return null;
@@ -431,13 +447,19 @@ async function api(request, env, metodo, pathname) {
     return json({ ok: true });
   }
 
-  // Blocchi manuali (quelli di Airbnb li gestisce la sincronizzazione)
-  if (risorsa === "blocchi" && metodo === "POST") {
+  // Blocchi manuali (quelli di Airbnb li gestisce la sincronizzazione).
+  // dal = prima notte, al = giorno di partenza. Bloccare o sbloccare un periodo
+  // ritaglia i blocchi manuali che lo toccano, così non restano sovrapposizioni.
+  if (risorsa === "blocchi" && metodo === "POST" && (!id || id === "sblocca")) {
     if (!DATA.test(corpo.dal) || !DATA.test(corpo.al) || corpo.al <= corpo.dal) {
       return errore("Il giorno di partenza deve venire dopo il primo giorno occupato.");
     }
-    await env.DB.prepare("INSERT INTO blocchi (dal, al, origine, nota) VALUES (?, ?, 'manuale', ?)")
-      .bind(corpo.dal, corpo.al, String(corpo.nota || "").trim() || null).run();
+    const istruzioni = await ritagliaBlocchi(env, corpo.dal, corpo.al);
+    if (!id) {
+      istruzioni.push(env.DB.prepare("INSERT INTO blocchi (dal, al, origine, nota) VALUES (?, ?, 'manuale', ?)")
+        .bind(corpo.dal, corpo.al, String(corpo.nota || "").trim() || null));
+    }
+    if (istruzioni.length) await env.DB.batch(istruzioni);
     return json({ ok: true });
   }
   if (risorsa === "blocchi" && metodo === "DELETE" && id) {
@@ -615,6 +637,24 @@ dialog::backdrop{background:rgba(16,42,58,.45)}
 .pk .g{min-height:2.6rem}
 .pk-piede{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:1rem}
 
+/* Finestra di conferma */
+dialog.domanda{width:min(420px,calc(100% - 2rem))}
+.dm{display:flex;flex-direction:column;gap:.75rem;padding:1.75rem 1.5rem 1.5rem;text-align:center;align-items:center}
+.dm h2{font-size:1.45rem}
+.dm p{margin:0}
+.dm label{width:100%;text-align:left}
+.dm-icona{width:3.25rem;height:3.25rem;border-radius:50%;display:grid;place-items:center;background:#EEF3F3;color:var(--sea);font:700 1.5rem/1 Georgia,serif}
+.dm-icona::before{content:attr(data-segno)}
+.domanda.pericolo .dm-icona{background:#F8E9E4;color:var(--red)}
+.domanda.pericolo #dm-si{background:var(--red)}
+.domanda.pericolo #dm-si:hover{background:#7d3121}
+.dm-tasti{display:flex;gap:.6rem;width:100%;margin-top:.5rem}
+.dm-tasti .btn{flex:1}
+dialog[open]{animation:entra .18s ease-out}
+dialog[open]::backdrop{animation:sfuma .18s ease-out}
+@keyframes entra{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes sfuma{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){dialog[open],dialog[open]::backdrop{animation:none}}
 #toast{position:fixed;left:50%;bottom:1rem;z-index:20;transform:translateX(-50%);background:var(--deep);color:#fff;padding:.6rem 1rem;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .2s;pointer-events:none}
 #toast.on{opacity:1}
 #toast.err{background:var(--red)}
@@ -632,6 +672,8 @@ dialog::backdrop{background:rgba(16,42,58,.45)}
   .card{padding:1rem}
   .g{min-height:3rem}
   dialog{width:100%;max-width:100%;max-height:92vh;margin:auto 0 0;border-radius:18px 18px 0 0}
+  dialog.domanda{width:100%}
+  .dm{padding-bottom:calc(1.5rem + env(safe-area-inset-bottom))}
   .pk .mesi{grid-template-columns:1fr}
   .barra-in{padding:.75rem 1rem;max-height:60vh;overflow-y:auto}
   .barra-in{gap:.5rem}
@@ -728,6 +770,8 @@ const PAGINA_GESTIONE = `<!doctype html>
   <div class="azioni" id="sel-azioni">
     <button class="btn" id="sel-prezzo">Prezzo e notti minime</button>
     <button class="btn chiaro" id="sel-blocca">Blocca queste notti</button>
+    <button class="btn chiaro" id="sel-sblocca">Sblocca</button>
+    <span class="muted" id="sel-airbnb"></span>
     <button class="link" id="sel-stagione">Crea una stagione</button>
     <button class="link danger" id="sel-togli">Togli i giorni speciali</button>
   </div>
@@ -747,6 +791,14 @@ const PAGINA_GESTIONE = `<!doctype html>
   </div>
   <div class="pk-piede"><span id="pk-sel" class="muted"></span><div class="azioni"><button class="link" id="pk-pulisci">Cancella</button><button class="btn" id="pk-ok">Conferma</button></div></div>
 </div></dialog>
+
+<dialog id="domanda" class="domanda"><form method="dialog" class="dm">
+  <div class="dm-icona" aria-hidden="true"></div>
+  <h2 id="dm-titolo"></h2>
+  <p class="muted" id="dm-testo"></p>
+  <label id="dm-campo-label" hidden><span id="dm-campo-nome"></span><input id="dm-campo" autocomplete="off"></label>
+  <div class="dm-tasti"><button type="button" class="btn chiaro" id="dm-no">Annulla</button><button class="btn" id="dm-si" value="si"></button></div>
+</form></dialog>
 
 <div id="toast" role="status"></div>
 <script>(${scriptGestione.toString()})();</script>
@@ -796,7 +848,35 @@ function scriptGestione() {
   const datiForm = (f) => Object.fromEntries(new FormData(f).entries());
   const riga = (...celle) => el("tr", null, celle.map((c) => el("td", null, c)));
   const vuoto = (n, testo) => el("tr", null, el("td", { colSpan: n, className: "vuoto" }, testo));
-  const elimina = (testo, fn, etichetta = "Elimina") => el("button", { className: "link danger", onclick: () => confirm(testo) && fn() }, etichetta);
+  const elimina = (testo, fn, etichetta = "Elimina") => el("button", {
+    className: "link danger",
+    onclick: async () => { if (await chiedi({ titolo: testo, si: etichetta, pericolo: etichetta !== "Sblocca" })) fn(); },
+  }, etichetta);
+
+  /*
+   * Finestra di conferma nella grafica della pagina (al posto di confirm e prompt).
+   * Con "campo" chiede anche un testo. Restituisce il testo (o true), null se si annulla.
+   */
+  function chiedi({ titolo, testo, si = "Conferma", pericolo = false, campo = null, segnaposto = "" }) {
+    const d = $("domanda");
+    d.classList.toggle("pericolo", pericolo);
+    d.querySelector(".dm-icona").dataset.segno = pericolo ? "!" : campo ? "✎" : "?";
+    $("dm-titolo").textContent = titolo;
+    $("dm-testo").textContent = testo || "";
+    $("dm-campo-label").hidden = !campo;
+    $("dm-campo-nome").textContent = campo || "";
+    $("dm-campo").value = "";
+    $("dm-campo").placeholder = segnaposto;
+    $("dm-si").textContent = si;
+    d.returnValue = "";
+    return new Promise((fatto) => {
+      d.onclose = () => fatto(d.returnValue === "si" ? (campo ? $("dm-campo").value.trim() : true) : null);
+      d.showModal();
+      (campo ? $("dm-campo") : $("dm-si")).focus();
+    });
+  }
+  $("dm-no").onclick = () => $("domanda").close();
+  $("domanda").addEventListener("click", (e) => { if (e.target === $("domanda")) $("domanda").close(); });
 
   /* ── Cosa succede in un giorno: prezzo, minimo, blocco ── */
   function info(s) {
@@ -942,7 +1022,18 @@ function scriptGestione() {
     const f = $("form-sel");
     f.elements.prezzo_notte_eur.placeholder = primo.prezzo == null ? "" : "ora " + primo.prezzo;
     f.elements.min_notti.placeholder = "ora " + primo.min;
-    $("sel-blocca").textContent = n === 1 ? "Blocca questa notte" : "Blocca queste " + n + " notti";
+    // Quali notti sono libere, bloccate da Luca o occupate su Airbnb
+    const conta = { libere: 0, manuale: 0, airbnb: 0 };
+    for (let s = a; s <= b; s = piu(s, 1)) {
+      const bl = info(s).blocco;
+      conta[bl === "manuale" ? "manuale" : bl ? "airbnb" : "libere"]++;
+    }
+    const notti = (k) => (k === 1 ? "la notte" : "le " + k + " notti");
+    $("sel-blocca").hidden = !conta.libere;
+    $("sel-blocca").textContent = conta.libere === n ? (n === 1 ? "Blocca questa notte" : "Blocca queste " + n + " notti") : "Blocca " + notti(conta.libere) + " libere";
+    $("sel-sblocca").hidden = !conta.manuale;
+    $("sel-sblocca").textContent = conta.manuale === n ? (n === 1 ? "Sblocca questa notte" : "Sblocca queste " + n + " notti") : "Sblocca " + notti(conta.manuale) + " bloccate da te";
+    $("sel-airbnb").textContent = conta.airbnb ? (conta.airbnb === n ? "Occupato su Airbnb: si libera solo da Airbnb." : conta.airbnb + " notti sono occupate su Airbnb.") : "";
     let speciali = false;
     for (let s = a; s <= b; s = piu(s, 1)) if (dati.giorni.has(s)) { speciali = true; break; }
     $("sel-togli").hidden = !speciali;
@@ -965,12 +1056,26 @@ function scriptGestione() {
   };
   $("sel-blocca").onclick = async () => {
     const fine = piu(sel.b || sel.a, 1);
-    const nota = prompt("Nota per queste date (facoltativa), ad esempio Lavori o Amici:", "");
+    const nota = await chiedi({
+      titolo: "Bloccare queste date?",
+      testo: periodo(sel.a, sel.b || sel.a) + ". Sul sito non si potranno prenotare; la partenza resta possibile il " + fmt(fine, false) + ".",
+      campo: "Nota (facoltativa)", segnaposto: "Lavori, amici, soggiorno mio…", si: "Blocca",
+    });
     if (nota === null) return;
-    if (await chiama("POST", "/api/blocchi", { dal: sel.a, al: fine, nota })) { toast("Bloccato: partenza possibile dal " + fmt(fine, false)); chiudiSelezione(); carica(); }
+    if (await chiama("POST", "/api/blocchi", { dal: sel.a, al: fine, nota })) { toast("Date bloccate"); chiudiSelezione(); carica(); }
+  };
+  $("sel-sblocca").onclick = async () => {
+    const fine = piu(sel.b || sel.a, 1);
+    const ok = await chiedi({
+      titolo: "Sbloccare queste date?",
+      testo: periodo(sel.a, sel.b || sel.a) + ". Le notti bloccate da te tornano prenotabili; quelle di Airbnb restano occupate.",
+      si: "Sblocca",
+    });
+    if (!ok) return;
+    if (await chiama("POST", "/api/blocchi/sblocca", { dal: sel.a, al: fine })) { toast("Date sbloccate"); chiudiSelezione(); carica(); }
   };
   $("sel-togli").onclick = async () => {
-    if (!confirm("Togliere i prezzi speciali in questi giorni? Tornano a valere le stagioni.")) return;
+    if (!(await chiedi({ titolo: "Togliere i giorni speciali?", testo: "In questi giorni tornano a valere i prezzi e i minimi delle stagioni.", si: "Togli", pericolo: true }))) return;
     if (await chiama("POST", "/api/prezzi_giorno/elimina", { dal: sel.a, al: sel.b || sel.a })) { toast("Giorni speciali tolti"); chiudiSelezione(); carica(); }
   };
   $("sel-stagione").onclick = () => {
