@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
 import { useLang, useT } from '../i18n';
-import { formatDay, guestsLabel, nightsBetween, totalGuests, type Guests } from '../booking/availability';
+import {
+    WORKER_URL,
+    formatDay,
+    formatEuro,
+    guestsLabel,
+    nightsBetween,
+    quote,
+    totalGuests,
+    type Guests,
+    type Pricing,
+} from '../booking/availability';
 import styles from './RequestForm.module.css';
 
-/** Il Worker Cloudflare che salva la richiesta in D1 e manda la mail di notifica. */
-const ENDPOINT = 'https://richieste.luca-dibelardino.workers.dev';
+/** Il Worker Cloudflare salva la richiesta in D1 e manda la mail di notifica. */
+const ENDPOINT = `${WORKER_URL}/richiesta`;
 const WHATSAPP = 'https://wa.me/393518085256';
 
 type Status = 'idle' | 'sending' | 'ok' | 'error';
@@ -17,6 +27,7 @@ interface Props {
     from: Date;
     to: Date;
     guests: Guests;
+    pricing: Pricing | null;
     /** Riapre la barra per cambiare date o ospiti. */
     onEdit: () => void;
     /** Dopo l'invio, "Invia un'altra richiesta" riparte da zero. */
@@ -24,7 +35,7 @@ interface Props {
 }
 
 /** Secondo passo: date e ospiti arrivano dalla barra, qui solo i recapiti. */
-const RequestForm: React.FC<Props> = ({ from, to, guests, onEdit, onReset }) => {
+const RequestForm: React.FC<Props> = ({ from, to, guests, pricing, onEdit, onReset }) => {
     const lang = useLang();
     const t = useT().request;
     const ts = useT().search;
@@ -34,6 +45,7 @@ const RequestForm: React.FC<Props> = ({ from, to, guests, onEdit, onReset }) => 
 
     const fmt = (d: Date) => formatDay(d, lang);
     const nights = nightsBetween(from, to);
+    const total = quote(from, to, pricing);
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -112,6 +124,16 @@ const RequestForm: React.FC<Props> = ({ from, to, guests, onEdit, onReset }) => 
                         {t.nights(nights)} · {guestsLabel(guests, ts)}
                     </span>
                 </div>
+
+                {total != null && (
+                    <div className={styles.estimate}>
+                        <div className={styles.estimateRow}>
+                            <span>{ts.estimate}</span>
+                            <strong>{formatEuro(total, lang)}</strong>
+                        </div>
+                        <p className={styles.hint}>{ts.priceNote}</p>
+                    </div>
+                )}
 
                 <button type="button" className={styles.linkBtn} onClick={onEdit}>
                     {ts.edit}
