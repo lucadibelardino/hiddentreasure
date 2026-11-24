@@ -9,7 +9,7 @@ export const PRIVACY = {
     address: 'DA_COMPLETARE indirizzo',
     email: 'gestionehtv@gmail.com',
     /** Richieste dal modulo: cancellate in automatico N mesi dopo la data di partenza. */
-    requestMonths: 12,
+    requestMonths: 3,
     /** Ultimo aggiornamento della policy (AAAA-MM-GG). */
     updated: '2026-11-25',
 };

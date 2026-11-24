@@ -1336,20 +1336,14 @@ function scriptGestione() {
 
 /* ════════════════════════ Pulizia automatica (GDPR) ════════════════════════ */
 
-// Quanto teniamo i dati: gli stessi numeri sono scritti nella privacy policy del sito
-// (src/data/privacy.ts). Se ne cambi uno, cambia anche l'altro.
-const MESI_RICHIESTE = 12;   // richieste: mesi dopo la data di partenza richiesta
-const GIORNI_CODICI = 1;     // codici di accesso alla gestione: giorni dopo la scadenza
+// Per quanti mesi teniamo le richieste dopo la data di partenza richiesta.
+// Lo stesso numero è scritto nella privacy policy del sito (src/data/privacy.ts):
+// se lo cambi qui, cambialo anche lì.
+const MESI_RICHIESTE = 3;
 
-// Parte a ogni Cron Trigger (ogni ora): cancella i dati che hanno finito il loro scopo
+// Parte a ogni Cron Trigger (ogni ora): cancella le richieste che hanno finito il loro scopo
 async function pulizia(env) {
-  const [richieste, codici] = await env.DB.batch([
-    env.DB.prepare("DELETE FROM richieste WHERE check_out < date('now', ?)")
-      .bind(`-${MESI_RICHIESTE} months`),
-    // scade è scritto in formato ISO (2026-11-24T23:05:00.000Z): lo confrontiamo con lo stesso formato
-    env.DB.prepare("DELETE FROM login_codici WHERE scade < strftime('%Y-%m-%dT%H:%M:%fZ', 'now', ?)")
-      .bind(`-${GIORNI_CODICI} days`),
-  ]);
-  const n1 = richieste.meta.changes, n2 = codici.meta.changes;
-  if (n1 || n2) console.log(`Pulizia: ${n1} richieste e ${n2} codici cancellati`);
+  const { meta } = await env.DB.prepare("DELETE FROM richieste WHERE check_out < date('now', ?)")
+    .bind(`-${MESI_RICHIESTE} months`).run();
+  if (meta.changes) console.log(`Pulizia: ${meta.changes} richieste cancellate`);
 }
