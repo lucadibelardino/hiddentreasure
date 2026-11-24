@@ -548,6 +548,11 @@ async function api(request, env, metodo, pathname) {
     await env.DB.prepare("UPDATE richieste SET stato = ? WHERE id = ?").bind(corpo.stato, Number(id)).run();
     return json({ ok: true });
   }
+  // Elimina una richiesta (cancellazione definitiva, anche per il GDPR)
+  if (risorsa === "richieste" && metodo === "DELETE" && id && !azione) {
+    await env.DB.prepare("DELETE FROM richieste WHERE id = ?").bind(Number(id)).run();
+    return json({ ok: true });
+  }
 
   // Impostazioni: si salvano solo le chiavi conosciute, ognuna con i suoi limiti
   if (risorsa === "impostazioni" && metodo === "POST") {
@@ -659,6 +664,7 @@ h3{margin:0 0 .5rem;font-size:1rem;color:var(--deep);text-transform:capitalize}
 .vuoto{color:var(--soft);text-align:center;padding:1rem}
 .richiesta{display:grid;gap:.25rem}
 .richiesta strong{color:var(--deep)}
+.stato{display:flex;flex-direction:column;align-items:flex-start;gap:.35rem}
 .azioni{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
 .btn.chiaro{background:#fff;color:var(--deep);border:1px solid var(--deep)}
 .btn.chiaro:hover{background:var(--deep);color:#fff}
@@ -723,6 +729,7 @@ dialog.domanda{width:min(420px,calc(100% - 2rem))}
 .dm h2{font-size:1.45rem}
 .dm p{margin:0}
 .dm label{width:100%;text-align:left}
+.dm label[hidden]{display:none}
 .dm-icona{width:3.25rem;height:3.25rem;border-radius:50%;display:grid;place-items:center;background:#EEF3F3;color:var(--sea);font:700 1.5rem/1 Georgia,serif}
 .dm-icona::before{content:attr(data-segno)}
 .domanda.pericolo .dm-icona{background:#F8E9E4;color:var(--red)}
@@ -931,9 +938,9 @@ function scriptGestione() {
   const datiForm = (f) => Object.fromEntries(new FormData(f).entries());
   const riga = (...celle) => el("tr", null, celle.map((c) => el("td", null, c)));
   const vuoto = (n, testo) => el("tr", null, el("td", { colSpan: n, className: "vuoto" }, testo));
-  const elimina = (testo, fn, etichetta = "Elimina") => el("button", {
+  const elimina = (testo, fn, etichetta = "Elimina", dettaglio = "") => el("button", {
     className: "link danger",
-    onclick: async () => { if (await chiedi({ titolo: testo, si: etichetta, pericolo: etichetta !== "Sblocca" })) fn(); },
+    onclick: async () => { if (await chiedi({ titolo: testo, testo: dettaglio, si: etichetta, pericolo: etichetta !== "Sblocca" })) fn(); },
   }, etichetta);
 
   /*
@@ -1211,7 +1218,11 @@ function scriptGestione() {
       const notti = giorniFra(r.check_in, r.check_out);
       return riga((r.creato_il || "").slice(0, 16), ospite,
         el("div", { className: "richiesta" }, fmt(r.check_in) + " → " + fmt(r.check_out), el("span", { className: "muted" }, notti + " notti · " + r.ospiti + " ospiti · " + (r.lingua || "").toUpperCase())),
-        el("span", { className: "muted", style: "white-space:pre-line" }, r.messaggio || ""), stato);
+        el("span", { className: "muted", style: "white-space:pre-line" }, r.messaggio || ""),
+        el("div", { className: "stato" }, stato,
+          elimina("Eliminare la richiesta di " + r.nome + "?", async () => {
+            if (await chiama("DELETE", "/api/richieste/" + r.id)) { toast("Richiesta eliminata"); carica(); }
+          }, "Elimina", "Nome, contatti e messaggio vengono cancellati per sempre.")));
     }) : [vuoto(5, "Nessuna richiesta per ora.")]));
   }
 
