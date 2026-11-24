@@ -84,11 +84,9 @@ function expandNights(periods: Period[]): Date[] {
 }
 
 /**
- * Calendario del sito:
- * - notti occupate = availability.json (Airbnb, via GitHub) + blocchi del Worker
- *   (finche' la sincronizzazione Airbnb non passa al Worker servono entrambe);
- * - prezzi, notti minime e massimo ospiti dal Worker.
- * Se una delle due fonti non risponde, il calendario resta usabile con l'altra.
+ * Calendario del sito, tutto dal Worker: notti occupate (Airbnb sincronizzato ogni ora,
+ * blocchi e sblocchi fatti da Luca nella gestione), prezzi, notti minime e massimo ospiti.
+ * availability.json non si usa piu' qui: avrebbe richiuso le notti che Luca sblocca.
  */
 export function useCalendar() {
     const [blocked, setBlocked] = useState<Date[]>([]);
@@ -99,17 +97,9 @@ export function useCalendar() {
     useEffect(() => {
         const controller = new AbortController();
         const { signal } = controller;
-        Promise.allSettled([
-            getJSON<{ blocked?: Period[] }>(`${import.meta.env.BASE_URL}availability.json`, signal),
-            getJSON<CalendarApi>(`${WORKER_URL}/calendario`, signal),
-        ]).then(([airbnb, api]) => {
-            if (signal.aborted) return;
-            const periods: Period[] = [];
-            if (airbnb.status === 'fulfilled') periods.push(...(airbnb.value.blocked ?? []));
-            else console.error('Date Airbnb non disponibili:', airbnb.reason);
-            if (api.status === 'fulfilled') {
-                const data = api.value;
-                periods.push(...(data.blocchi ?? []).map((b) => ({ from: b.dal, to: b.al })));
+        getJSON<CalendarApi>(`${WORKER_URL}/calendario`, signal)
+            .then((data) => {
+                setBlocked(expandNights((data.blocchi ?? []).map((b) => ({ from: b.dal, to: b.al }))));
                 setPricing({
                     stagioni: data.stagioni ?? [],
                     giorni: new Map((data.prezzi_giorno ?? []).map((g) => [g.data, g])),
@@ -117,12 +107,13 @@ export function useCalendar() {
                     extraGuestFee: data.supplemento_ospite_eur ?? 0,
                 });
                 if (data.max_ospiti && data.max_ospiti > 0) setMaxGuests(data.max_ospiti);
-            } else {
-                console.error('Calendario Cloudflare non disponibile:', api.reason);
-            }
-            setBlocked(expandNights(periods));
-            setLoading(false);
-        });
+            })
+            .catch((e) => {
+                if (!signal.aborted) console.error('Calendario Cloudflare non disponibile:', e);
+            })
+            .finally(() => {
+                if (!signal.aborted) setLoading(false);
+            });
         return () => controller.abort();
     }, []);
 

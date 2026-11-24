@@ -79,22 +79,66 @@ async function impostazione(env, chiave, predefinito) {
 async function calendario(env) {
   const oggi = new Date().toISOString().slice(0, 10);
   // batch: tre query in un solo viaggio verso il database
-  const [blocchi, stagioni, giorni, impostazioni] = await env.DB.batch([
-    env.DB.prepare("SELECT dal, al FROM blocchi WHERE al > ? ORDER BY dal").bind(oggi),
+  const [stagioni, giorni, impostazioni] = await env.DB.batch([
     env.DB.prepare("SELECT nome, dal, al, prezzo_notte_eur, min_notti FROM stagioni WHERE al >= ? ORDER BY dal").bind(oggi),
     env.DB.prepare("SELECT data, prezzo_notte_eur, min_notti FROM prezzi_giorno WHERE data >= ? ORDER BY data").bind(oggi),
     env.DB.prepare("SELECT chiave, valore FROM impostazioni"),
   ]);
   const imp = Object.fromEntries(impostazioni.results.map((r) => [r.chiave, Number(r.valore)]));
+  const { blocchi } = await blocchiEffettivi(env, oggi);
   return {
     aggiornato: new Date().toISOString(),
     max_ospiti: imp.max_ospiti ?? 6,
     ospiti_inclusi: imp.ospiti_inclusi ?? 2,
     supplemento_ospite_eur: imp.supplemento_ospite_eur ?? 0,
-    blocchi: blocchi.results,
+    blocchi: blocchi.map((b) => ({ dal: b.dal, al: b.al })),
     stagioni: stagioni.results,
     prezzi_giorno: giorni.results,
   };
+}
+
+/*
+ * Notti occupate davvero: i blocchi meno le notti Airbnb che Luca ha sbloccato.
+ * Gli sblocchi stanno in una tabella a parte (sblocchi), quindi la sincronizzazione
+ * oraria può riscrivere i blocchi Airbnb senza cancellarli.
+ * Le PRENOTAZIONI Airbnb non si sbloccano mai: si sbloccano solo le notti
+ * "non disponibili" (chiuse a mano su Airbnb o per le sue regole).
+ */
+const prenotazione = (b) => b.origine === "airbnb" && !/not available|non disponibile|blocked/i.test(b.nota || "");
+
+async function leggiSblocchi(env, daGiorno) {
+  try {
+    const { results } = await env.DB.prepare("SELECT id, dal, al FROM sblocchi WHERE al > ? ORDER BY dal").bind(daGiorno).all();
+    return results;
+  } catch {
+    return []; // tabella non ancora creata: nessuno sblocco
+  }
+}
+
+async function blocchiEffettivi(env, daGiorno) {
+  const { results } = await env.DB.prepare(
+    "SELECT id, dal, al, origine, nota FROM blocchi WHERE al > ? ORDER BY dal"
+  ).bind(daGiorno).all();
+  const sblocchi = await leggiSblocchi(env, daGiorno);
+  const blocchi = [];
+  const sbloccati = []; // pezzi di Airbnb liberati da Luca, per mostrarli nella gestione
+  for (const b of results) {
+    if (b.origine !== "airbnb" || prenotazione(b)) { blocchi.push({ ...b, prenotazione: prenotazione(b) }); continue; }
+    // Sottrae gli sblocchi dal blocco, pezzo per pezzo
+    let pezzi = [{ dal: b.dal, al: b.al }];
+    for (const s of sblocchi) {
+      const nuovi = [];
+      for (const p of pezzi) {
+        if (s.al <= p.dal || s.dal >= p.al) { nuovi.push(p); continue; }
+        if (p.dal < s.dal) nuovi.push({ dal: p.dal, al: s.dal });
+        if (s.al < p.al) nuovi.push({ dal: s.al, al: p.al });
+        sbloccati.push({ dal: s.dal > p.dal ? s.dal : p.dal, al: s.al < p.al ? s.al : p.al });
+      }
+      pezzi = nuovi;
+    }
+    for (const p of pezzi) blocchi.push({ ...b, ...p, prenotazione: false });
+  }
+  return { blocchi, sbloccati, sblocchi };
 }
 
 async function nuovaRichiesta(request, env, risposta) {
@@ -112,8 +156,8 @@ async function nuovaRichiesta(request, env, risposta) {
   }
 
   // Le date cadono su un periodo occupato? (dal < partenza E al > arrivo)
-  const occupato = await env.DB.prepare("SELECT 1 FROM blocchi WHERE dal < ? AND al > ? LIMIT 1")
-    .bind(r.check_out, r.check_in).first();
+  const { blocchi } = await blocchiEffettivi(env, r.check_in);
+  const occupato = blocchi.some((b) => b.dal < r.check_out && b.al > r.check_in);
   if (occupato) return risposta({ errore: "Date non disponibili" }, 409);
 
   // INSERT con i "?": i valori vengono passati a parte, mai incollati nel testo SQL
@@ -160,14 +204,14 @@ async function sincronizzaAirbnb(env) {
   await env.DB.batch([
     env.DB.prepare("DELETE FROM blocchi WHERE origine = 'airbnb'"),
     ...eventi.map((e) =>
-      env.DB.prepare("INSERT OR IGNORE INTO blocchi (dal, al, origine, uid_ical) VALUES (?, ?, 'airbnb', ?)")
-        .bind(e.dal, e.al, e.uid || null)
+      env.DB.prepare("INSERT OR IGNORE INTO blocchi (dal, al, origine, uid_ical, nota) VALUES (?, ?, 'airbnb', ?, ?)")
+        .bind(e.dal, e.al, e.uid || null, e.titolo || null)
     ),
   ]);
   console.log(`Airbnb: ${eventi.length} periodi occupati`);
 }
 
-// Legge gli eventi da un file iCal: servono solo inizio, fine e UID
+// Legge gli eventi da un file iCal: servono inizio, fine, UID e titolo
 function leggiIcal(testo) {
   // Le righe lunghe sono spezzate: la continuazione inizia con uno spazio
   const righe = testo.replace(/\r?\n[ \t]/g, "").split(/\r?\n/);
@@ -185,6 +229,7 @@ function leggiIcal(testo) {
       if (nome === "DTSTART") ev.dal = dataIcal(valore);
       if (nome === "DTEND") ev.al = dataIcal(valore);
       if (nome === "UID") ev.uid = valore;
+      if (nome === "SUMMARY") ev.titolo = valore; // "Reserved" = prenotazione, "Airbnb (Not available)" = chiuso
     }
   }
   return eventi;
@@ -360,6 +405,19 @@ async function ritagliaBlocchi(env, dal, al) {
   return istruzioni;
 }
 
+// Come ritagliaBlocchi, ma sulla tabella degli sblocchi di Airbnb
+async function ritagliaSblocchi(env, dal, al) {
+  const ins = env.DB.prepare("INSERT INTO sblocchi (dal, al) VALUES (?, ?)");
+  const istruzioni = [];
+  for (const s of await leggiSblocchi(env, "0000-00-00")) {
+    if (s.dal >= al || s.al <= dal) continue;
+    istruzioni.push(env.DB.prepare("DELETE FROM sblocchi WHERE id = ?").bind(s.id));
+    if (s.dal < dal) istruzioni.push(ins.bind(s.dal, dal));
+    if (s.al > al) istruzioni.push(ins.bind(al, s.al));
+  }
+  return istruzioni;
+}
+
 // Tutti i giorni da dal ad al compresi, come "AAAA-MM-GG" (null se le date non vanno bene o superano un anno)
 function giorniTra(dal, al) {
   if (!DATA.test(dal || "") || !DATA.test(al || "") || al < dal) return null;
@@ -385,17 +443,18 @@ async function api(request, env, metodo, pathname) {
   // Tutti i dati della pagina in una volta
   if (metodo === "GET" && risorsa === "dati") {
     const oggi = new Date().toISOString().slice(0, 10);
-    const [stagioni, giorni, blocchi, richieste, impostazioni] = await env.DB.batch([
+    const [stagioni, giorni, richieste, impostazioni] = await env.DB.batch([
       env.DB.prepare("SELECT * FROM stagioni ORDER BY dal"),
       env.DB.prepare("SELECT * FROM prezzi_giorno WHERE data >= ? ORDER BY data").bind(oggi),
-      env.DB.prepare("SELECT id, dal, al, origine, nota FROM blocchi WHERE al > ? ORDER BY dal").bind(oggi),
       env.DB.prepare("SELECT * FROM richieste ORDER BY id DESC LIMIT 200"),
       env.DB.prepare("SELECT chiave, valore FROM impostazioni"),
     ]);
+    const { blocchi, sbloccati } = await blocchiEffettivi(env, oggi);
     return json({
       stagioni: stagioni.results,
       prezzi_giorno: giorni.results,
-      blocchi: blocchi.results,
+      blocchi,
+      sbloccati,
       richieste: richieste.results,
       impostazioni: Object.fromEntries(impostazioni.results.map((r) => [r.chiave, r.valore])),
     });
@@ -450,11 +509,27 @@ async function api(request, env, metodo, pathname) {
   // Blocchi manuali (quelli di Airbnb li gestisce la sincronizzazione).
   // dal = prima notte, al = giorno di partenza. Bloccare o sbloccare un periodo
   // ritaglia i blocchi manuali che lo toccano, così non restano sovrapposizioni.
-  if (risorsa === "blocchi" && metodo === "POST" && (!id || id === "sblocca")) {
+  if (risorsa === "blocchi" && metodo === "POST" && (!id || id === "sblocca" || id === "riblocca")) {
     if (!DATA.test(corpo.dal) || !DATA.test(corpo.al) || corpo.al <= corpo.dal) {
       return errore("Il giorno di partenza deve venire dopo il primo giorno occupato.");
     }
+    // Riblocca: toglie gli sblocchi, così tornano a valere le date di Airbnb
+    if (id === "riblocca") {
+      const istr = await ritagliaSblocchi(env, corpo.dal, corpo.al);
+      if (istr.length) await env.DB.batch(istr);
+      return json({ ok: true });
+    }
     const istruzioni = await ritagliaBlocchi(env, corpo.dal, corpo.al);
+    if (id === "sblocca") {
+      // Notti Airbnb "non disponibili" nel periodo: si ricorda lo sblocco (le prenotazioni restano)
+      const { results } = await env.DB.prepare(
+        "SELECT dal, al, origine, nota FROM blocchi WHERE origine = 'airbnb' AND dal < ? AND al > ?"
+      ).bind(corpo.al, corpo.dal).all();
+      if (results.some((b) => !prenotazione(b))) {
+        istruzioni.push(...await ritagliaSblocchi(env, corpo.dal, corpo.al));
+        istruzioni.push(env.DB.prepare("INSERT INTO sblocchi (dal, al) VALUES (?, ?)").bind(corpo.dal, corpo.al));
+      }
+    }
     if (!id) {
       istruzioni.push(env.DB.prepare("INSERT INTO blocchi (dal, al, origine, nota) VALUES (?, ?, 'manuale', ?)")
         .bind(corpo.dal, corpo.al, String(corpo.nota || "").trim() || null));
@@ -579,6 +654,8 @@ h3{margin:0 0 .5rem;font-size:1rem;color:var(--deep);text-transform:capitalize}
 .tag{display:inline-block;padding:.1rem .55rem;border-radius:999px;font-size:.8rem;font-weight:600;background:#EEF3F3;color:var(--sea)}
 .tag.airbnb{background:#FBEFEA;color:#B4533C}
 .tag.manuale{background:#F3EEE4;color:var(--brass)}
+.tag.prenotato{background:#F6DCD3;color:var(--red)}
+.tag.sbloccato{background:#fff;color:#B4533C;border:1px dashed #E3B5A6}
 .vuoto{color:var(--soft);text-align:center;padding:1rem}
 .richiesta{display:grid;gap:.25rem}
 .richiesta strong{color:var(--deep)}
@@ -603,6 +680,7 @@ h3{margin:0 0 .5rem;font-size:1rem;color:var(--deep);text-transform:capitalize}
 .g:disabled .p,.g:disabled .m{display:none}
 .g.airbnb{background:#FBEFEA}
 .g.airbnb .n{text-decoration:line-through;color:#B4533C}
+.g.prenotato .n{color:#9A3F2B}
 .g.manuale{background:#F3EEE4}
 .g.manuale .n{text-decoration:line-through;color:var(--brass)}
 .g.speciale::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--brass)}
@@ -613,6 +691,8 @@ h3{margin:0 0 .5rem;font-size:1rem;color:var(--deep);text-transform:capitalize}
 .legenda{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font-size:.8rem;color:var(--soft)}
 .legenda span{display:inline-flex;align-items:center;gap:.35rem}
 .legenda i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.legenda .i-sbloccato,.g.sbloccato{background:repeating-linear-gradient(135deg,#fff 0 4px,#FBEFEA 4px 8px)}
+.legenda .i-prenotato,.g.prenotato{background:#F6DCD3}
 .riga-titolo{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap}
 
 /* Barra della selezione nel calendario */
@@ -707,8 +787,10 @@ const PAGINA_GESTIONE = `<!doctype html>
       <div class="riga-titolo">
         <h2>Calendario</h2>
         <div class="legenda">
-          <span><i style="background:#FBEFEA"></i>Airbnb</span>
+          <span><i class="i-prenotato"></i>Prenotato su Airbnb</span>
+          <span><i style="background:#FBEFEA"></i>Chiuso su Airbnb</span>
           <span><i style="background:#F3EEE4"></i>Bloccato da te</span>
+          <span><i class="i-sbloccato"></i>Airbnb sbloccato da te</span>
           <span><i style="background:var(--brass);width:8px;height:8px;border-radius:50%"></i>Giorno speciale</span>
         </div>
       </div>
@@ -771,6 +853,7 @@ const PAGINA_GESTIONE = `<!doctype html>
     <button class="btn" id="sel-prezzo">Prezzo e notti minime</button>
     <button class="btn chiaro" id="sel-blocca">Blocca queste notti</button>
     <button class="btn chiaro" id="sel-sblocca">Sblocca</button>
+    <button class="link" id="sel-riblocca">Richiudi come su Airbnb</button>
     <span class="muted" id="sel-airbnb"></span>
     <button class="link" id="sel-stagione">Crea una stagione</button>
     <button class="link danger" id="sel-togli">Togli i giorni speciali</button>
@@ -883,7 +966,10 @@ function scriptGestione() {
     const g = dati.giorni.get(s);
     const st = dati.stagioni.find((x) => x.dal <= s && s <= x.al);
     const b = dati.blocchi.find((x) => x.dal <= s && s < x.al);
+    const libero = !b && dati.sbloccati.some((x) => x.dal <= s && s < x.al);
     return {
+      prenotato: !!(b && b.prenotazione),
+      sbloccato: libero,
       prezzo: g && g.prezzo_notte_eur != null ? g.prezzo_notte_eur : st ? st.prezzo_notte_eur : null,
       min: g && g.min_notti != null ? g.min_notti : st ? st.min_notti : 1,
       speciale: !!g,
@@ -910,11 +996,13 @@ function scriptGestione() {
   function decoraGiorno(s, b, conMinimo) {
     const i = info(s);
     if (i.blocco) b.classList.add(i.blocco);
+    if (i.prenotato) b.classList.add("prenotato");
+    if (i.sbloccato) b.classList.add("sbloccato");
     if (i.speciale) b.classList.add("speciale");
     b.append(el("span", { className: "p" }, i.prezzo == null ? "–" : "€" + i.prezzo));
     if (conMinimo && i.min > 1) b.append(el("span", { className: "m" }, "min " + i.min));
     b.title = [fmt(s), i.prezzo == null ? "senza prezzo" : euro(i.prezzo) + " a notte", i.min > 1 ? "minimo " + i.min + " notti" : "",
-      i.blocco === "airbnb" ? "occupato su Airbnb" : i.blocco === "manuale" ? "bloccato da te" : ""].filter(Boolean).join(" · ");
+      i.prenotato ? "prenotato su Airbnb" : i.blocco === "airbnb" ? "chiuso su Airbnb" : i.blocco === "manuale" ? "bloccato da te" : i.sbloccato ? "chiuso su Airbnb, sbloccato da te" : ""].filter(Boolean).join(" · ");
   }
   // Colora la selezione da a a b compresi (b può mancare)
   function evidenzia(contenitore, a, b, classe = "sel") {
@@ -1023,17 +1111,23 @@ function scriptGestione() {
     f.elements.prezzo_notte_eur.placeholder = primo.prezzo == null ? "" : "ora " + primo.prezzo;
     f.elements.min_notti.placeholder = "ora " + primo.min;
     // Quali notti sono libere, bloccate da Luca o occupate su Airbnb
-    const conta = { libere: 0, manuale: 0, airbnb: 0 };
+    const conta = { libere: 0, manuale: 0, airbnb: 0, prenotate: 0, sbloccate: 0 };
     for (let s = a; s <= b; s = piu(s, 1)) {
-      const bl = info(s).blocco;
-      conta[bl === "manuale" ? "manuale" : bl ? "airbnb" : "libere"]++;
+      const i = info(s);
+      if (i.prenotato) conta.prenotate++;
+      else if (i.blocco === "airbnb") conta.airbnb++;
+      else if (i.blocco === "manuale") conta.manuale++;
+      else { conta.libere++; if (i.sbloccato) conta.sbloccate++; }
     }
     const notti = (k) => (k === 1 ? "la notte" : "le " + k + " notti");
     $("sel-blocca").hidden = !conta.libere;
     $("sel-blocca").textContent = conta.libere === n ? (n === 1 ? "Blocca questa notte" : "Blocca queste " + n + " notti") : "Blocca " + notti(conta.libere) + " libere";
-    $("sel-sblocca").hidden = !conta.manuale;
-    $("sel-sblocca").textContent = conta.manuale === n ? (n === 1 ? "Sblocca questa notte" : "Sblocca queste " + n + " notti") : "Sblocca " + notti(conta.manuale) + " bloccate da te";
-    $("sel-airbnb").textContent = conta.airbnb ? (conta.airbnb === n ? "Occupato su Airbnb: si libera solo da Airbnb." : conta.airbnb + " notti sono occupate su Airbnb.") : "";
+    const chiuse = conta.manuale + conta.airbnb;
+    $("sel-sblocca").hidden = !chiuse;
+    $("sel-sblocca").textContent = chiuse === n ? (n === 1 ? "Sblocca questa notte" : "Sblocca queste " + n + " notti") : "Sblocca " + notti(chiuse) + " bloccate";
+    $("sel-riblocca").hidden = !conta.sbloccate;
+    $("sel-riblocca").textContent = "Richiudi come su Airbnb";
+    $("sel-airbnb").textContent = conta.prenotate ? (conta.prenotate === n ? "Prenotato su Airbnb: non si sblocca." : conta.prenotate + " notti sono prenotate su Airbnb e restano occupate.") : "";
     let speciali = false;
     for (let s = a; s <= b; s = piu(s, 1)) if (dati.giorni.has(s)) { speciali = true; break; }
     $("sel-togli").hidden = !speciali;
@@ -1068,11 +1162,17 @@ function scriptGestione() {
     const fine = piu(sel.b || sel.a, 1);
     const ok = await chiedi({
       titolo: "Sbloccare queste date?",
-      testo: periodo(sel.a, sel.b || sel.a) + ". Le notti bloccate da te tornano prenotabili; quelle di Airbnb restano occupate.",
+      testo: periodo(sel.a, sel.b || sel.a) + ". Diventano prenotabili sul sito e restano libere anche dopo la sincronizzazione con Airbnb. " +
+        "Le notti chiuse su Airbnb restano chiuse su Airbnb: se un ospite le chiede, aprile anche lì prima di confermare. Le prenotazioni Airbnb non si toccano.",
       si: "Sblocca",
     });
     if (!ok) return;
     if (await chiama("POST", "/api/blocchi/sblocca", { dal: sel.a, al: fine })) { toast("Date sbloccate"); chiudiSelezione(); carica(); }
+  };
+  $("sel-riblocca").onclick = async () => {
+    const ok = await chiedi({ titolo: "Richiudere come su Airbnb?", testo: periodo(sel.a, sel.b || sel.a) + ". Le notti che hai sbloccato tornano a seguire il calendario di Airbnb.", si: "Richiudi" });
+    if (!ok) return;
+    if (await chiama("POST", "/api/blocchi/riblocca", { dal: sel.a, al: piu(sel.b || sel.a, 1) })) { toast("Di nuovo come su Airbnb"); chiudiSelezione(); carica(); }
   };
   $("sel-togli").onclick = async () => {
     if (!(await chiedi({ titolo: "Togliere i giorni speciali?", testo: "In questi giorni tornano a valere i prezzi e i minimi delle stagioni.", si: "Togli", pericolo: true }))) return;
@@ -1158,11 +1258,20 @@ function scriptGestione() {
   }
 
   function disegnaBlocchi() {
-    $("blocchi").replaceChildren(...(dati.blocchi.length ? dati.blocchi.map((b) => riga(
-      fmt(b.dal), fmt(b.al), el("span", { className: "tag " + b.origine }, b.origine), b.nota || "",
-      b.origine === "manuale"
-        ? elimina("Sbloccare queste date?", async () => { if (await chiama("DELETE", "/api/blocchi/" + b.id)) { toast("Date sbloccate"); carica(); } }, "Sblocca")
-        : el("span", { className: "muted" }, "da Airbnb")
+    const sblocca = (dal, al) => async () => { if (await chiama("POST", "/api/blocchi/sblocca", { dal, al })) { toast("Date sbloccate"); carica(); } };
+    const righe = [
+      ...dati.blocchi.map((b) => ({ ...b, tipo: b.prenotazione ? "prenotato" : b.origine })),
+      ...dati.sbloccati.map((b) => ({ ...b, tipo: "sbloccato" })),
+    ].sort((x, y) => (x.dal < y.dal ? -1 : 1));
+    const etichette = { prenotato: "prenotato su Airbnb", airbnb: "chiuso su Airbnb", manuale: "da te", sito: "dal sito", sbloccato: "sbloccato da te" };
+    $("blocchi").replaceChildren(...(righe.length ? righe.map((b) => riga(
+      fmt(b.dal), fmt(b.al), el("span", { className: "tag " + b.tipo }, etichette[b.tipo] || b.tipo), b.tipo === "manuale" ? b.nota || "" : "",
+      b.tipo === "prenotato" ? el("span", { className: "muted" }, "non si sblocca")
+        : b.tipo === "sbloccato"
+          ? el("button", { className: "link", onclick: async () => {
+              if (await chiama("POST", "/api/blocchi/riblocca", { dal: b.dal, al: b.al })) { toast("Di nuovo come su Airbnb"); carica(); }
+            } }, "Richiudi")
+          : elimina("Sbloccare " + periodo(b.dal, piu(b.al, -1)) + "?", sblocca(b.dal, b.al), "Sblocca")
     )) : [vuoto(5, "Nessuna data bloccata.")]));
   }
 
