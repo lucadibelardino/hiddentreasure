@@ -65,6 +65,7 @@ for (const meta of PAGES) {
 // Pagine di prova: stesso HTML pre-renderizzato, ma noindex e fuori dalla sitemap
 for (const meta of HIDDEN_PAGES) {
     const file = `${meta.path.slice(1)}.html`;
+    fs.mkdirSync(path.dirname(path.join(dist, file)), { recursive: true });
     fs.writeFileSync(path.join(dist, file), buildPage(meta, { noindex: true }));
     console.log(`prerender: ${meta.path} -> dist/${file} (noindex)`);
 }
