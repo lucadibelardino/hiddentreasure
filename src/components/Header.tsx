@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { LANGS, LANG_NAMES, ROUTES, pageFromPath, useLang, useT, type Lang } from '../i18n';
 import { useOpenDates } from '../booking/openDates';
@@ -258,34 +259,51 @@ const Header: React.FC = () => {
                 <LangHint />
             </div>
 
-            {/* Menu mobile a tutto schermo */}
-            <div
-                id="menu-mobile"
-                className={`${styles.mobileMenu} ${menuOpen ? styles.open : ''}`}
-                hidden={!menuOpen}
-            >
-                <button className={styles.closeMenu} onClick={() => setMenuOpen(false)} aria-label={t.closeMenu}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
-                        <path d="M18 6 6 18M6 6l12 12" />
-                    </svg>
-                </button>
+            {/* Menu mobile a tutto schermo.
+                Va montato in <body> con un portal: l'header ha backdrop-filter,
+                che fa da riferimento per i figli position:fixed e ritagliava
+                il menu all'altezza della barra (si vedevano solo 2 voci). */}
+            {/* Montato solo da aperto: nel prerender (server) document non esiste */}
+            {menuOpen && createPortal(
+                <div
+                    id="menu-mobile"
+                    className={styles.mobileMenu}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={t.navMobileAria}
+                >
+                    <div className={styles.mobileTop}>
+                        <button className={styles.mobileLogo} onClick={goHome} aria-label={t.homeAria}>
+                            <span className={styles.logoMark} aria-hidden="true" />
+                            <span>Hidden Treasure</span>
+                        </button>
+                        <button className={styles.closeMenu} autoFocus onClick={() => { setMenuOpen(false); burgerRef.current?.focus(); }} aria-label={t.closeMenu}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+                                <path d="M18 6 6 18M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
 
-                <nav className={styles.mobileNav} aria-label={t.navMobileAria}>
-                    <a href={routes.home} onClick={(e) => goToSection(e, 'hero')}>{t.home}</a>
-                    <a href={`${routes.home}#villa`} onClick={(e) => goToSection(e, 'villa')}>{t.villa}</a>
-                    <a href={routes.gallery} onClick={(e) => goTo(e, routes.gallery)}>{t.gallery}</a>
-                    <a href={routes.reviews} onClick={(e) => goTo(e, routes.reviews)}>{t.reviews}</a>
-                    <a href={routes.contact} onClick={(e) => goTo(e, routes.contact)}>{t.contact}</a>
-                </nav>
+                    <nav className={styles.mobileNav} aria-label={t.navMobileAria}>
+                        <a href={routes.home} onClick={(e) => goToSection(e, 'hero')}>{t.home}</a>
+                        <a href={`${routes.home}#villa`} onClick={(e) => goToSection(e, 'villa')}>{t.villa}</a>
+                        <a href={routes.gallery} onClick={(e) => goTo(e, routes.gallery)}>{t.gallery}</a>
+                        <a href={routes.reviews} onClick={(e) => goTo(e, routes.reviews)}>{t.reviews}</a>
+                        <a href={routes.contact} onClick={(e) => goTo(e, routes.contact)}>{t.contact}</a>
+                    </nav>
 
-                <a href={routes.home} className={styles.mobileCta} onClick={goBook}>
-                    {t.bookStay}
-                </a>
-
-                <LanguageSwitcher variant="mobile" onPick={() => setMenuOpen(false)} />
-
-                <p className={styles.mobileMeta}>{dict.common.place}</p>
-            </div>
+                    <div className={styles.mobileBottom}>
+                        <a href={routes.home} className={styles.mobileCta} onClick={goBook}>
+                            {t.bookStay}
+                        </a>
+                        <div className={styles.mobileFoot}>
+                            <LanguageSwitcher variant="mobile" onPick={() => setMenuOpen(false)} />
+                            <p className={styles.mobileMeta}>{dict.common.place}</p>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
         </header>
     );
 };
