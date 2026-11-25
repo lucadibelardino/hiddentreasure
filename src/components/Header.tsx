@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { LANGS, LANG_NAMES, ROUTES, pageFromPath, useLang, useT, type Lang } from '../i18n';
+import { useOpenDates } from '../booking/openDates';
 import styles from './Header.module.css';
 
 /** Selettore lingua: porta alla stessa pagina nell'altra lingua. */
@@ -204,6 +205,13 @@ const Header: React.FC = () => {
         navigate(path);
     };
 
+    const openDates = useOpenDates();
+    const goBook = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setMenuOpen(false);
+        openDates();
+    };
+
     const goHome = () => {
         setMenuOpen(false);
         if (!isHome) navigate(routes.home);
@@ -231,7 +239,7 @@ const Header: React.FC = () => {
                     <a href={routes.gallery} className={styles.link} onClick={(e) => goTo(e, routes.gallery)}>{t.gallery}</a>
                     <a href={routes.reviews} className={styles.link} onClick={(e) => goTo(e, routes.reviews)}>{t.reviews}</a>
                     <a href={routes.contact} className={styles.link} onClick={(e) => goTo(e, routes.contact)}>{t.contact}</a>
-                    <a href={routes.contact} className={styles.cta} onClick={(e) => goTo(e, routes.contact)}>{t.book}</a>
+                    <a href={routes.home} className={styles.cta} onClick={goBook}>{t.book}</a>
                     <LanguageSwitcher variant="desk" />
                 </nav>
 
@@ -270,7 +278,7 @@ const Header: React.FC = () => {
                     <a href={routes.contact} onClick={(e) => goTo(e, routes.contact)}>{t.contact}</a>
                 </nav>
 
-                <a href={routes.contact} className={styles.mobileCta} onClick={(e) => goTo(e, routes.contact)}>
+                <a href={routes.home} className={styles.mobileCta} onClick={goBook}>
                     {t.bookStay}
                 </a>
 
