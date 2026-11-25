@@ -419,13 +419,38 @@
     gap: 0.5rem;
     padding: 0.85rem 1.5rem;
     border-radius: var(--radius-pill);
+    border: 1px solid var(--c-sea);
     background: var(--c-sea);
     color: var(--c-white);
+    font: inherit;
     font-weight: 600;
+    cursor: pointer;
     transition: background var(--transition-fast);
 }
 
 .ctaBtn:hover { background: var(--c-sea-dark); }
+
+.ctaActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.ctaBtnGhost {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.85rem 1.5rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--c-sea);
+    color: var(--c-sea);
+    font-weight: 600;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.ctaBtnGhost:hover {
+    background: var(--c-sea);
+    color: var(--c-white);
+}
 
 @media (max-width: 860px) {
     .summary {
