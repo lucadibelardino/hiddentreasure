@@ -44,6 +44,7 @@ const RequestForm: React.FC<Props> = ({ from, to, guests, pricing, onEdit, onRes
 
     const [status, setStatus] = useState<Status>('idle');
     const [sentName, setSentName] = useState('');
+    const [mailSent, setMailSent] = useState(false);
     // Token anti-bot di Turnstile: senza, il Worker rifiuta la richiesta
     const [token, setToken] = useState('');
     const turnstile = useRef<TurnstileHandle>(null);
@@ -78,6 +79,8 @@ const RequestForm: React.FC<Props> = ({ from, to, guests, pricing, onEdit, onRes
                 }),
             });
             if (!res.ok) throw new Error(`Risposta ${res.status}`);
+            const dati = await res.json().catch(() => ({}));
+            setMailSent(dati.conferma === true);
             setSentName(nome.split(' ')[0]);
             setStatus('ok');
         } catch (err) {
@@ -98,6 +101,7 @@ const RequestForm: React.FC<Props> = ({ from, to, guests, pricing, onEdit, onRes
                 </span>
                 <h2 className={styles.doneTitle}>{t.okTitle}</h2>
                 <p className={styles.doneText}>{t.okText(sentName)}</p>
+                {mailSent && <p className={styles.doneText}>{t.okMail}</p>}
                 <p className={styles.doneDates}>
                     {fmt(from)} → {fmt(to)} · {t.nights(nights)}
                 </p>

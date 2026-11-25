@@ -8,6 +8,8 @@
  *   AIRBNB_ICAL_URL secret: link "Esporta calendario" di Airbnb
  *   SESSION_SECRET  secret: stringa casuale lunga, firma i cookie di accesso
  *   TURNSTILE_SECRET secret: "Secret key" del widget Turnstile (anti-bot)
+ *   RESEND_API_KEY  secret FACOLTATIVO: se c'è, la conferma all'ospite parte da Resend
+ *                   invece che dal binding EMAIL (vedi inviaConferma)
  * Cron Trigger: 0 * * * *   (sincronizzazione Airbnb ogni ora)
  * Domini: richieste.luca-dibelardino.workers.dev (API pubbliche)
  *         gestione.hiddentreasurevillasimius.com (pagina di gestione, con login)
@@ -20,6 +22,12 @@ const DATA = /^\d{4}-\d{2}-\d{2}$/;
 const HOST_GESTIONE = "gestione.hiddentreasurevillasimius.com";
 const EMAIL_LUCA = "luca.dibelardino@gmail.com";
 const MITTENTE = { email: "sito@hiddentreasurevillasimius.com", name: "Hidden Treasure - sito" };
+
+// Conferma di ricezione all'ospite
+const MITTENTE_OSPITI = { email: "sito@hiddentreasurevillasimius.com", name: "Hidden Treasure Villasimius" };
+const RISPOSTE_A = "gestionehtv@gmail.com"; // dove arriva il "Rispondi" dell'ospite
+const CONFERME_PER_INDIRIZZO = 1; // al massimo 1 conferma ogni 24 ore allo stesso indirizzo
+const CONFERME_AL_GIORNO = 20;    // oltre 20 richieste in 24 ore sospendiamo le conferme (spam)
 
 // Regole del login
 const CIFRE_CODICE = 8;          // 10^8 combinazioni
@@ -237,8 +245,135 @@ async function nuovaRichiesta(request, env, risposta) {
     console.log("Email non inviata:", e.message);
   }
 
-  return risposta({ ok: true });
+  // Conferma all'ospite (se fallisce, la richiesta resta salvata e Luca è avvisato lo stesso)
+  const conferma = await inviaConferma(env, { nome, email, lingua, check_in: r.check_in, check_out: r.check_out, notti, ospiti });
+
+  return risposta({ ok: true, conferma });
 }
+
+/* ── Conferma di ricezione all'ospite ──
+ * Va a un indirizzo scritto da chiunque nel modulo: per non diventare uno strumento
+ * per mandare spam a sconosciuti
+ *  - parte solo dopo Turnstile e dopo che la richiesta è stata salvata;
+ *  - non contiene MAI testo libero dell'ospite (messaggio), solo date e numeri già controllati;
+ *  - il nome compare solo se fatto di lettere (niente link o cifre);
+ *  - al massimo CONFERME_PER_INDIRIZZO al giorno allo stesso indirizzo,
+ *    e nessuna conferma se in 24 ore arrivano più di CONFERME_AL_GIORNO richieste.
+ */
+async function inviaConferma(env, d) {
+  const { stesso, totale } = await env.DB.prepare(
+    `SELECT SUM(lower(email) = lower(?)) AS stesso, COUNT(*) AS totale
+     FROM richieste WHERE creato_il > datetime('now', '-1 day')`
+  ).bind(d.email).first();
+  // La richiesta appena salvata è già contata
+  if (stesso > CONFERME_PER_INDIRIZZO || totale > CONFERME_AL_GIORNO) return false;
+
+  const t = TESTI_CONFERMA[d.lingua] || TESTI_CONFERMA.it;
+  const primo = d.nome.split(/\s+/)[0];
+  const nome = /^[\p{L}'’-]{1,30}$/u.test(primo) ? primo : "";
+  const data = (iso) => new Date(iso + "T12:00:00Z").toLocaleDateString(t.locale, {
+    weekday: "short", day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
+  });
+  const righe = [
+    [t.arrivo, data(d.check_in)],
+    [t.partenza, data(d.check_out)],
+    [t.notti, String(d.notti)],
+    [t.ospiti, String(d.ospiti)],
+  ];
+  const sito = "https://hiddentreasurevillasimius.com" + (d.lingua === "it" ? "" : "/" + d.lingua);
+
+  const text = `${t.ciao(nome)}\n\n${t.intro}\n\n` +
+    righe.map(([k, v]) => `${k}: ${v}`).join("\n") +
+    `\n\n${t.nonAncora}\n${t.rispondi}\n\n${t.firma}\n${sito}\n\n— \n${t.piede}`;
+
+  const html = `<!doctype html><html lang="${d.lingua}"><body style="margin:0;padding:0;background:#f6f4ef">
+<div style="max-width:520px;margin:0 auto;padding:40px 24px;font-family:Georgia,'Times New Roman',serif;color:#1f2a2e">
+<p style="margin:0 0 28px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#7a8a8f">Hidden Treasure · Villasimius</p>
+<p style="margin:0 0 16px;font-size:20px">${esc(t.ciao(nome))}</p>
+<p style="margin:0 0 28px;font-size:16px;line-height:1.6">${esc(t.intro)}</p>
+<table role="presentation" style="width:100%;border-collapse:collapse;font-family:Helvetica,Arial,sans-serif;font-size:15px;margin:0 0 28px">
+${righe.map(([k, v]) => `<tr><td style="padding:10px 0;border-top:1px solid #e3ded3;color:#7a8a8f">${esc(k)}</td><td style="padding:10px 0;border-top:1px solid #e3ded3;text-align:right">${esc(v)}</td></tr>`).join("\n")}
+</table>
+<p style="margin:0 0 12px;font-size:16px;line-height:1.6">${esc(t.nonAncora)}</p>
+<p style="margin:0 0 28px;font-size:16px;line-height:1.6">${esc(t.rispondi)}</p>
+<p style="margin:0 0 40px;font-size:16px">${esc(t.firma).replace(/\n/g, "<br>")}<br><a href="${sito}" style="color:#1f2a2e">hiddentreasurevillasimius.com</a></p>
+<p style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:1.5;color:#9aa5a8">${esc(t.piede)}</p>
+</div></body></html>`;
+
+  const mail = { to: d.email, subject: t.oggetto, text, html };
+  try {
+    if (env.RESEND_API_KEY) {
+      // Alternativa gratuita: Resend (serve il dominio verificato su resend.com)
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: `${MITTENTE_OSPITI.name} <${MITTENTE_OSPITI.email}>`,
+          to: [mail.to], reply_to: RISPOSTE_A, subject: mail.subject, text, html,
+        }),
+      });
+      if (!res.ok) throw new Error(`Resend ${res.status}: ${await res.text()}`);
+    } else {
+      // Cloudflare Email Sending: richiede dominio "onboarded" in Email Sending + piano Workers Paid.
+      // Senza, Cloudflare rifiuta (E_RECIPIENT_PLAN_RESTRICTED / E_RECIPIENT_NOT_ALLOWED) e finiamo nel catch.
+      await env.EMAIL.send({ from: MITTENTE_OSPITI, replyTo: RISPOSTE_A, ...mail });
+    }
+    return true;
+  } catch (e) {
+    console.log("Conferma all'ospite non inviata:", e.code || "", e.message);
+    return false;
+  }
+}
+
+// Per l'HTML della mail: niente tag dentro i testi
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+const TESTI_CONFERMA = {
+  it: {
+    locale: "it-IT",
+    oggetto: "Abbiamo ricevuto la tua richiesta · Hidden Treasure",
+    ciao: (n) => (n ? `Ciao ${n},` : "Ciao,"),
+    intro: "grazie per averci scritto. Abbiamo ricevuto la tua richiesta per queste date:",
+    arrivo: "Arrivo", partenza: "Partenza", notti: "Notti", ospiti: "Ospiti",
+    nonAncora: "Non è ancora una prenotazione: controlliamo la disponibilità e ti rispondiamo al più presto.",
+    rispondi: "Per qualsiasi domanda puoi rispondere direttamente a questa email.",
+    firma: "A presto,\nHidden Treasure Villasimius",
+    piede: "Ricevi questa email perché il tuo indirizzo è stato inserito nel modulo richieste del sito. Se non sei stato tu, puoi ignorarla.",
+  },
+  en: {
+    locale: "en-GB",
+    oggetto: "We have received your request · Hidden Treasure",
+    ciao: (n) => (n ? `Hi ${n},` : "Hi,"),
+    intro: "thank you for getting in touch. We have received your request for these dates:",
+    arrivo: "Check-in", partenza: "Check-out", notti: "Nights", ospiti: "Guests",
+    nonAncora: "This is not a booking yet: we will check availability and get back to you as soon as possible.",
+    rispondi: "If you have any questions, just reply to this email.",
+    firma: "See you soon,\nHidden Treasure Villasimius",
+    piede: "You are receiving this email because your address was entered in the request form on our website. If it wasn't you, you can ignore it.",
+  },
+  de: {
+    locale: "de-DE",
+    oggetto: "Wir haben Ihre Anfrage erhalten · Hidden Treasure",
+    ciao: (n) => (n ? `Hallo ${n},` : "Hallo,"),
+    intro: "vielen Dank für Ihre Nachricht. Wir haben Ihre Anfrage für diese Daten erhalten:",
+    arrivo: "Anreise", partenza: "Abreise", notti: "Nächte", ospiti: "Gäste",
+    nonAncora: "Dies ist noch keine Buchung: Wir prüfen die Verfügbarkeit und melden uns so bald wie möglich.",
+    rispondi: "Bei Fragen antworten Sie einfach auf diese E-Mail.",
+    firma: "Bis bald,\nHidden Treasure Villasimius",
+    piede: "Sie erhalten diese E-Mail, weil Ihre Adresse im Anfrageformular unserer Website eingegeben wurde. Falls Sie das nicht waren, können Sie sie ignorieren.",
+  },
+  fr: {
+    locale: "fr-FR",
+    oggetto: "Nous avons bien reçu votre demande · Hidden Treasure",
+    ciao: (n) => (n ? `Bonjour ${n},` : "Bonjour,"),
+    intro: "merci de nous avoir écrit. Nous avons bien reçu votre demande pour ces dates :",
+    arrivo: "Arrivée", partenza: "Départ", notti: "Nuits", ospiti: "Voyageurs",
+    nonAncora: "Ce n'est pas encore une réservation : nous vérifions la disponibilité et nous vous répondons au plus vite.",
+    rispondi: "Pour toute question, il vous suffit de répondre à cet e-mail.",
+    firma: "À bientôt,\nHidden Treasure Villasimius",
+    piede: "Vous recevez cet e-mail parce que votre adresse a été saisie dans le formulaire de demande de notre site. Si ce n'était pas vous, vous pouvez l'ignorer.",
+  },
+};
 
 /* ════════════════════════ Sincronizzazione Airbnb ════════════════════════ */
 
