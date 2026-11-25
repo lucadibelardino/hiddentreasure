@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import useReveal from '../hooks/useReveal';
 import Stars from './Stars';
 import { sources, sourceKeys, reviews, totalCount, overall, formatDate, fmt, localize } from '../data/reviewsData';
-import { LANGS, ROUTES, useLang, useT, type Lang } from '../i18n';
+import { LANGS, useLang, useT, type Lang } from '../i18n';
+import { MAPS_URL } from '../data/location';
+import { useOpenDates } from '../booking/openDates';
 import type { Review, SourceKey } from '../data/reviewsData';
 import keywords from '../data/reviewKeywords';
 import styles from './ReviewsPage.module.css';
@@ -113,6 +114,7 @@ const ReviewsPage: React.FC = () => {
     const t = useT().reviews;
     const regexes = keywordRegex[lang];
     const textOf = (r: Review) => localize(r, lang).text;
+    const openDates = useOpenDates();
 
     const bySource = useMemo(
         () => (filter === 'all' ? reviews : reviews.filter((r) => r.source === filter)),
@@ -245,7 +247,10 @@ const ReviewsPage: React.FC = () => {
                 {/* Chiusura */}
                 <section className={`${styles.cta} reveal`}>
                     <h2 className={styles.ctaTitle}>{t.ctaTitle}</h2>
-                    <Link to={ROUTES[lang].contact} className={styles.ctaBtn}>{t.ctaBtn} <Arrow /></Link>
+                    <div className={styles.ctaActions}>
+                        <a href={MAPS_URL} target="_blank" rel="noopener noreferrer" className={styles.ctaBtnGhost}>{t.ctaReview}</a>
+                        <button type="button" onClick={openDates} className={styles.ctaBtn}>{t.ctaBook} <Arrow /></button>
+                    </div>
                 </section>
             </div>
         </main>
