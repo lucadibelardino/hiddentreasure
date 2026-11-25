@@ -752,12 +752,11 @@ h3{margin:0 0 .5rem;font-size:1rem;color:var(--deep);text-transform:capitalize}
 .mesi{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem 2rem}
 .griglia{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .gs{font-size:.7rem;font-weight:700;color:var(--soft);text-align:center;padding:.2rem 0}
-.g{position:relative;border:0;border-radius:6px;background:#fff;min-height:3.2rem;padding:.2rem .1rem;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:1px;color:var(--ink);font-size:.9rem;line-height:1.15}
+.g{position:relative;border:0;border-radius:6px;background:#fff;min-height:3.2rem;padding:.2rem .1rem;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:1px;color:var(--ink);font-size:1rem;line-height:1.15}
 .g:hover:not(:disabled){outline:2px solid var(--sea);outline-offset:-2px}
-.g .p{font-size:.7rem;color:var(--soft)}
-.g .m{font-size:.65rem;font-weight:700;color:var(--brass)}
+.g .p{font-size:.8rem;color:var(--soft)}
 .g:disabled{color:#B9C0C5;background:transparent;cursor:default}
-.g:disabled .p,.g:disabled .m{display:none}
+.g:disabled .p{display:none}
 .g.airbnb{background:#FBEFEA}
 .g.airbnb .n{text-decoration:line-through;color:#B4533C}
 .g.prenotato .n{color:#9A3F2B}
@@ -765,7 +764,7 @@ h3{margin:0 0 .5rem;font-size:1rem;color:var(--deep);text-transform:capitalize}
 .g.manuale .n{text-decoration:line-through;color:var(--brass)}
 .g.speciale::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--brass)}
 .g.sel{background:var(--sea);color:#fff}
-.g.sel .p,.g.sel .m,.g.sel .n{color:#fff}
+.g.sel .p,.g.sel .n{color:#fff}
 .g.estremo{background:var(--deep)}
 .g.anteprima{background:#DCEBEC}
 .legenda{display:flex;flex-wrap:wrap;gap:.4rem 1rem;font-size:.8rem;color:var(--soft)}
@@ -875,7 +874,7 @@ const PAGINA_GESTIONE = `<!doctype html>
           <span><i style="background:var(--brass);width:8px;height:8px;border-radius:50%"></i>Giorno speciale</span>
         </div>
       </div>
-      <p class="muted">Tocca il primo e l'ultimo giorno di un periodo, poi scegli cosa farne: cambiare prezzo o notti minime, bloccarlo, crearci una stagione. In ogni casella: prezzo a notte e, sotto, il minimo di notti se è più di 1.</p>
+      <p class="muted">Tocca il primo e l'ultimo giorno di un periodo, poi scegli cosa farne: cambiare prezzo o notti minime, bloccarlo, crearci una stagione. In ogni casella c'è il prezzo a notte; passandoci sopra vedi anche il minimo di notti.</p>
       <div class="mesi" id="panoramica"></div>
     </div>
     <div class="card scroll">
@@ -1074,14 +1073,13 @@ function scriptGestione() {
     const nome = primo.toLocaleDateString("it-IT", { month: "long", year: "numeric", timeZone: "UTC" });
     return el("div", { className: "mese" }, el("h3", null, nome), griglia);
   }
-  function decoraGiorno(s, b, conMinimo) {
+  function decoraGiorno(s, b) {
     const i = info(s);
     if (i.blocco) b.classList.add(i.blocco);
     if (i.prenotato) b.classList.add("prenotato");
     if (i.sbloccato) b.classList.add("sbloccato");
     if (i.speciale) b.classList.add("speciale");
     b.append(el("span", { className: "p" }, i.prezzo == null ? "–" : "€" + i.prezzo));
-    if (conMinimo && i.min > 1) b.append(el("span", { className: "m" }, "min " + i.min));
     b.title = [fmt(s), i.prezzo == null ? "senza prezzo" : euro(i.prezzo) + " a notte", i.min > 1 ? "minimo " + i.min + " notti" : "",
       i.prenotato ? "prenotato su Airbnb" : i.blocco === "airbnb" ? "chiuso su Airbnb" : i.blocco === "manuale" ? "bloccato da te" : i.sbloccato ? "chiuso su Airbnb, sbloccato da te" : ""].filter(Boolean).join(" · ");
   }
@@ -1113,7 +1111,7 @@ function scriptGestione() {
     for (let i = 0; i < n; i++) {
       const d = new Date(Date.UTC(pk.mese.y, pk.mese.m + i, 1));
       mesi.push(mese(d.getUTCFullYear(), d.getUTCMonth(), (s, b) => {
-        decoraGiorno(s, b, false);
+        decoraGiorno(s, b);
         b.onclick = () => sceltaPicker(s);
         b.onmouseenter = () => { if (pk.a && !pk.b && s > pk.a) evidenzia($("pk-mesi"), pk.a, s); };
       }));
@@ -1166,7 +1164,7 @@ function scriptGestione() {
     for (let i = 0; i < 13; i++) {
       const d = new Date(Date.UTC(ora.y, ora.m + i, 1));
       mesi.push(mese(d.getUTCFullYear(), d.getUTCMonth(), (s, b) => {
-        decoraGiorno(s, b, true);
+        decoraGiorno(s, b);
         b.onclick = () => sceltaPanoramica(s);
       }));
     }
