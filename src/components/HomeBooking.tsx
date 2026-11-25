@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { DateRange } from 'react-day-picker';
 import BookingSearch, { type BookingSearchHandle } from './BookingSearch';
 import RequestForm from './RequestForm';
 import { useT } from '../i18n';
 import { DEFAULT_GUESTS, useCalendar, type Guests } from '../booking/availability';
+import { OPEN_DATES_EVENT, type OpenDatesState } from '../booking/openDates';
 import styles from './HomeBooking.module.css';
 
 /**
@@ -20,6 +22,29 @@ const HomeBooking: React.FC = () => {
     const [open, setOpen] = useState(false);
     const searchRef = useRef<BookingSearchHandle>(null);
     const dialogRef = useRef<HTMLDivElement>(null);
+
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    // "Prenota" / "Chiedi le date": apre il calendario della barra
+    useEffect(() => {
+        const openDates = () => {
+            setOpen(false);
+            searchRef.current?.open();
+        };
+        window.addEventListener(OPEN_DATES_EVENT, openDates);
+        // Arrivando da un'altra pagina: aspetta che la pagina sia tornata in cima
+        let id: number | undefined;
+        if ((location.state as OpenDatesState | null)?.openDates) {
+            navigate(location.pathname, { replace: true, state: null });
+            id = window.setTimeout(openDates, 150);
+        }
+        return () => {
+            window.removeEventListener(OPEN_DATES_EVENT, openDates);
+            window.clearTimeout(id);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const complete = !!(range?.from && range.to);
     const dialogOpen = open && complete;

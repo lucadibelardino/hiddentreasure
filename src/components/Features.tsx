@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import useReveal from '../hooks/useReveal';
 import { ROUTES, useLang, useT } from '../i18n';
+import { useOpenDates } from '../booking/openDates';
 import styles from './Features.module.css';
 
 const delay = (ms: number) => ({ '--reveal-delay': `${ms}ms` } as React.CSSProperties);
@@ -13,6 +14,7 @@ const Features: React.FC = () => {
     const navigate = useNavigate();
     const lang = useLang();
     const t = useT().features;
+    const openDates = useOpenDates();
     const { items: features, stats } = t;
 
     return (
@@ -61,7 +63,7 @@ const Features: React.FC = () => {
                     </ul>
 
                     <div className={`${styles.actions} reveal`}>
-                        <button className={styles.primary} onClick={() => navigate(ROUTES[lang].contact)}>
+                        <button className={styles.primary} onClick={openDates}>
                             {t.askDates}
                         </button>
                         <button className={styles.secondary} onClick={() => navigate(ROUTES[lang].gallery)}>
