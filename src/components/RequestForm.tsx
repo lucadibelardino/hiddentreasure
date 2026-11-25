@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ROUTES, useLang, useT } from '../i18n';
 import {
@@ -12,6 +12,7 @@ import {
     type Guests,
     type Pricing,
 } from '../booking/availability';
+import Turnstile, { type TurnstileHandle } from './Turnstile';
 import styles from './RequestForm.module.css';
 
 /** Il Worker Cloudflare salva la richiesta in D1 e manda la mail di notifica. */
@@ -43,6 +44,9 @@ const RequestForm: React.FC<Props> = ({ from, to, guests, pricing, onEdit, onRes
 
     const [status, setStatus] = useState<Status>('idle');
     const [sentName, setSentName] = useState('');
+    // Token anti-bot di Turnstile: senza, il Worker rifiuta la richiesta
+    const [token, setToken] = useState('');
+    const turnstile = useRef<TurnstileHandle>(null);
 
     const fmt = (d: Date) => formatDay(d, lang);
     const nights = nightsBetween(from, to);
@@ -70,6 +74,7 @@ const RequestForm: React.FC<Props> = ({ from, to, guests, pricing, onEdit, onRes
                     messaggio: testo ? `${dettaglio}\n\n${testo}` : dettaglio,
                     lingua: lang,
                     sito: String(form.get('sito') || ''),
+                    turnstile: token,
                 }),
             });
             if (!res.ok) throw new Error(`Risposta ${res.status}`);
@@ -78,6 +83,8 @@ const RequestForm: React.FC<Props> = ({ from, to, guests, pricing, onEdit, onRes
         } catch (err) {
             console.error('Richiesta non inviata:', err);
             setStatus('error');
+            // Il token è stato consumato: ne serve uno nuovo per riprovare
+            turnstile.current?.reset();
         }
     };
 
@@ -220,7 +227,9 @@ const RequestForm: React.FC<Props> = ({ from, to, guests, pricing, onEdit, onRes
                     </p>
                 )}
 
-                <button type="submit" className={styles.submit} disabled={sending}>
+                <Turnstile ref={turnstile} lang={lang} onToken={setToken} className={styles.turnstile} />
+
+                <button type="submit" className={styles.submit} disabled={sending || !token}>
                     {sending ? t.sending : t.submit}
                 </button>
                 <p className={styles.note}>
