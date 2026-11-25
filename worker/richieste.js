@@ -7,6 +7,7 @@
  *   EMAIL           send_email (Email Routing)
  *   AIRBNB_ICAL_URL secret: link "Esporta calendario" di Airbnb
  *   SESSION_SECRET  secret: stringa casuale lunga, firma i cookie di accesso
+ *   TURNSTILE_SECRET secret: "Secret key" del widget Turnstile (anti-bot)
  * Cron Trigger: 0 * * * *   (sincronizzazione Airbnb ogni ora)
  * Domini: richieste.luca-dibelardino.workers.dev (API pubbliche)
  *         gestione.hiddentreasurevillasimius.com (pagina di gestione, con login)
@@ -25,7 +26,17 @@ const CIFRE_CODICE = 8;          // 10^8 combinazioni
 const MINUTI_CODICE = 10;        // durata di un codice
 const TENTATIVI_CODICE = 5;      // errori ammessi per codice
 const CODICI_AL_GIORNO = 10;     // codici richiedibili in 24 ore
-const GIORNI_SESSIONE = 30;      // durata del cookie
+const GIORNI_SESSIONE = 7;       // durata del cookie
+const COOKIE = "__Host-sessione"; // __Host-: solo HTTPS, solo questo dominio, Path=/
+
+// Turnstile: il "non sono un robot" di Cloudflare. La Site key è pubblica,
+// la Secret key sta nel secret TURNSTILE_SECRET e non va mai scritta qui.
+const TURNSTILE_SITEKEY = "0x4AAAAAAGRhX_xa0_6Ci-QP";
+const TURNSTILE_HOST_OK = ["hiddentreasurevillasimius.com", HOST_GESTIONE, "localhost"];
+
+// Limiti del modulo richieste (gli stessi del sito, con un po' di margine)
+const MAX_NOME = 120, MAX_EMAIL = 254, MAX_TELEFONO = 40, MAX_MESSAGGIO = 2500, MAX_NOTTI = 90;
+const LINGUE = ["it", "en", "de", "fr"];
 
 export default {
   async fetch(request, env) {
@@ -142,6 +153,32 @@ async function blocchiEffettivi(env, daGiorno) {
   return { blocchi, sbloccati, sblocchi };
 }
 
+// Chiede a Cloudflare se il token del widget è valido. Ogni token vale una volta sola.
+// Senza TURNSTILE_SECRET risponde sempre no: meglio un modulo fermo che uno aperto ai bot.
+async function turnstileValido(token, request, env) {
+  if (!env.TURNSTILE_SECRET) { console.log("Manca il secret TURNSTILE_SECRET"); return false; }
+  if (typeof token !== "string" || !token || token.length > 2048) return false;
+  const dati = new FormData();
+  dati.append("secret", env.TURNSTILE_SECRET);
+  dati.append("response", token);
+  const ip = request.headers.get("CF-Connecting-IP");
+  if (ip) dati.append("remoteip", ip);
+  try {
+    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: dati });
+    const esito = await res.json();
+    // Il token deve venire da una delle nostre pagine, non da un sito qualsiasi
+    return esito.success === true && TURNSTILE_HOST_OK.includes(esito.hostname);
+  } catch (e) {
+    console.log("Turnstile non raggiungibile:", e.message);
+    return false;
+  }
+}
+
+// Testo dal modulo: deve essere una stringa, senza spazi ai lati e non troppo lungo
+const testo = (v, max) => (typeof v === "string" && v.trim().length <= max ? v.trim() : null);
+// Nell'oggetto della mail niente "a capo": servirebbero a falsificare intestazioni
+const unaRiga = (v) => v.replace(/[\r\n]+/g, " ");
+
 async function nuovaRichiesta(request, env, risposta) {
   let r;
   try { r = await request.json(); } catch { return risposta({ errore: "JSON non valido" }, 400); }
@@ -149,11 +186,27 @@ async function nuovaRichiesta(request, env, risposta) {
   // Trappola anti-spam: campo nascosto che solo i bot compilano
   if (r.sito) return risposta({ ok: true });
 
-  // Controlli minimi, con il massimo ospiti preso dal database
+  // Controlli sui campi: tipo, lunghezza, date sensate (il massimo ospiti è nel database)
+  const nome = testo(r.nome, MAX_NOME);
+  const email = testo(r.email, MAX_EMAIL);
+  const telefono = r.telefono == null || r.telefono === "" ? "" : testo(r.telefono, MAX_TELEFONO);
+  const messaggio = r.messaggio == null || r.messaggio === "" ? "" : testo(r.messaggio, MAX_MESSAGGIO);
+  const lingua = LINGUE.includes(r.lingua) ? r.lingua : "it";
+  const ospiti = Number(r.ospiti);
   const maxOspiti = Number(await impostazione(env, "max_ospiti", "6"));
-  if (!r.nome || !r.email?.includes("@") || !DATA.test(r.check_in) || !DATA.test(r.check_out)
-      || r.check_out <= r.check_in || !(r.ospiti >= 1 && r.ospiti <= maxOspiti)) {
+  // "ieri" in UTC: chi è in un fuso più avanti può avere già cambiato giorno
+  const ieri = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  const notti = DATA.test(r.check_in) && DATA.test(r.check_out)
+    ? (Date.parse(r.check_out) - Date.parse(r.check_in)) / 86_400_000 : NaN;
+  if (!nome || !email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || telefono === null || messaggio === null
+      || !(notti >= 1 && notti <= MAX_NOTTI) || r.check_in < ieri
+      || !Number.isInteger(ospiti) || ospiti < 1 || ospiti > maxOspiti) {
     return risposta({ errore: "Dati mancanti o non validi" }, 400);
+  }
+
+  // Solo adesso il controllo anti-bot (costa una chiamata a Cloudflare)
+  if (!(await turnstileValido(r.turnstile, request, env))) {
+    return risposta({ errore: "Verifica anti-bot non riuscita" }, 403);
   }
 
   // Le date cadono su un periodo occupato? (dal < partenza E al > arrivo)
@@ -165,7 +218,7 @@ async function nuovaRichiesta(request, env, risposta) {
   await env.DB.prepare(
     `INSERT INTO richieste (nome, email, telefono, check_in, check_out, ospiti, messaggio, lingua)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-  ).bind(r.nome, r.email, r.telefono || null, r.check_in, r.check_out, r.ospiti, r.messaggio || null, r.lingua || "it")
+  ).bind(nome, email, telefono || null, r.check_in, r.check_out, ospiti, messaggio || null, lingua)
    .run();
 
   // Notifica via email (se fallisce, la richiesta resta comunque salvata)
@@ -173,11 +226,11 @@ async function nuovaRichiesta(request, env, risposta) {
     await env.EMAIL.send({
       from: MITTENTE,
       to: EMAIL_LUCA,
-      replyTo: r.email,
-      subject: `Nuova richiesta: ${r.nome}, ${r.check_in} → ${r.check_out}`,
-      text: `Nome: ${r.nome}\nEmail: ${r.email}\nTelefono: ${r.telefono || "-"}\n` +
-            `Arrivo: ${r.check_in}\nPartenza: ${r.check_out}\nOspiti: ${r.ospiti}\n` +
-            `Lingua: ${r.lingua || "it"}\n\nMessaggio:\n${r.messaggio || "-"}\n\n` +
+      replyTo: unaRiga(email),
+      subject: `Nuova richiesta: ${unaRiga(nome)}, ${r.check_in} → ${r.check_out}`,
+      text: `Nome: ${nome}\nEmail: ${email}\nTelefono: ${telefono || "-"}\n` +
+            `Arrivo: ${r.check_in}\nPartenza: ${r.check_out}\nOspiti: ${ospiti}\n` +
+            `Lingua: ${lingua}\n\nMessaggio:\n${messaggio || "-"}\n\n` +
             `Gestisci: https://${HOST_GESTIONE}`,
     });
   } catch (e) {
@@ -247,7 +300,7 @@ const SICUREZZA = {
   "X-Frame-Options": "DENY",
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "no-referrer",
-  "Content-Security-Policy": "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'",
+  "Content-Security-Policy": "default-src 'self'; script-src 'unsafe-inline' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'none'",
 };
 
 const json = (dati, stato = 200, extra = {}) =>
@@ -268,10 +321,10 @@ async function gestione(request, env, url) {
   const dentro = await sessioneValida(request, env);
 
   if (metodo === "GET" && pathname === "/") return html(dentro ? PAGINA_GESTIONE : PAGINA_LOGIN);
-  if (metodo === "POST" && pathname === "/login/codice") return mandaCodice(env);
+  if (metodo === "POST" && pathname === "/login/codice") return mandaCodice(request, env);
   if (metodo === "POST" && pathname === "/login/verifica") return verificaCodice(request, env);
   if (metodo === "POST" && pathname === "/logout") {
-    return json({ ok: true }, 200, { "Set-Cookie": "sessione=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0" });
+    return json({ ok: true }, 200, { "Set-Cookie": `${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0` });
   }
 
   if (pathname.startsWith("/api/")) {
@@ -289,7 +342,13 @@ async function gestione(request, env, url) {
 
 /* ── Login: codice via email ── */
 
-async function mandaCodice(env) {
+async function mandaCodice(request, env) {
+  // Prima di tutto il controllo anti-bot: senza, chiunque potrebbe esaurire i codici del giorno
+  const corpo = await request.json().catch(() => ({}));
+  if (!(await turnstileValido(corpo.turnstile, request, env))) {
+    return json({ errore: "Verifica anti-bot non riuscita: ricarica la pagina e riprova." }, 403);
+  }
+
   // Limiti: un codice al minuto, CODICI_AL_GIORNO al giorno
   const { ultimo, giorno } = await env.DB.prepare(
     `SELECT
@@ -334,26 +393,32 @@ async function verificaCodice(request, env) {
   if (!riga) return json({ errore: "Codice scaduto: chiedine uno nuovo." }, 400);
   if (riga.tentativi >= TENTATIVI_CODICE) return json({ errore: "Troppi tentativi: chiedi un nuovo codice." }, 400);
 
-  // Il tentativo si conta PRIMA del confronto
-  await env.DB.prepare("UPDATE login_codici SET tentativi = tentativi + 1 WHERE id = ?").bind(riga.id).run();
+  // Il tentativo si conta PRIMA del confronto, con un'unica istruzione:
+  // aumenta solo se c'è ancora posto, così cento tentativi in parallelo non superano il limite
+  const conto = await env.DB.prepare(
+    "UPDATE login_codici SET tentativi = tentativi + 1 WHERE id = ? AND tentativi < ? AND usato = 0 RETURNING tentativi"
+  ).bind(riga.id, TENTATIVI_CODICE).first();
+  if (!conto) return json({ errore: "Troppi tentativi: chiedi un nuovo codice." }, 400);
 
   if (!uguali(await impronta(codice, env), riga.hash)) {
-    const restano = TENTATIVI_CODICE - riga.tentativi - 1;
+    const restano = TENTATIVI_CODICE - conto.tentativi;
     return json({ errore: restano > 0 ? `Codice sbagliato. Tentativi rimasti: ${restano}.` : "Codice sbagliato: chiedine uno nuovo." }, 400);
   }
 
-  await env.DB.prepare("UPDATE login_codici SET usato = 1 WHERE id = ?").bind(riga.id).run();
+  // Il codice si usa una volta sola: se due richieste arrivano insieme, vince solo la prima
+  const { meta } = await env.DB.prepare("UPDATE login_codici SET usato = 1 WHERE id = ? AND usato = 0").bind(riga.id).run();
+  if (meta.changes !== 1) return json({ errore: "Codice già usato: chiedine uno nuovo." }, 400);
   const scadenza = Date.now() + GIORNI_SESSIONE * 86_400_000;
   const token = `${scadenza}.${await firma(String(scadenza), env)}`;
   return json({ ok: true }, 200, {
-    "Set-Cookie": `sessione=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${GIORNI_SESSIONE * 86400}`,
+    "Set-Cookie": `${COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${GIORNI_SESSIONE * 86400}`,
   });
 }
 
 // Il cookie è "scadenza.firma": chi non conosce SESSION_SECRET non può crearne uno valido
 async function sessioneValida(request, env) {
   const cookie = request.headers.get("Cookie") || "";
-  const token = cookie.split(/;\s*/).find((c) => c.startsWith("sessione="))?.slice(9);
+  const token = cookie.split(/;\s*/).find((c) => c.startsWith(`${COOKIE}=`))?.slice(COOKIE.length + 1);
   if (!token) return false;
   const [scadenza, firmaRicevuta] = token.split(".");
   if (!scadenza || !firmaRicevuta || !(Number(scadenza) > Date.now())) return false;
@@ -610,21 +675,29 @@ main{min-height:100vh;display:grid;place-items:center;padding:1rem}
 <p class="eyebrow">Hidden Treasure</p>
 <h1>Gestione</h1>
 <p class="muted" id="testo">Ti mandiamo un codice di accesso alla tua email.</p>
-<button class="btn" id="manda">Mandami il codice</button>
+<div class="cf-turnstile" data-sitekey="${TURNSTILE_SITEKEY}" data-language="it" data-callback="pronto" data-expired-callback="scaduto"></div>
+<button class="btn" id="manda" disabled>Mandami il codice</button>
 <form id="form" hidden>
   <label>Codice ricevuto<input id="codice" inputmode="numeric" autocomplete="one-time-code" maxlength="9" required></label>
   <button class="btn" style="width:100%">Entra</button>
 </form>
 <p class="msg" id="msg" role="alert"></p>
 </div></main>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
 const msg = document.getElementById("msg");
+const manda = document.getElementById("manda");
+// Turnstile chiama queste due funzioni: il pulsante si attiva solo con un token valido
+let token = "";
+function pronto(t) { token = t; manda.disabled = false; }
+function scaduto() { token = ""; manda.disabled = true; }
 const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) })
   .then(async (r) => ({ ok: r.ok, dati: await r.json().catch(() => ({})) }));
 document.getElementById("manda").onclick = async (e) => {
   e.target.disabled = true; msg.textContent = "";
-  const r = await post("/login/codice");
-  e.target.disabled = false;
+  const r = await post("/login/codice", { turnstile: token });
+  // Ogni token vale una volta: ne serve uno nuovo per "Mandane un altro"
+  scaduto(); window.turnstile?.reset();
   if (!r.ok) { msg.textContent = r.dati.errore || "Errore, riprova."; return; }
   document.getElementById("testo").textContent = "Codice inviato: controlla la tua email (anche lo spam).";
   e.target.textContent = "Mandane un altro";

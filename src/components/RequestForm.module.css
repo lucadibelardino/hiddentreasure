@@ -372,6 +372,13 @@
     overflow: hidden;
 }
 
+/* Turnstile: il riquadro di Cloudflare (alto 65px) centrato; vuoto finché non carica */
+.turnstile {
+    display: flex;
+    justify-content: center;
+    min-height: 65px;
+}
+
 /* ── Invio ────────────────────────────────────── */
 .submit {
     width: 100%;
