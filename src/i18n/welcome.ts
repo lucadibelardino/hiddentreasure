@@ -3,8 +3,7 @@
  * Pagina nascosta: fuori dal menu e dalla sitemap, con noindex.
  *
  * ATTENZIONE: la repo e' pubblica. Qui NON vanno mai Wi-Fi, codici di porte o
- * cassette, numeri privati: quelli stanno nel database del Worker e la pagina li
- * mostra solo a chi inserisce il codice ospite (vedi WelcomePage.tsx, WelcomeSecrets).
+ * cassette, numeri privati: gli ospiti li trovano in casa.
  *
  * Nei testi:
  *  - {{testo}}         = segnaposto ancora da compilare (evidenziato in giallo sulla pagina)
@@ -28,21 +27,6 @@ export interface WelcomeSection {
     nav: string;
     h: string;
     body: Block[];
-    /** Mostra qui il riquadro protetto con Wi-Fi e codici. */
-    secrets?: boolean;
-}
-
-export interface SecretsText {
-    intro: string;
-    label: string;
-    placeholder: string;
-    submit: string;
-    loading: string;
-    wrong: string;
-    error: string;
-    copy: string;
-    copied: string;
-    other: string;
 }
 
 export interface WelcomeText {
@@ -51,7 +35,6 @@ export interface WelcomeText {
     title: string;
     intro: string;
     contents: string;
-    secrets: SecretsText;
     sections: WelcomeSection[];
 }
 
@@ -65,18 +48,6 @@ const it: WelcomeText = {
     intro:
         'Siamo felici di avervi qui. In questa pagina trovate tutto quello che serve durante il soggiorno: tenetela a portata di mano e, per qualsiasi dubbio, scriveteci.',
     contents: 'In questa guida',
-    secrets: {
-        intro: 'Inserite il codice ospite che avete ricevuto con la conferma della prenotazione.',
-        label: 'Codice ospite',
-        placeholder: 'es. AB12CD',
-        submit: 'Mostra',
-        loading: 'Un attimo…',
-        wrong: 'Codice non valido o scaduto. Controllate il messaggio di conferma o scriveteci.',
-        error: 'Non riusciamo a caricare i dati ora. Riprovate tra poco o scriveteci su WhatsApp.',
-        copy: 'Copia',
-        copied: 'Copiato',
-        other: 'Usa un altro codice',
-    },
     sections: [
         {
             id: 'arrivo',
@@ -89,19 +60,13 @@ const it: WelcomeText = {
             ],
         },
         {
-            id: 'wifi',
-            nav: 'Wi-Fi e codici',
-            h: 'Wi-Fi e codici',
-            body: [],
-            secrets: true,
-        },
-        {
             id: 'casa',
             nav: 'La casa',
             h: 'Come funziona la casa',
             body: [
                 {
                     list: [
+                        'Wi-Fi: nome della rete e password li trovate in casa, {{dove}}',
                         'Aria condizionata: {{come si accende, telecomandi}}',
                         'Acqua calda: {{boiler, tempi}}',
                         'Cucina: {{piano cottura, forno, lavastoviglie, caffè}}',
@@ -195,18 +160,6 @@ const en: WelcomeText = {
     intro:
         'We are happy to have you here. This page has everything you need during your stay: keep it handy and message us with any question.',
     contents: 'In this guide',
-    secrets: {
-        intro: 'Enter the guest code you received with your booking confirmation.',
-        label: 'Guest code',
-        placeholder: 'e.g. AB12CD',
-        submit: 'Show',
-        loading: 'One moment…',
-        wrong: 'Invalid or expired code. Check your confirmation message or contact us.',
-        error: 'We cannot load the details right now. Please try again shortly or message us on WhatsApp.',
-        copy: 'Copy',
-        copied: 'Copied',
-        other: 'Use another code',
-    },
     sections: [
         {
             id: 'arrivo',
@@ -218,7 +171,6 @@ const en: WelcomeText = {
                 '{{how to get in: who meets you or where the keys are}}',
             ],
         },
-        { id: 'wifi', nav: 'Wi-Fi and codes', h: 'Wi-Fi and codes', body: [], secrets: true },
         {
             id: 'casa',
             nav: 'The house',
@@ -226,6 +178,7 @@ const en: WelcomeText = {
             body: [
                 {
                     list: [
+                        'Wi-Fi: network name and password are in the house, {{where}}',
                         'Air conditioning: {{how to switch on, remotes}}',
                         'Hot water: {{boiler, timing}}',
                         'Kitchen: {{hob, oven, dishwasher, coffee}}',
@@ -309,18 +262,6 @@ const de: WelcomeText = {
     intro:
         'Schön, dass Sie da sind. Hier finden Sie alles, was Sie während Ihres Aufenthalts brauchen. Bei Fragen schreiben Sie uns gerne.',
     contents: 'In dieser Info',
-    secrets: {
-        intro: 'Geben Sie den Gästecode ein, den Sie mit der Buchungsbestätigung erhalten haben.',
-        label: 'Gästecode',
-        placeholder: 'z. B. AB12CD',
-        submit: 'Anzeigen',
-        loading: 'Einen Moment…',
-        wrong: 'Ungültiger oder abgelaufener Code. Prüfen Sie Ihre Bestätigung oder schreiben Sie uns.',
-        error: 'Die Daten können gerade nicht geladen werden. Bitte versuchen Sie es gleich noch einmal oder schreiben Sie uns auf WhatsApp.',
-        copy: 'Kopieren',
-        copied: 'Kopiert',
-        other: 'Anderen Code verwenden',
-    },
     sections: [
         {
             id: 'arrivo',
@@ -332,7 +273,6 @@ const de: WelcomeText = {
                 '{{wie Sie hineinkommen: wer Sie empfängt oder wo die Schlüssel sind}}',
             ],
         },
-        { id: 'wifi', nav: 'WLAN und Codes', h: 'WLAN und Codes', body: [], secrets: true },
         {
             id: 'casa',
             nav: 'Das Haus',
@@ -340,6 +280,7 @@ const de: WelcomeText = {
             body: [
                 {
                     list: [
+                        'WLAN: Netzwerkname und Passwort finden Sie im Haus, {{wo}}',
                         'Klimaanlage: {{Einschalten, Fernbedienungen}}',
                         'Warmwasser: {{Boiler, Zeiten}}',
                         'Küche: {{Kochfeld, Backofen, Spülmaschine, Kaffee}}',
@@ -423,18 +364,6 @@ const fr: WelcomeText = {
     intro:
         'Nous sommes ravis de vous accueillir. Vous trouverez ici tout ce qu’il faut pendant le séjour : gardez cette page sous la main et écrivez-nous pour toute question.',
     contents: 'Dans ce guide',
-    secrets: {
-        intro: 'Saisissez le code hôte reçu avec la confirmation de réservation.',
-        label: 'Code hôte',
-        placeholder: 'ex. AB12CD',
-        submit: 'Afficher',
-        loading: 'Un instant…',
-        wrong: 'Code non valide ou expiré. Vérifiez votre message de confirmation ou contactez-nous.',
-        error: 'Impossible de charger les informations pour le moment. Réessayez bientôt ou écrivez-nous sur WhatsApp.',
-        copy: 'Copier',
-        copied: 'Copié',
-        other: 'Utiliser un autre code',
-    },
     sections: [
         {
             id: 'arrivo',
@@ -446,7 +375,6 @@ const fr: WelcomeText = {
                 '{{comment entrer : qui vous accueille ou où sont les clés}}',
             ],
         },
-        { id: 'wifi', nav: 'Wi-Fi et codes', h: 'Wi-Fi et codes', body: [], secrets: true },
         {
             id: 'casa',
             nav: 'La maison',
@@ -454,6 +382,7 @@ const fr: WelcomeText = {
             body: [
                 {
                     list: [
+                        'Wi-Fi : le nom du réseau et le mot de passe sont dans la maison, {{où}}',
                         'Climatisation : {{allumage, télécommandes}}',
                         'Eau chaude : {{chauffe-eau, délais}}',
                         'Cuisine : {{plaques, four, lave-vaisselle, café}}',
