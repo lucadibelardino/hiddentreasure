@@ -71,7 +71,7 @@ const it: PrivacyText = {
                 {
                     list: [
                         'GitHub (GitHub Inc.): ospita il sito;',
-                        'Cloudflare (Cloudflare Inc.): riceve e conserva le richieste del modulo, invia le email di notifica, gestisce il dominio e le statistiche anonime delle visite;',
+                        'Cloudflare (Cloudflare Inc.): riceve e conserva le richieste del modulo, le protegge dai programmi automatici con Turnstile (che non usa cookie), invia le email di notifica, gestisce il dominio e le statistiche anonime delle visite;',
                         'Google (Gmail): la casella dove riceviamo le notifiche e le tue email;',
                         'Esri: immagini satellitari della mappa.',
                     ],
@@ -151,7 +151,7 @@ const en: PrivacyText = {
                 {
                     list: [
                         'GitHub (GitHub Inc.): hosts the website;',
-                        'Cloudflare (Cloudflare Inc.): receives and stores form requests, sends notification emails, manages the domain and the anonymous visit statistics;',
+                        'Cloudflare (Cloudflare Inc.): receives and stores form requests, protects them from automated programs with Turnstile (which uses no cookies), sends notification emails, manages the domain and the anonymous visit statistics;',
                         'Google (Gmail): the mailbox where we receive notifications and your emails;',
                         'Esri: satellite images for the map.',
                     ],
@@ -231,7 +231,7 @@ const de: PrivacyText = {
                 {
                     list: [
                         'GitHub (GitHub Inc.): Hosting der Website;',
-                        'Cloudflare (Cloudflare Inc.): Empfang und Speicherung der Formularanfragen, Versand der Benachrichtigungs-E-Mails, Verwaltung der Domain und anonyme Besucherstatistik;',
+                        'Cloudflare (Cloudflare Inc.): Empfang und Speicherung der Formularanfragen, Schutz vor automatisierten Programmen mit Turnstile (ohne Cookies), Versand der Benachrichtigungs-E-Mails, Verwaltung der Domain und anonyme Besucherstatistik;',
                         'Google (Gmail): das Postfach, in dem wir Benachrichtigungen und Ihre E-Mails erhalten;',
                         'Esri: Satellitenbilder der Karte.',
                     ],
@@ -311,7 +311,7 @@ const fr: PrivacyText = {
                 {
                     list: [
                         'GitHub (GitHub Inc.) : héberge le site ;',
-                        'Cloudflare (Cloudflare Inc.) : reçoit et conserve les demandes du formulaire, envoie les e-mails de notification, gère le domaine et les statistiques anonymes de visite ;',
+                        'Cloudflare (Cloudflare Inc.) : reçoit et conserve les demandes du formulaire, les protège des programmes automatiques avec Turnstile (sans cookies), envoie les e-mails de notification, gère le domaine et les statistiques anonymes de visite ;',
                         'Google (Gmail) : la boîte où nous recevons les notifications et vos e-mails ;',
                         'Esri : images satellite de la carte.',
                     ],
